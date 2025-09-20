@@ -65,6 +65,14 @@ For v1, the bot does not remove users automatically; it informs admins via a
 modlog channel or, if unlinked, retains internal reports accessible from the
 moderated channel.
 
+## Roles
+
+- Moderator/Admin/Mod: Interacts with the bot to operate moderation features
+  (typically from the modlog chat).
+- Operator/Sysadmin: Installs and configures the bot (Docker/Portainer, DB,
+  YAML configs).
+- User/Channel member: Non‑privileged member who may be challenged as a lurker.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### Primary User Story
@@ -146,22 +154,51 @@ community stays engaged and admins stay informed.
     `/antlurk report lurkers [--threshold-days D] [--limit M]` in a moderated
     channel, then the bot returns users whose last response exceeds the lurk
     threshold (default 14 days), including last activity timestamps.
-3. Given a new show is scheduled for
-   [NEEDS CLARIFICATION: lead time, e.g., 30–60 min], when the time window
-   opens, then the bot posts a templated announcement to configured channels
-   and records the Announcement.
-4. Given the admin searches archived messages for a keyword,
-   when the admin runs a search command, then the bot returns top matches with
-   links and metadata, respecting access permissions.
-5. Given a username is queried, when the admin requests a profile lookup,
-   then the bot returns basic activity stats and disruptor signals for review
-   without auto-banning.
+15. Given the system operates across multiple chats, when additional moderated
+    or modlog chats are added, then each chat can be configured independently;
+    at minimum, one moderated chat and one modlog chat are required for full
+    operation, but more than one of each type is supported.
+16. Given provocation scheduling is active, when the bot selects lurkers to
+    challenge, then it enforces rate limits: by default no more than 2
+    provocations per hour and no more than 15 per day per moderated chat.
+17. Given an admin taps the Kick button in the modlog chat, when the bot
+    receives the request, then it asks for a confirmation (Yes/No). After
+    confirmation, the bot does not perform automatic removal; instead it posts
+    clear instructions for admins to manually remove the user via Telegram
+    tools and logs the request.
+18. Given an admin runs `/antlurk reboot`, when the bot receives the command,
+    then it performs a graceful restart of internal components (reloads config,
+    reschedules jobs) or exits to allow the container to restart, and reports
+    status in the modlog chat.
+19. Given an admin runs `/antlurk checkuser <username|user_id>` in a moderated
+    chat, when the bot receives the command, then it returns a summary
+    including: overall last interaction timestamp; current lurk status;
+    provocation counts; last challenge status; and per‑moderated‑chat activity
+    showing total message count and most recent message timestamp in each
+    moderated chat the system manages.
+20. Given the bot starts and `$CONFIG_DIR` is missing expected files, when
+    initialization runs, then default templates for `channels.yaml`,
+    `config.yaml`, and `puzzles.yaml` are created with sensible defaults and a
+    starter bank of ~50 puzzles; operators can edit these later.
+21. Given the bot starts up, when initialization completes, then it posts a
+    “bot is live” message to each configured modlog chat. Given a shutdown or
+    reboot is initiated, when the bot is terminating, then it posts a “bot
+    shutting down” message to each configured modlog chat before exit.
+22. Given a user was provoked recently, when the scheduler runs, then the bot
+    MUST skip provoking that user again if the last provocation was within the
+    past 15 minutes (cooldown), even if they still qualify as a lurker.
+3. Given challenges are posted to a moderated chat, when the bot creates a
+   challenge, then it posts a plain public message (not threaded) that mentions
+   the target user and presents multiple-choice buttons in English.
 
 ### Edge Cases
  - Platform limits: respect Telegram rate limits with backoff.
-- Protections: admins/mods/allowlisted users are never removed.
-- Failure handling: network/API errors retried with jitter; actions idempotent.
-- Reactions or read receipts alone do not count as responses.
+ - Protections: admins/mods/allowlisted users are never removed.
+ - Failure handling: network/API errors retried with jitter; actions idempotent.
+ - Reactions or read receipts alone do not count as responses.
+ - Platform constraint: Telegram does not support making a group message
+   visible only to one user. Challenges are public in the moderated chat. The
+   bot mentions the target user and uses inline buttons to capture responses.
 
 ## Requirements *(mandatory)*
 
@@ -179,10 +216,11 @@ community stays engaged and admins stay informed.
   does not respond within the provocation interval, the notification MUST
   include an inline Kick button for admins. MUST log a ModerationAction with
   timestamps.
-- **FR-004**: MUST post show announcements with a configurable template and
-  lead time [NEEDS CLARIFICATION], to selected channels.
-- **FR-005**: MUST archive group messages with metadata to enable search by
-  keyword, user, channel, and date range, subject to privacy rules.
+ - **FR-004**: SHOULD post show announcements with a configurable template and
+  lead time in a future version; de‑scoped for initial MVP unless configured.
+- **FR-005**: MUST store group messages and rich metadata to support future
+  indexing and analysis (search/reporting deferred). For v1, search UX is
+  de‑scoped; data is collected now for future features.
 - **FR-006**: MUST provide an admin-only search and user lookup interface via
   bot commands.
 - **FR-007**: MUST support sending prompts and notifications at any time (no
@@ -241,12 +279,27 @@ community stays engaged and admins stay informed.
   - **FR-031**: MUST reset a member’s last‑interaction timestamp on any message
     they post in the moderated channel and on any challenge answer button press
     (correct or incorrect).
-  - **FR-032**: The Kick button posted to the modlog channel MUST only execute
-    for admins; on press, the bot attempts to remove the user from the moderated
-    channel and logs success/failure in the modlog channel and audit logs.
+  - **FR-032**: The Kick button posted to the modlog channel MUST only be
+    usable by admins; on confirmation, the bot MUST NOT perform automatic
+    removal. Instead, it posts clear instructions to perform a manual kick via
+    Telegram admin tools and logs the request in audit logs.
   - **FR-033**: Passing a challenge (correct answer) MUST NOT generate a modlog
     post; the outcome MUST still be recorded in audit logs and reflected in
     the member’s status.
+  - **FR-039**: MUST enforce provocation rate limits per moderated chat: default
+    maximum 2 provocations per hour and 15 per day; values are configurable via
+    `$CONFIG_DIR/config.yaml` and per‑chat overrides in `channels.yaml`.
+  - **FR-040**: The Kick action MUST require a confirmation step (e.g., inline
+    Yes/No). Only confirmed actions by admins proceed to attempt removal.
+  - **FR-041**: MUST support `/antlurk reboot` for admins by terminating the
+    process with exit code 0 after logging intent. Rely on the container runner
+    (e.g., Docker/compose/Portainer) to restart the container. Ensure any
+    in-memory schedules/state are persisted before exit.
+  - **FR-042**: MUST support `/antlurk checkuser <username|user_id>` for admins
+    in a moderated chat, returning: overall last interaction timestamp; current
+    lurk status; provocation count; last challenge status; and per‑moderated‑chat
+    activity (message count and most recent message timestamp per moderated chat).
+    If the user is unknown or not a member, respond clearly.
   - **FR-035**: MUST read the Telegram bot token from `TELEGRAM_TOKEN` at
     startup; fail fast with a clear error if missing.
   - **FR-036**: MUST read PostgreSQL connection configuration from
@@ -259,11 +312,16 @@ community stays engaged and admins stay informed.
   - **FR-038**: SHOULD expose a simple readiness/health indicator (e.g., logs a
     “ready” message after successful initialization) and provide clear log lines
     for major lifecycle events (startup, linking, audits, reports).
+  - **FR-044**: OPTIONAL: If `NATS_URL` is set, publish notable events (e.g.,
+    link established, audit run summary, challenge created/responded/timeout,
+    kick attempted/succeeded/failed) to NATS using a configurable subject prefix
+    (env `NATS_SUBJECT_PREFIX`, default `antilurk`).
  - **FR-023**: MUST persist the channel linking graph (moderated→modlog) and
-   per‑chat configuration at `$DATA_DIR/config/channels.yaml` and load/apply it
-   on startup. Config files MUST be human‑readable YAML under `$DATA_DIR/config/`.
-  - **FR-024**: MUST operate with `$DATA_DIR` defaulting to `/data` in
-    containerized deployments, overridable via environment variable.
+  per‑chat configuration at `$CONFIG_DIR/channels.yaml` and load/apply it on
+  startup. Config files MUST be human‑readable YAML under `$CONFIG_DIR`.
+  - **FR-024**: MUST operate with `$DATA_DIR` defaulting to `/data` and
+    `$CONFIG_DIR` defaulting to `$DATA_DIR/config` in containerized deployments;
+    both overridable via environment variables.
  - **FR-025**: MUST log all stored messages to a PostgreSQL database, recording
    at minimum: message ID, time, channel, and username; and SHOULD capture other
    readily available Telegram metadata (e.g., chat ID, user ID, message type,
@@ -272,11 +330,13 @@ community stays engaged and admins stay informed.
    tracking and assessments. [Note: retention duration defined in FR‑011.]
 
 *Example of marking unclear requirements:*
-- **FR-011**: System MUST retain archived messages for
-  [NEEDS CLARIFICATION: retention period, e.g., 180/365 days].
+- **FR-011**: System MUST retain archived messages and challenge records
+  indefinitely (no automatic deletion). A cleanup/retention mechanism may be
+  added in a future version.
 - **FR-012**: System MUST enforce access controls for archive search
   [NEEDS CLARIFICATION: owner-only, selected moderators].
-- **FR-013**: System MUST generate simple multiple‑choice puzzles: either
+ - **FR-013**: System MUST generate simple multiple‑choice puzzles (English‑only
+  in v1): either
   arithmetic (addition/subtraction/multiplication within small integers) or
   common‑sense questions with obvious correct answers. Each puzzle MUST have
   3–4 choices, be randomly ordered, and track the correct answer per session.
@@ -297,15 +357,18 @@ community stays engaged and admins stay informed.
  - **ChannelConfig**: Telegram chat with mode (`moderated` | `modlog`), whether it
    is linked to other channels, and related settings (e.g., inactivity threshold
    override, provocation interval override).
- - **ModLogChannel**: The configured channel that receives notifications about
-   responses, timeouts, and audit summaries for its linked moderated channels.
+ - **ModLogChannel**: The configured group/supergroup chat that receives
+   notifications about responses, timeouts, and audit summaries for its linked
+   moderated channels.
  - **ChannelLinkToken**: Ephemeral code used for forward‑based linking between
    a moderated channel and a modlog channel; includes code, source chat ID,
    expiry, issuer, and status (unused/used/expired).
 - **Announcement**: Title, link, schedule, target channels, message template.
 - **MessageArchive**: Message ID, author (username/user ID), channel (name/ID),
-  content digest, timestamps (sent/edited), message type, reply_to ID, and any
-  readily available Telegram metadata needed for moderation analytics.
+  full text (if available), content digest, timestamps (sent/edited), message
+  type, reply_to ID, forward/origin info, attachment/file references (file_id,
+  mime type, size), and other readily available Telegram metadata for future
+  analytics.
 - **ModerationAction**: Type (challenge/notify/announce), reason, actor,
   references, timestamps.
 
@@ -314,9 +377,10 @@ community stays engaged and admins stay informed.
 ## Deployment & Config
 
  - Containerized deployment: Runs as a Docker container.
- - Data directory: `$DATA_DIR` defaults to `/data`; mount a volume for
-  persistence. Store YAML configs under `$DATA_DIR/config/` (e.g.,
-  `channels.yaml`, `timing.yaml`).
+ - Config directory: `$CONFIG_DIR` defaults to `/data`; mount a volume for
+  persistence. Store YAML configs directly under `$CONFIG_DIR` (e.g.,
+  `channels.yaml`, `timing.yaml`). Example Portainer host bind: map
+  `/volume1/telegram_antilurk_bot/data` → container `/data`.
  - Database: PostgreSQL is the system of record for persistence. Connect via
   `DATABASE_URL` environment variable; connection details must be provided at
   startup.
@@ -362,7 +426,8 @@ community stays engaged and admins stay informed.
 - [ ] Review checklist passed
 
 ---
-  - **FR-034**: MUST persist global timing parameters (defaults for lurk
-    threshold and provocation interval) in `$DATA_DIR/config/timing.yaml`, and
-    apply precedence: per‑chat overrides in `channels.yaml` > global defaults in
-    `timing.yaml` > built‑in defaults (14 days; 48 hours).
+  - **FR-034**: MUST persist global configuration parameters (defaults for lurk
+    threshold, provocation interval, audit cadence, and provocation rate limits)
+    in `$CONFIG_DIR/config.yaml`, and apply precedence: per‑chat overrides in
+    `channels.yaml` > global defaults in `config.yaml` > built‑in defaults
+    (14 days; 48 hours; 15 minutes; 2/hour; 15/day).
