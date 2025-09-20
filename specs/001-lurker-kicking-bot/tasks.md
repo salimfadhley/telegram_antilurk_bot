@@ -3,37 +3,37 @@
 This is a granular task list derived from the implementation plan. Use it to track progress and verify acceptance.
 
 ## Phase 1 — Config & Bootstrapping
-- [ ] Define YAML schemas (Python) for:
-  - [ ] `$CONFIG_DIR/config.yaml` (threshold, interval, cadence, rate limits, notices, features, provenance).
-  - [ ] `$CONFIG_DIR/channels.yaml` (chat entries, mode, modlog_ref, overrides, provenance).
-  - [ ] `$CONFIG_DIR/puzzles.yaml` (id, type, question, choices, correct_index, provenance).
-- [ ] Implement config loader:
-  - [ ] Load all three configs; validate against schema.
-  - [ ] On valid: recompute checksum, set `updated_at`, preserve `updated_by` if present, write back.
-  - [ ] On invalid: raise a structured error naming file and issues; exit non‑zero.
-- [ ] First‑run seeding:
-  - [ ] If missing, write default `config.yaml` (built‑in defaults), `channels.yaml` (empty chats list), and `puzzles.yaml` (~50 items).
-- [ ] Command‑driven config updates:
-  - [ ] Persist changes to `config.yaml` immediately.
-  - [ ] Before write: verify on‑disk checksum; if mismatch, still write and emit warning to modlog + invoking chat (include old/new checksums).
-  - [ ] Reconfigure schedulers/limits in memory after successful write.
+- [x] Define YAML schemas (Python) for:
+  - [x] `$CONFIG_DIR/config.yaml` (threshold, interval, cadence, rate limits, notices, features, provenance).
+  - [x] `$CONFIG_DIR/channels.yaml` (chat entries, mode, modlog_ref, overrides, provenance).
+  - [x] `$CONFIG_DIR/puzzles.yaml` (id, type, question, choices, correct_index, provenance).
+- [x] Implement config loader:
+  - [x] Load all three configs; validate against schema.
+  - [x] On valid: recompute checksum, set `updated_at`, preserve `updated_by` if present, write back.
+  - [x] On invalid: raise a structured error naming file and issues; exit non‑zero.
+- [x] First‑run seeding:
+  - [x] If missing, write default `config.yaml` (built‑in defaults), `channels.yaml` (empty chats list), and `puzzles.yaml` (~50 items).
+- [x] Command‑driven config updates:
+  - [x] Persist changes to `config.yaml` immediately.
+  - [x] Before write: verify on‑disk checksum; if mismatch, still write and emit warning to modlog + invoking chat (include old/new checksums).
+  - [x] Reconfigure schedulers/limits in memory after successful write.
 
 ## Phase 2 — Database Model & Migrations
-- [ ] Create migrations for tables:
-  - [ ] `users` (user_id, username, first_seen, last_seen, last_interaction_at, flags/roles).
-  - [ ] `message_archive` (chat_id, user_id, message_id, text, sent_at, edited_at, type, reply_to_id, forward_info, attachments, metadata JSON; indexes on (chat_id, user_id, sent_at)).
-  - [ ] `provocations` (provocation_id, chat_id, user_id, created_at, scheduled_at, sent_at, responded_at, outcome enum, puzzle_id, callback_data).
-- [ ] Create view `user_channel_activity`:
-  - [ ] Aggregates per (chat_id, user_id): message_count, last_message_at, last_provocation_at.
-- [ ] Bootstrap DB on startup (idempotent): apply migrations if needed.
+- [x] Create migrations for tables:
+  - [x] `users` (user_id, username, first_seen, last_seen, last_interaction_at, flags/roles).
+  - [x] `message_archive` (chat_id, user_id, message_id, text, sent_at, edited_at, type, reply_to_id, forward_info, attachments, metadata JSON; indexes on (chat_id, user_id, sent_at)).
+  - [x] `provocations` (provocation_id, chat_id, user_id, created_at, scheduled_at, sent_at, responded_at, outcome enum, puzzle_id, callback_data).
+- [x] Create view `user_channel_activity`:
+  - [x] Aggregates per (chat_id, user_id): message_count, last_message_at, last_provocation_at.
+- [x] Bootstrap DB on startup (idempotent): apply migrations if needed.
 
 ## Phase 3 — Telegram Bot Core
-- [ ] Startup checks: `TELEGRAM_TOKEN`, `DATABASE_URL`, `CONFIG_DIR` writable; connect DB.
-- [ ] Post “bot is live” notice to all configured modlog chats.
-- [ ] Implement `/antlurk help` (commands, roles, where usable).
-- [ ] Implement `/antlurk mode`:
-  - [ ] No args: show inline buttons (moderated/modlog).
-  - [ ] With arg: set mode immediately; persist to `channels.yaml`.
+- [x] Startup checks: `TELEGRAM_TOKEN`, `DATABASE_URL`, `CONFIG_DIR` writable; connect DB.
+- [x] Post "bot is live" notice to all configured modlog chats.
+- [x] Implement `/antlurk help` (commands, roles, where usable).
+- [x] Implement `/antlurk mode`:
+  - [x] No args: show inline buttons (moderated/modlog).
+  - [x] With arg: set mode immediately; persist to `channels.yaml`.
 
 ## Phase 4 — Linking (Forward‑Code Handshake)
 - [ ] In moderated chat, generate linking message with unique code (10‑min TTL) when mode set and no link exists.
