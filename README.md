@@ -99,6 +99,10 @@ On startup the bot validates critical configuration and will exit with a clear, 
 
 - Python build tool: `uv` is recommended for local development and packaging.
 - For native testing (outside Docker), set env vars (`DATA_DIR`, `CONFIG_DIR`, `TELEGRAM_TOKEN`, `DATABASE_URL`) in your shell.
+- Pre-commit hooks: install and enable
+  - pipx install pre-commit (or `uvx pre-commit` on demand)
+  - pre-commit install && pre-commit install -t commit-msg
+  - Hooks use `uvx` to run tools (ruff, mypy, pytest, bandit, yamllint, commitizen). No hygiene checks included.
 - Responses:
   - Any button press resets the user’s last‑interaction.
   - Correct answer → Thank user; no modlog post.

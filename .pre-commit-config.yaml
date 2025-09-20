@@ -1,0 +1,53 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-format
+        name: Ruff Format (uvx)
+        entry: bash -c 'uvx ruff format'
+        language: system
+        types_or: [python]
+        pass_filenames: false
+
+      - id: ruff-check
+        name: Ruff Lint (uvx)
+        entry: bash -c 'uvx ruff check --fix'
+        language: system
+        types_or: [python]
+        pass_filenames: false
+
+      - id: mypy
+        name: Mypy Type Check (uvx)
+        entry: bash -c 'if [ -d src ] || rg -n \\.(py|pyi)$ > /dev/null; then uvx mypy $(git ls-files "*.py" "*.pyi" 2>/dev/null); else echo "No Python files found; skipping mypy"; fi'
+        language: system
+        types_or: [python]
+        pass_filenames: false
+
+      - id: pytest-unit
+        name: Pytest Unit Suite (uvx)
+        entry: bash -c 'if [ -d tests/unit ]; then uvx pytest -q tests/unit; else echo "No tests/unit; skipping unit tests"; fi'
+        language: system
+        types_or: [python]
+        pass_filenames: false
+
+      - id: bandit
+        name: Bandit Security Scan (uvx)
+        entry: bash -c 'if [ -d src ]; then uvx bandit -q -r src -x tests; else echo "No src directory; skipping bandit"; fi'
+        language: system
+        types_or: [python]
+        pass_filenames: false
+
+      - id: yamllint
+        name: YAML Lint (uvx)
+        entry: bash -c 'if rg -n "\\.ya?ml$" -g "!*venv*" -g "!*site-packages*" > /dev/null; then uvx yamllint -s .; else echo "No YAML files; skipping yamllint"; fi'
+        language: system
+        files: \.ya?ml$
+        pass_filenames: false
+
+  - repo: local
+    hooks:
+      - id: conventional-commits
+        name: Conventional Commits (commit-msg via Commitizen, uvx)
+        entry: bash -c 'uvx commitizen check --message-file $1'
+        language: system
+        stages: [commit-msg]
+        pass_filenames: false
