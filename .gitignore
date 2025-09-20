@@ -1,0 +1,8 @@
+
+# Test coverage
+.coverage
+htmlcov/
+*.cover
+.hypothesis/
+.pytest_cache/
+

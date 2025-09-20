@@ -239,7 +239,7 @@ class ConfigLoader:
         self._convert_datetimes(data)
 
         with open(path, 'w') as f:
-            yaml.safe_dump(data, default_flow_style=False, sort_keys=False)
+            yaml.safe_dump(data, f, default_flow_style=False, sort_keys=False)
 
     def _convert_datetimes(self, obj):
         """Recursively convert datetime objects to ISO format strings."""
