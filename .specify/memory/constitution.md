@@ -1,10 +1,10 @@
 <!--
 Sync Impact Report
-- Version change: N/A → 1.0.0
-- Modified principles: N/A (initial version)
+- Version change: 1.0.0 → 1.1.0
+- Modified principles: III strengthened to Strict TDD Methodology
 - Added sections: Core Principles; Additional Constraints & Security; Development Workflow & Quality Gates; Governance
-- Templates requiring updates: ✅ .specify/templates/plan-template.md (aligned); ✅ .specify/templates/spec-template.md (aligned); ✅ .specify/templates/tasks-template.md (aligned); ✅ .codex/commands/* (no outdated references)
-- Follow-up TODOs: None
+- Templates requiring updates: Optional — add "Tests first" prompt to tasks template
+- Follow-up TODOs: Consider adding CI stub to enforce tests exist for changes
 -->
 
 # Mind of Steele Bot Constitution
@@ -21,9 +21,19 @@ Tools expose functionality via CLI with text protocols: stdin/args → stdout,
 errors → stderr. Where applicable, support a `--json` flag for machine output.
 Absolute paths must be used in agent output.
 
-### III. Test-First (Non‑Negotiable)
-TDD is mandatory. Write tests first so they fail, then implement to pass,
-following the task order in tasks.md. Red‑Green‑Refactor is strictly enforced.
+### III. Strict TDD Methodology (Non‑Negotiable)
+TDD is mandatory and strictly enforced:
+- Red‑Green‑Refactor: Always write a failing test first, implement the minimal
+  change to pass, then refactor while keeping tests green.
+- No code without tests: Production code must not be merged unless introduced
+  by a prior failing test in the same change.
+- Test hierarchy: Prefer fast unit tests; add contract/integration tests where
+  behavior spans modules or external boundaries.
+- Coverage gates: Aim for high, pragmatic coverage (e.g., 85%+ of units, 100%
+  of critical paths). New or changed code must be exercised by tests.
+- CI enforcement: PRs must run tests; failing or skipped tests block merge.
+- Regressions: When a defect is found, first add a failing test reproducing it,
+  then fix.
 
 ### IV. Contracts & Integration Testing
 Generate contracts and integration scenarios from specs. Maintain tests under
@@ -60,5 +70,5 @@ rationale, version bump, and migration notes if behavior changes. Reviewers
 must verify compliance (principles, gates, structure). Deviations require a
 filled "Complexity Tracking" section in plan.md with explicit justification.
 
-**Version**: 1.0.0 | **Ratified**: 2025-09-20 | **Last Amended**: 2025-09-20
+**Version**: 1.1.0 | **Ratified**: 2025-09-20 | **Last Amended**: 2025-09-20
 <!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
