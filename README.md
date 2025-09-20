@@ -67,7 +67,7 @@ Then:
 - `CONFIG_DIR` (optional): Directory for YAML configs. Defaults to `$DATA_DIR/config`.
   - Files used:
     - `channels.yaml`: Links moderated chats → modlog chat; per‑chat overrides.
-    - `timing.yaml`: Global defaults (lurk threshold, provocation interval, rate limits).
+    - `config.yaml`: Global defaults (lurk threshold, provocation interval, audit cadence, rate limits).
     - `puzzles.yaml`: Bank of simple multiple‑choice puzzles. Seeded with ~50 on first run if missing.
   - `NATS_URL` (optional): If set, the bot may publish events/logs to NATS.
   - `NATS_SUBJECT_PREFIX` (optional): Subject prefix for NATS messages (e.g., `antilurk`).
@@ -80,6 +80,10 @@ On startup the bot validates critical configuration and will exit with a clear, 
 - Missing `DATABASE_URL` → “Missing DATABASE_URL. Provide a Postgres URL like postgres://user:pass@host:5432/dbname.”
 - Database unreachable → “Cannot connect to PostgreSQL at DATABASE_URL. Check credentials/network and try again.”
 - `CONFIG_DIR` not writable → “CONFIG_DIR ‘/data/config’ not writable. Mount a volume and correct permissions.”
+- Invalid config file(s) → The bot names the invalid file(s) (`config.yaml`,
+  `channels.yaml`, `puzzles.yaml`) and the specific problems (missing keys,
+  wrong types, invalid values), then exits non‑zero. For valid files, the bot
+  recomputes and writes checksums (“adopts” current content) on startup.
 
 ## Moderator Workflow (Summary)
 
@@ -89,6 +93,7 @@ On startup the bot validates critical configuration and will exit with a clear, 
 - Reboot: `/antlurk reboot` cleanly exits the process with status 0; your container orchestrator should restart the container.
  - Check user: `/antlurk checkuser <username|user_id>` returns per‑moderated‑chat activity and status.
  - Config changes: Edit `$CONFIG_DIR/config.yaml` (cadence, provocation interval, rate limits) and run `/antlurk reboot` to apply. On startup/shutdown the bot posts a notice to all linked modlog chats.
+  - Safety: When applying config changes via commands, the bot verifies the on‑disk config checksum. If it has changed (manual edit), it applies your change but warns that it overwrote a manual edit (shows old/new checksums). Use `/antlurk reboot` after manual edits to reload cleanly.
 
 ## Development
 
@@ -103,12 +108,18 @@ On startup the bot validates critical configuration and will exit with a clear, 
    last interaction, current lurk status, provocation count, last challenge
    status, and per‑moderated‑chat message counts with the most recent message
    timestamp per chat.
+ - Help: `/antlurk help` lists available commands, roles, and where to use them.
 
 ## Data & Persistence
 
 - PostgreSQL is the system of record (messages, challenge sessions, schedules).
 - YAML in `CONFIG_DIR` is for static configuration only (links and defaults).
 - Default thresholds: lurk 14 days; provocation interval 48h (overridable by YAML per‑chat or global defaults).
+ - Core tables (simplified):
+   - `users`: one row per encountered user; tracks last interaction.
+  - `message_archive`: one row per message in moderated chats (full text + metadata).
+   - `provocations`: one row per provocation initiated (timestamps, outcome).
+   - View `user_channel_activity`: per chat/user — message_count, last_message_at, last_provocation_at.
 
 ## Security Notes
 

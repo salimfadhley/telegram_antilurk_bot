@@ -186,7 +186,18 @@ community stays engaged and admins stay informed.
     shutting down” message to each configured modlog chat before exit.
 22. Given a user was provoked recently, when the scheduler runs, then the bot
     MUST skip provoking that user again if the last provocation was within the
-    past 15 minutes (cooldown), even if they still qualify as a lurker.
+    current provocation interval, even if they still qualify as a lurker.
+23. Given an admin changes a setting via an `/antlurk` command that persists to
+    `config.yaml`, when the bot detects the on-disk checksum does not match the
+    expected value (indicating a manual edit), then it still applies the change
+    but posts a warning in the modlog (and to the invoking chat) that a manual
+    change was overwritten, including old/new checksums and a reminder to use
+    `/antlurk reboot` after manual edits.
+24. Given the bot starts, when it loads `config.yaml`, `channels.yaml`, and
+    `puzzles.yaml`, then it validates each against expected schema/constraints;
+    if valid, it recomputes and writes checksums and adopts the configs. If any
+    file is invalid, the bot exits with a clear error specifying which file and
+    which keys/lines failed validation.
 3. Given challenges are posted to a moderated chat, when the bot creates a
    challenge, then it posts a plain public message (not threaded) that mentions
    the target user and presents multiple-choice buttons in English.
@@ -221,8 +232,11 @@ community stays engaged and admins stay informed.
 - **FR-005**: MUST store group messages and rich metadata to support future
   indexing and analysis (search/reporting deferred). For v1, search UX is
   de‑scoped; data is collected now for future features.
-- **FR-006**: MUST provide an admin-only search and user lookup interface via
-  bot commands.
+- **FR-006**: MUST provide an admin-only user lookup interface via bot commands
+  (search de-scoped for v1).
+ - **FR-006a**: MUST provide a help command `/antlurk help` accessible in both
+  moderated and modlog chats that lists available commands, required roles, and
+  where each command can be used.
 - **FR-007**: MUST support sending prompts and notifications at any time (no
   quiet hours) and provide a dry‑run mode for bulk operations.
 - **FR-008**: MUST maintain audit logs of actions (challenge, acknowledge,
@@ -312,6 +326,26 @@ community stays engaged and admins stay informed.
   - **FR-038**: SHOULD expose a simple readiness/health indicator (e.g., logs a
     “ready” message after successful initialization) and provide clear log lines
     for major lifecycle events (startup, linking, audits, reports).
+  - **FR-050**: MUST include change provenance in `config.yaml`: store a
+    checksum over the canonicalized config and metadata fields such as
+    `updated_at` and `updated_by` (e.g., `bot-command` or `manual-edit`). On
+    startup, load configs, validate them, verify checksum, and recompute/write
+    a fresh checksum for valid files. If any config fails validation, exit with
+    an error indicating which file and why. If checksum mismatch is detected,
+    treat the last change as manual.
+  - **FR-051**: On config changes that affect scheduling (e.g., audit cadence,
+    provocation interval, rate limits), MUST reconfigure schedulers and limits
+    immediately without reboot when changed via commands.
+  - **FR-053**: On startup, MUST validate `config.yaml`, `channels.yaml`, and
+    `puzzles.yaml` against expected schema and constraints. For valid files,
+    recompute and persist checksums (adopt current content). For invalid files,
+    exit non‑zero with a clear error message naming the file and problems
+    (missing keys, wrong types, invalid values).
+  - **FR-052**: Before persisting config changes initiated via commands, MUST
+    verify the on-disk checksum matches the expected value. If it does not,
+    proceed to write but MUST warn the admin in the modlog (and the invoking
+    chat) that a manual change was detected and has been overwritten, including
+    previous vs new checksum (and optionally a brief diff summary).
   - **FR-044**: OPTIONAL: If `NATS_URL` is set, publish notable events (e.g.,
     link established, audit run summary, challenge created/responded/timeout,
     kick attempted/succeeded/failed) to NATS using a configurable subject prefix
@@ -322,12 +356,27 @@ community stays engaged and admins stay informed.
   - **FR-024**: MUST operate with `$DATA_DIR` defaulting to `/data` and
     `$CONFIG_DIR` defaulting to `$DATA_DIR/config` in containerized deployments;
     both overridable via environment variables.
- - **FR-025**: MUST log all stored messages to a PostgreSQL database, recording
-   at minimum: message ID, time, channel, and username; and SHOULD capture other
-   readily available Telegram metadata (e.g., chat ID, user ID, message type,
-   reply_to message ID, edit timestamp, forward/origin info). Coverage includes
-   moderated channel messages and challenge interactions used for activity
-   tracking and assessments. [Note: retention duration defined in FR‑011.]
+- **FR-025**: MUST log all stored messages to a PostgreSQL database, recording
+  at minimum: message ID, time, channel, and username; and SHOULD capture other
+  readily available Telegram metadata (e.g., chat ID, user ID, message type,
+  reply_to message ID, edit timestamp, forward/origin info). Coverage includes
+  moderated channel messages and challenge interactions used for activity
+  tracking and assessments. [Note: retention duration defined in FR‑011.]
+  No redaction is applied in the database; store full available content and
+  metadata for future indexing/analysis (subject to platform terms of service).
+  - **FR-048**: MUST maintain the following core tables in PostgreSQL:
+   - `users`: one row per encountered user (user_id, username, first_seen,
+     last_seen, last_interaction_at, flags/roles as needed).
+   - `message_archive`: one row per message in moderated chats (see MessageArchive
+     entity fields) with chat_id, user_id, message_id, timestamps, text, and
+     metadata. Index on (chat_id, user_id, sent_at).
+   - `provocations`: one row per provocation initiated (provocation_id,
+     chat_id, user_id, created_at, scheduled_at, sent_at, responded_at,
+     outcome: correct/incorrect/timeout, puzzle_id/ref, and any callback data).
+  - **FR-049**: MUST provide an SQL view `user_channel_activity` with per-user,
+   per-chat aggregates computed from `message_archive` and `provocations`, exposing:
+   (chat_id, user_id, message_count, last_message_at, last_provocation_at).
+   Use appropriate indexes to keep the view performant.
 
 *Example of marking unclear requirements:*
 - **FR-011**: System MUST retain archived messages and challenge records
@@ -364,11 +413,11 @@ community stays engaged and admins stay informed.
    a moderated channel and a modlog channel; includes code, source chat ID,
    expiry, issuer, and status (unused/used/expired).
 - **Announcement**: Title, link, schedule, target channels, message template.
-- **MessageArchive**: Message ID, author (username/user ID), channel (name/ID),
-  full text (if available), content digest, timestamps (sent/edited), message
-  type, reply_to ID, forward/origin info, attachment/file references (file_id,
-  mime type, size), and other readily available Telegram metadata for future
-  analytics.
+ - **MessageArchive**: One row per message in moderated chats: message ID, author
+  (username/user ID), channel (name/ID), full text (if available), content
+  digest, timestamps (sent/edited), message type, reply_to ID, forward/origin
+  info, attachment/file references (file_id, mime type, size), and other
+  readily available Telegram metadata for future analytics.
 - **ModerationAction**: Type (challenge/notify/announce), reason, actor,
   references, timestamps.
 
@@ -430,4 +479,7 @@ community stays engaged and admins stay informed.
     threshold, provocation interval, audit cadence, and provocation rate limits)
     in `$CONFIG_DIR/config.yaml`, and apply precedence: per‑chat overrides in
     `channels.yaml` > global defaults in `config.yaml` > built‑in defaults
-    (14 days; 48 hours; 15 minutes; 2/hour; 15/day).
+    (14 days; 48 hours; 15 minutes; 2/hour; 15/day). Config changes applied via
+    bot commands MUST take effect immediately at runtime and be persisted to
+    `config.yaml` without requiring a reboot. Changes made by manually editing
+    `config.yaml` MUST require `/antlurk reboot` to reload.
