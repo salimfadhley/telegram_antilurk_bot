@@ -51,6 +51,15 @@ notes in PRs.
 - Conventions: `pytest -q` default, `-k` for focused runs; prefer fixtures over
   ad-hoc setup; use markers for slow/integration.
 
+### VII. Code Quality & Hooks (Enforced)
+- Lint/format: Use ruff to keep code tidy and consistent. Code must be formatted
+  with `ruff format`; linting rules may be incrementally adopted but formatting
+  is mandatory.
+- Types: Use mypy to ensure type consistency. Treat mypy errors as blockers.
+- Hooks: Enforce ruff+mypy via pre-commit hooks (uv/uvx driven). Contributors
+  must install and run hooks locally; CI should verify hooks (or equivalent
+  commands) to prevent regressions.
+
 ## Additional Constraints & Security
 - Default runtime is workspace-write with restricted network; avoid networked
   dependencies unless explicitly approved.
