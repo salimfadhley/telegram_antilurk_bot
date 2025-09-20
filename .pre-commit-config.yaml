@@ -8,6 +8,13 @@ repos:
         types_or: [python]
         pass_filenames: false
 
+      - id: pytest-unit
+        name: Pytest Unit Suite (uv run)
+        entry: bash -c 'if [ -d tests/unit ]; then uv run pytest -q tests/unit; elif [ -d tests ]; then uv run pytest -q -k "not integration and not contract"; else echo "No tests found; skipping unit tests"; fi'
+        language: system
+        types_or: [python]
+        pass_filenames: false
+
       - id: ruff-format
         name: Ruff Format (uv run)
         entry: bash -c 'uv run ruff format'

@@ -104,7 +104,8 @@ On startup the bot validates critical configuration and will exit with a clear, 
   - Run on all files: `uvx pre-commit run -a`
   - Hooks run tools via `uv run`:
     - mypy: type check (runs first)
-    - ruff: code formatting (`ruff format` runs after mypy)
+    - pytest: run fast unit tests (prefers `tests/unit`; otherwise excludes integration/contract)
+    - ruff: code formatting (`ruff format` runs after tests)
   - Note: This project avoids pip/pipx; prefer `uv`/`uvx` exclusively.
 - Responses:
   - Any button press resets the user’s last‑interaction.
