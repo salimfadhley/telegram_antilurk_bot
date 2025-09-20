@@ -1,0 +1,115 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/telegram-antilurk-bot
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh -s -- -y
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Sync deps (dev)
+        run: uv sync --dev
+
+      - name: Ruff check
+        run: uv run ruff check
+
+      - name: Mypy
+        run: uv run mypy src
+
+      - name: Unit tests (exclude integration/contract)
+        run: uv run pytest -q -k "not integration and not contract"
+
+      - name: Build Docker image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+
+  release:
+    if: github.ref == 'refs/heads/main'
+    needs: build-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh -s -- -y
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Bump patch version in pyproject.toml
+        id: bump
+        run: |
+          python - <<'PY'
+          import re, pathlib
+          p = pathlib.Path('pyproject.toml')
+          s = p.read_text()
+          m = re.search(r'^(version\s*=\s*"(\d+)\.(\d+)\.(\d+)")', s, re.M)
+          if not m:
+              raise SystemExit('Could not find version in pyproject.toml')
+          major, minor, patch = map(int, m.group(2,3,4))
+          new = f'{major}.{minor}.{patch+1}'
+          s2 = re.sub(r'^(version\s*=\s*"\d+\.\d+\.\d+")', f'version = "{new}"', s, flags=re.M)
+          p.write_text(s2)
+          print(f"::set-output name=version::{new}")
+          PY
+
+      - name: Commit version bump
+        if: ${{ github.actor != 'github-actions[bot]' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pyproject.toml
+          git commit -m "ci: bump version to ${{ steps.bump.outputs.version }} [skip ci]" || echo "No changes to commit"
+          git push || true
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version
+        id: ver
+        run: |
+          echo version=$(grep '^version\s*=\s*"' pyproject.toml | head -n1 | sed -E 's/.*"(.*)"/\1/') >> $GITHUB_OUTPUT
+
+      - name: Build and push docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.version }}
+
