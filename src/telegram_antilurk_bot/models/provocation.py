@@ -2,8 +2,12 @@
 
 from datetime import datetime
 from enum import Enum
-from sqlalchemy import Column, BigInteger, String, DateTime, JSON, Index, ForeignKey, Enum as SQLEnum
+from typing import Any
+
+from sqlalchemy import JSON, BigInteger, Column, DateTime, ForeignKey, Index, String
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import relationship
+
 from .base import Base
 
 
@@ -42,7 +46,7 @@ class Provocation(Base):
     expires_at = Column(DateTime, nullable=False)
 
     # Outcome
-    outcome = Column(
+    outcome: Column[ProvocationOutcome] = Column(
         SQLEnum(ProvocationOutcome),
         default=ProvocationOutcome.PENDING,
         nullable=False
@@ -66,42 +70,42 @@ class Provocation(Base):
         Index('ix_provocations_expires', 'expires_at'),
     )
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize provocation with defaults."""
         super().__init__(**kwargs)
         if not self.created_at:
-            self.created_at = datetime.utcnow()
+            self.created_at = datetime.utcnow()  # type: ignore[assignment]
         if not self.outcome:
-            self.outcome = ProvocationOutcome.PENDING
+            self.outcome = ProvocationOutcome.PENDING  # type: ignore[assignment]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Provocation(id={self.provocation_id}, user_id={self.user_id}, outcome={self.outcome})>"
 
     @property
     def is_expired(self) -> bool:
         """Check if the provocation has expired."""
-        return datetime.utcnow() > self.expires_at
+        return bool(datetime.utcnow() > self.expires_at)
 
     @property
     def is_pending(self) -> bool:
         """Check if the provocation is still pending."""
-        return self.outcome == ProvocationOutcome.PENDING
+        return bool(self.outcome == ProvocationOutcome.PENDING)
 
-    def mark_sent(self, message_id: int):
+    def mark_sent(self, message_id: int) -> None:
         """Mark the provocation as sent with the message ID."""
-        self.sent_at = datetime.utcnow()
-        self.challenge_message_id = message_id
+        self.sent_at = datetime.utcnow()  # type: ignore[assignment]
+        self.challenge_message_id = message_id  # type: ignore[assignment]
 
-    def mark_responded(self, answer: str, is_correct: bool):
+    def mark_responded(self, answer: str, is_correct: bool) -> None:
         """Mark the provocation as responded with the user's answer."""
-        self.responded_at = datetime.utcnow()
-        self.user_answer = answer
-        self.outcome = ProvocationOutcome.CORRECT if is_correct else ProvocationOutcome.INCORRECT
+        self.responded_at = datetime.utcnow()  # type: ignore[assignment]
+        self.user_answer = answer  # type: ignore[assignment]
+        self.outcome = ProvocationOutcome.CORRECT if is_correct else ProvocationOutcome.INCORRECT  # type: ignore[assignment]
 
-    def mark_timeout(self):
+    def mark_timeout(self) -> None:
         """Mark the provocation as timed out."""
-        self.outcome = ProvocationOutcome.TIMEOUT
+        self.outcome = ProvocationOutcome.TIMEOUT  # type: ignore[assignment]
 
-    def mark_cancelled(self):
+    def mark_cancelled(self) -> None:
         """Mark the provocation as cancelled."""
-        self.outcome = ProvocationOutcome.CANCELLED
+        self.outcome = ProvocationOutcome.CANCELLED  # type: ignore[assignment]

@@ -1,14 +1,14 @@
 """Unit tests for configuration schemas - written FIRST in TDD style."""
 
+
 import pytest
-from datetime import datetime
 from pydantic import ValidationError
 
 
 class TestGlobalConfigSchema:
     """Tests for GlobalConfig schema."""
 
-    def test_global_config_with_defaults(self):
+    def test_global_config_with_defaults(self) -> None:
         """GlobalConfig should have sensible defaults."""
         from telegram_antilurk_bot.config.schemas import GlobalConfig
 
@@ -22,7 +22,7 @@ class TestGlobalConfigSchema:
         assert config.enable_nats is False
         assert config.enable_announcements is False
 
-    def test_global_config_with_custom_values(self):
+    def test_global_config_with_custom_values(self) -> None:
         """GlobalConfig should accept custom values within valid ranges."""
         from telegram_antilurk_bot.config.schemas import GlobalConfig
 
@@ -40,7 +40,7 @@ class TestGlobalConfigSchema:
         assert config.rate_limit_per_hour == 5
         assert config.rate_limit_per_day == 50
 
-    def test_global_config_validation_errors(self):
+    def test_global_config_validation_errors(self) -> None:
         """GlobalConfig should reject invalid values."""
         from telegram_antilurk_bot.config.schemas import GlobalConfig
 
@@ -56,7 +56,7 @@ class TestGlobalConfigSchema:
             GlobalConfig(audit_cadence_minutes=3)  # Too low
         assert "greater than or equal to 5" in str(exc_info.value)
 
-    def test_global_config_checksum_computation(self):
+    def test_global_config_checksum_computation(self) -> None:
         """GlobalConfig should compute consistent checksums."""
         from telegram_antilurk_bot.config.schemas import GlobalConfig
 
@@ -75,7 +75,7 @@ class TestGlobalConfigSchema:
         assert len(checksum) == 64  # SHA256 produces 64 hex chars
         assert all(c in '0123456789abcdef' for c in checksum)
 
-    def test_global_config_provenance_update(self):
+    def test_global_config_provenance_update(self) -> None:
         """GlobalConfig should track provenance correctly."""
         from telegram_antilurk_bot.config.schemas import GlobalConfig
 
@@ -95,7 +95,7 @@ class TestGlobalConfigSchema:
 class TestPuzzleSchema:
     """Tests for Puzzle schema."""
 
-    def test_valid_puzzle_creation(self):
+    def test_valid_puzzle_creation(self) -> None:
         """Puzzle should accept valid configuration."""
         from telegram_antilurk_bot.config.schemas import Puzzle, PuzzleChoice
 
@@ -117,7 +117,7 @@ class TestPuzzleSchema:
         assert len(puzzle.choices) == 4
         assert sum(1 for c in puzzle.choices if c.is_correct) == 1
 
-    def test_puzzle_type_validation(self):
+    def test_puzzle_type_validation(self) -> None:
         """Puzzle should only accept valid types."""
         from telegram_antilurk_bot.config.schemas import Puzzle, PuzzleChoice
 
@@ -139,7 +139,7 @@ class TestPuzzleSchema:
             Puzzle(id="p3", type="invalid_type", question="Q?", choices=choices)
         assert "pattern" in str(exc_info.value).lower()
 
-    def test_puzzle_choices_validation(self):
+    def test_puzzle_choices_validation(self) -> None:
         """Puzzle should validate choice requirements."""
         from telegram_antilurk_bot.config.schemas import Puzzle, PuzzleChoice
 
@@ -201,7 +201,7 @@ class TestPuzzleSchema:
 class TestChannelSchema:
     """Tests for Channel configuration schema."""
 
-    def test_channel_entry_creation(self):
+    def test_channel_entry_creation(self) -> None:
         """ChannelEntry should store channel configuration."""
         from telegram_antilurk_bot.config.schemas import ChannelEntry
 
@@ -217,7 +217,7 @@ class TestChannelSchema:
         assert channel.modlog_ref is None
         assert channel.overrides is None
 
-    def test_channel_mode_validation(self):
+    def test_channel_mode_validation(self) -> None:
         """ChannelEntry should only accept valid modes."""
         from telegram_antilurk_bot.config.schemas import ChannelEntry
 
@@ -233,7 +233,7 @@ class TestChannelSchema:
             ChannelEntry(chat_id=3, chat_name="C3", mode="invalid")
         assert "pattern" in str(exc_info.value).lower()
 
-    def test_channel_overrides(self):
+    def test_channel_overrides(self) -> None:
         """ChannelEntry should accept per-channel overrides."""
         from telegram_antilurk_bot.config.schemas import ChannelEntry, ChannelOverride
 
@@ -249,13 +249,14 @@ class TestChannelSchema:
             overrides=override
         )
 
+        assert channel.overrides is not None
         assert channel.overrides.lurk_threshold_days == 7
         assert channel.overrides.rate_limit_per_hour == 3
         assert channel.overrides.audit_cadence_minutes is None  # Not overridden
 
-    def test_channels_config_methods(self):
+    def test_channels_config_methods(self) -> None:
         """ChannelsConfig should provide helper methods."""
-        from telegram_antilurk_bot.config.schemas import ChannelsConfig, ChannelEntry
+        from telegram_antilurk_bot.config.schemas import ChannelEntry, ChannelsConfig
 
         config = ChannelsConfig(channels=[
             ChannelEntry(chat_id=1, chat_name="Mod1", mode="moderated", modlog_ref=3),

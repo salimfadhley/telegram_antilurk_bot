@@ -1,17 +1,17 @@
 """Config module initialization."""
 
+from .defaults import get_default_puzzles
+from .loader import ConfigLoader, ConfigurationError
 from .schemas import (
-    GlobalConfig,
-    ChannelsConfig,
-    PuzzlesConfig,
     ChannelEntry,
     ChannelOverride,
+    ChannelsConfig,
+    GlobalConfig,
+    ProvenanceInfo,
     Puzzle,
     PuzzleChoice,
-    ProvenanceInfo
+    PuzzlesConfig,
 )
-from .loader import ConfigLoader, ConfigurationError
-from .defaults import get_default_puzzles
 
 __all__ = [
     'GlobalConfig',

@@ -1,10 +1,10 @@
 """Default puzzles for the bot."""
 
-from typing import List
+
 from .schemas import Puzzle, PuzzleChoice
 
 
-def get_default_puzzles() -> List[Puzzle]:
+def get_default_puzzles() -> list[Puzzle]:
     """Generate default puzzles for first-time setup."""
     puzzles = []
 

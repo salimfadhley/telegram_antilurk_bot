@@ -1,8 +1,11 @@
 """Message archive model - TDD implementation."""
 
 from datetime import datetime
-from sqlalchemy import Column, BigInteger, String, Text, DateTime, JSON, Index, ForeignKey
+from typing import Any
+
+from sqlalchemy import JSON, BigInteger, Column, DateTime, ForeignKey, Index, String, Text
 from sqlalchemy.orm import relationship
+
 from .base import Base
 
 
@@ -48,14 +51,14 @@ class MessageArchive(Base):
         Index('ix_message_archive_chat_message', 'chat_id', 'message_id', unique=True),
     )
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize message with archived_at timestamp."""
         super().__init__(**kwargs)
         if not self.archived_at:
-            self.archived_at = datetime.utcnow()
+            self.archived_at = datetime.utcnow()  # type: ignore[assignment]
 
-    def __repr__(self):
-        return f"<MessageArchive(chat_id={self.chat_id}, message_id={self.message_id}, user_id={self.user_id})>"
+    def __repr__(self) -> str:
+        return f"<MessageArchive(chat_id={self.chat_id}, message_id={self.message_id}, user_id={self.user_id})"
 
     @property
     def is_reply(self) -> bool:

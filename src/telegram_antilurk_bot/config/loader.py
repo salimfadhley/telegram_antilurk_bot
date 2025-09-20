@@ -3,13 +3,14 @@
 import os
 import sys
 from pathlib import Path
-from typing import Tuple, Optional
-import yaml
+from typing import Any
+
 import structlog
+import yaml
 from pydantic import ValidationError
 
-from .schemas import GlobalConfig, ChannelsConfig, PuzzlesConfig
 from .defaults import get_default_puzzles
+from .schemas import ChannelsConfig, GlobalConfig, PuzzlesConfig
 
 logger = structlog.get_logger(__name__)
 
@@ -22,7 +23,7 @@ class ConfigurationError(Exception):
 class ConfigLoader:
     """Manages configuration loading, validation, and persistence."""
 
-    def __init__(self, config_dir: Optional[Path] = None):
+    def __init__(self, config_dir: Path | None = None):
         """Initialize the configuration loader."""
         if config_dir:
             self.config_dir = config_dir
@@ -42,7 +43,7 @@ class ConfigLoader:
         self.channels_path = self.config_dir / 'channels.yaml'
         self.puzzles_path = self.config_dir / 'puzzles.yaml'
 
-    def load_all(self) -> Tuple[GlobalConfig, ChannelsConfig, PuzzlesConfig]:
+    def load_all(self) -> tuple[GlobalConfig, ChannelsConfig, PuzzlesConfig]:
         """Load all configuration files with validation."""
         logger.info("Loading configuration files", config_dir=str(self.config_dir))
 
@@ -79,7 +80,7 @@ class ConfigLoader:
     def _load_global_config(self) -> GlobalConfig:
         """Load and validate global configuration."""
         try:
-            with open(self.config_path, 'r') as f:
+            with open(self.config_path) as f:
                 data = yaml.safe_load(f) or {}
 
             config = GlobalConfig(**data)
@@ -113,7 +114,7 @@ class ConfigLoader:
     def _load_channels_config(self) -> ChannelsConfig:
         """Load and validate channels configuration."""
         try:
-            with open(self.channels_path, 'r') as f:
+            with open(self.channels_path) as f:
                 data = yaml.safe_load(f) or {}
 
             config = ChannelsConfig(**data)
@@ -147,7 +148,7 @@ class ConfigLoader:
     def _load_puzzles_config(self) -> PuzzlesConfig:
         """Load and validate puzzles configuration."""
         try:
-            with open(self.puzzles_path, 'r') as f:
+            with open(self.puzzles_path) as f:
                 data = yaml.safe_load(f) or {}
 
             config = PuzzlesConfig(**data)
@@ -178,13 +179,13 @@ class ConfigLoader:
             print(f"ERROR: Failed to load puzzles.yaml - {e}")
             sys.exit(1)
 
-    def save_global_config(self, config: GlobalConfig, updated_by: str = "bot-command") -> Tuple[Optional[str], str]:
+    def save_global_config(self, config: GlobalConfig, updated_by: str = "bot-command") -> tuple[str | None, str | None]:
         """Save global configuration with checksum verification."""
         # Check for manual edits
         old_checksum = None
         if self.config_path.exists():
             try:
-                with open(self.config_path, 'r') as f:
+                with open(self.config_path) as f:
                     existing_data = yaml.safe_load(f)
                     if existing_data and 'provenance' in existing_data and 'checksum' in existing_data['provenance']:
                         # Load existing config to verify checksum
@@ -207,12 +208,12 @@ class ConfigLoader:
         self._save_config(self.config_path, config)
         return old_checksum, config.provenance.checksum
 
-    def save_channels_config(self, config: ChannelsConfig, updated_by: str = "bot-command") -> Tuple[Optional[str], str]:
+    def save_channels_config(self, config: ChannelsConfig, updated_by: str = "bot-command") -> tuple[str | None, str | None]:
         """Save channels configuration with checksum verification."""
         # Check for manual edits
         old_checksum = None
         if self.channels_path.exists():
-            with open(self.channels_path, 'r') as f:
+            with open(self.channels_path) as f:
                 existing_data = yaml.safe_load(f) or {}
                 if 'provenance' in existing_data and 'checksum' in existing_data['provenance']:
                     # Load existing config to verify checksum
@@ -232,7 +233,7 @@ class ConfigLoader:
         self._save_config(self.channels_path, config)
         return old_checksum, config.provenance.checksum
 
-    def _save_config(self, path: Path, config) -> None:
+    def _save_config(self, path: Path, config: Any) -> None:
         """Save a configuration object to YAML file."""
         data = config.model_dump(mode='json')
         # Convert datetime objects to ISO format strings
@@ -241,7 +242,7 @@ class ConfigLoader:
         with open(path, 'w') as f:
             yaml.safe_dump(data, f, default_flow_style=False, sort_keys=False)
 
-    def _convert_datetimes(self, obj):
+    def _convert_datetimes(self, obj: Any) -> None:
         """Recursively convert datetime objects to ISO format strings."""
         if isinstance(obj, dict):
             for key, value in obj.items():
@@ -260,6 +261,6 @@ class ConfigLoader:
         """Format Pydantic validation errors for display."""
         errors = []
         for error in e.errors():
-            loc = ' -> '.join(str(l) for l in error['loc'])
+            loc = ' -> '.join(str(location_part) for location_part in error['loc'])
             errors.append(f"{loc}: {error['msg']}")
         return '\n  '.join(errors)

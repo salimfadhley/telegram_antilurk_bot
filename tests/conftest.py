@@ -3,8 +3,11 @@
 import os
 import sys
 import tempfile
+from collections.abc import Generator
 from pathlib import Path
-from unittest.mock import Mock, AsyncMock
+from typing import Any
+from unittest.mock import AsyncMock, MagicMock, Mock
+
 import pytest
 from faker import Faker
 
@@ -17,20 +20,20 @@ os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5432/test_antilur
 
 
 @pytest.fixture
-def fake():
+def fake() -> Faker:
     """Provide Faker instance for test data generation."""
     return Faker()
 
 
 @pytest.fixture
-def temp_config_dir():
+def temp_config_dir() -> Generator[Path, None, None]:
     """Create a temporary config directory for testing."""
     with tempfile.TemporaryDirectory() as tmpdir:
         yield Path(tmpdir)
 
 
 @pytest.fixture
-def mock_telegram_bot():
+def mock_telegram_bot() -> AsyncMock:
     """Mock Telegram bot instance."""
     bot = AsyncMock()
     bot.send_message = AsyncMock(return_value=Mock(message_id=12345))
@@ -39,7 +42,7 @@ def mock_telegram_bot():
 
 
 @pytest.fixture
-def sample_config_data():
+def sample_config_data() -> dict[str, Any]:
     """Sample configuration data for testing."""
     return {
         "global_config": {
@@ -90,7 +93,7 @@ def sample_config_data():
 
 
 @pytest.fixture
-def mock_database_engine():
+def mock_database_engine() -> MagicMock:
     """Mock database engine for testing."""
     from unittest.mock import MagicMock
     engine = MagicMock()

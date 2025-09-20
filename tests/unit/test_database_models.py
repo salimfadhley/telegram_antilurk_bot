@@ -1,14 +1,14 @@
 """Unit tests for database models - TDD approach."""
 
-import pytest
 from datetime import datetime, timedelta
-from unittest.mock import Mock, MagicMock
+
+import pytest
 
 
 class TestUserModel:
     """Tests for User model."""
 
-    def test_user_creation(self):
+    def test_user_creation(self) -> None:
         """User model should store user information."""
         from telegram_antilurk_bot.models.user import User
 
@@ -293,8 +293,9 @@ class TestDatabaseInitialization:
 
     def test_get_db_url(self):
         """Should get database URL from environment."""
-        from telegram_antilurk_bot.models.base import get_db_url
         import os
+
+        from telegram_antilurk_bot.models.base import get_db_url
 
         # Test with postgres:// format
         os.environ['DATABASE_URL'] = 'postgres://user:pass@host:5432/db'
@@ -308,8 +309,9 @@ class TestDatabaseInitialization:
 
     def test_get_db_url_missing(self):
         """Should raise error if DATABASE_URL is not set."""
-        from telegram_antilurk_bot.models.base import get_db_url
         import os
+
+        from telegram_antilurk_bot.models.base import get_db_url
 
         # Remove DATABASE_URL if it exists
         original = os.environ.pop('DATABASE_URL', None)

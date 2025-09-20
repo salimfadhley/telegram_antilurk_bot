@@ -1,17 +1,17 @@
 """Configuration schemas - implemented to pass tests."""
 
-from datetime import datetime
-from typing import Optional, List
-from pydantic import BaseModel, Field, field_validator
 import hashlib
+from datetime import datetime
+
 import yaml
+from pydantic import BaseModel, Field, field_validator
 
 
 class ProvenanceInfo(BaseModel):
     """Tracks configuration changes."""
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     updated_by: str = Field(default="bot-init")
-    checksum: Optional[str] = None
+    checksum: str | None = None
 
 
 class GlobalConfig(BaseModel):
@@ -49,11 +49,11 @@ class Puzzle(BaseModel):
     id: str
     type: str = Field(..., pattern="^(arithmetic|common_sense)$")
     question: str
-    choices: List[PuzzleChoice] = Field(..., min_length=3, max_length=4)
+    choices: list[PuzzleChoice] = Field(..., min_length=3, max_length=4)
 
     @field_validator('choices')
     @classmethod
-    def validate_choices(cls, v: List[PuzzleChoice]) -> List[PuzzleChoice]:
+    def validate_choices(cls, v: list[PuzzleChoice]) -> list[PuzzleChoice]:
         """Ensure exactly one correct choice."""
         correct_count = sum(1 for choice in v if choice.is_correct)
         if correct_count != 1:
@@ -63,11 +63,11 @@ class Puzzle(BaseModel):
 
 class ChannelOverride(BaseModel):
     """Per-channel configuration overrides."""
-    lurk_threshold_days: Optional[int] = Field(None, ge=1, le=365)
-    provocation_interval_hours: Optional[int] = Field(None, ge=1, le=168)
-    audit_cadence_minutes: Optional[int] = Field(None, ge=5, le=1440)
-    rate_limit_per_hour: Optional[int] = Field(None, ge=1, le=10)
-    rate_limit_per_day: Optional[int] = Field(None, ge=1, le=100)
+    lurk_threshold_days: int | None = Field(None, ge=1, le=365)
+    provocation_interval_hours: int | None = Field(None, ge=1, le=168)
+    audit_cadence_minutes: int | None = Field(None, ge=5, le=1440)
+    rate_limit_per_hour: int | None = Field(None, ge=1, le=10)
+    rate_limit_per_day: int | None = Field(None, ge=1, le=100)
 
 
 class ChannelEntry(BaseModel):
@@ -75,15 +75,15 @@ class ChannelEntry(BaseModel):
     chat_id: int
     chat_name: str
     mode: str = Field(..., pattern="^(moderated|modlog)$")
-    modlog_ref: Optional[int] = None
-    overrides: Optional[ChannelOverride] = None
-    link_code: Optional[str] = None
-    link_expires_at: Optional[datetime] = None
+    modlog_ref: int | None = None
+    overrides: ChannelOverride | None = None
+    link_code: str | None = None
+    link_expires_at: datetime | None = None
 
 
 class ChannelsConfig(BaseModel):
     """Channels configuration."""
-    channels: List[ChannelEntry] = Field(default_factory=list)
+    channels: list[ChannelEntry] = Field(default_factory=list)
     provenance: ProvenanceInfo = Field(default_factory=ProvenanceInfo)
 
     def compute_checksum(self) -> str:
@@ -98,15 +98,15 @@ class ChannelsConfig(BaseModel):
         self.provenance.updated_by = updated_by
         self.provenance.checksum = self.compute_checksum()
 
-    def get_moderated_channels(self) -> List[ChannelEntry]:
+    def get_moderated_channels(self) -> list[ChannelEntry]:
         """Get all moderated channels."""
         return [ch for ch in self.channels if ch.mode == "moderated"]
 
-    def get_modlog_channels(self) -> List[ChannelEntry]:
+    def get_modlog_channels(self) -> list[ChannelEntry]:
         """Get all modlog channels."""
         return [ch for ch in self.channels if ch.mode == "modlog"]
 
-    def get_linked_modlog(self, chat_id: int) -> Optional[ChannelEntry]:
+    def get_linked_modlog(self, chat_id: int) -> ChannelEntry | None:
         """Get the modlog channel linked to a moderated channel."""
         moderated = next((ch for ch in self.channels if ch.chat_id == chat_id), None)
         if moderated and moderated.modlog_ref:
@@ -116,7 +116,7 @@ class ChannelsConfig(BaseModel):
 
 class PuzzlesConfig(BaseModel):
     """Puzzles configuration."""
-    puzzles: List[Puzzle] = Field(default_factory=list)
+    puzzles: list[Puzzle] = Field(default_factory=list)
     provenance: ProvenanceInfo = Field(default_factory=ProvenanceInfo)
 
     def compute_checksum(self) -> str:

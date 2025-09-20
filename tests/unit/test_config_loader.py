@@ -1,16 +1,16 @@
 """Unit tests for configuration loader - TDD style."""
 
+from pathlib import Path
+from unittest.mock import patch
+
 import pytest
 import yaml
-from pathlib import Path
-from unittest.mock import Mock, patch
-import tempfile
 
 
 class TestConfigLoader:
     """Tests for ConfigLoader class."""
 
-    def test_config_loader_initialization(self, temp_config_dir):
+    def test_config_loader_initialization(self, temp_config_dir: Path) -> None:
         """ConfigLoader should initialize with config directory."""
         from telegram_antilurk_bot.config.loader import ConfigLoader
 
@@ -20,7 +20,7 @@ class TestConfigLoader:
         assert loader.channels_path == temp_config_dir / 'channels.yaml'
         assert loader.puzzles_path == temp_config_dir / 'puzzles.yaml'
 
-    def test_config_loader_uses_environment_variable(self):
+    def test_config_loader_uses_environment_variable(self) -> None:
         """ConfigLoader should use CONFIG_DIR from environment if not specified."""
         from telegram_antilurk_bot.config.loader import ConfigLoader
 
@@ -28,17 +28,17 @@ class TestConfigLoader:
             loader = ConfigLoader()
             assert str(loader.config_dir) == '/custom/config'
 
-    def test_config_loader_creates_directory_if_missing(self, temp_config_dir):
+    def test_config_loader_creates_directory_if_missing(self, temp_config_dir: Path) -> None:
         """ConfigLoader should create config directory if it doesn't exist."""
         from telegram_antilurk_bot.config.loader import ConfigLoader
 
         new_dir = temp_config_dir / 'new_subdir'
         assert not new_dir.exists()
 
-        loader = ConfigLoader(config_dir=new_dir)
+        ConfigLoader(config_dir=new_dir)
         assert new_dir.exists()
 
-    def test_load_all_creates_default_files_if_missing(self, temp_config_dir):
+    def test_load_all_creates_default_files_if_missing(self, temp_config_dir: Path) -> None:
         """ConfigLoader should create default config files if they don't exist."""
         from telegram_antilurk_bot.config.loader import ConfigLoader
 
@@ -62,7 +62,7 @@ class TestConfigLoader:
         assert len(channels_config.channels) == 0
         assert len(puzzles_config.puzzles) >= 50  # Should have default puzzles
 
-    def test_load_global_config_validates_checksum(self, temp_config_dir):
+    def test_load_global_config_validates_checksum(self, temp_config_dir: Path) -> None:
         """ConfigLoader should validate checksum and detect manual edits."""
         from telegram_antilurk_bot.config.loader import ConfigLoader
         from telegram_antilurk_bot.config.schemas import GlobalConfig
@@ -79,7 +79,7 @@ class TestConfigLoader:
             yaml.dump(config_dict, f)
 
         # Now manually edit the file (simulate manual edit)
-        with open(loader.config_path, 'r') as f:
+        with open(loader.config_path) as f:
             data = yaml.safe_load(f)
         data['lurk_threshold_days'] = 10  # Change a value
         with open(loader.config_path, 'w') as f:
@@ -98,7 +98,7 @@ class TestConfigLoader:
         assert loaded_config.lurk_threshold_days == 10
         assert loaded_config.provenance.checksum is not None
 
-    def test_load_invalid_config_exits(self, temp_config_dir):
+    def test_load_invalid_config_exits(self, temp_config_dir: Path) -> None:
         """ConfigLoader should exit with clear error on invalid config."""
         from telegram_antilurk_bot.config.loader import ConfigLoader
 
@@ -113,7 +113,7 @@ class TestConfigLoader:
             loader._load_global_config()
         assert exc_info.value.code == 1
 
-    def test_save_config_detects_manual_edits(self, temp_config_dir):
+    def test_save_config_detects_manual_edits(self, temp_config_dir: Path) -> None:
         """Save should detect and warn about manual edits before overwriting."""
         from telegram_antilurk_bot.config.loader import ConfigLoader
         from telegram_antilurk_bot.config.schemas import GlobalConfig
@@ -126,7 +126,7 @@ class TestConfigLoader:
         assert old_checksum is None  # No previous config
 
         # Manually edit the file
-        with open(loader.config_path, 'r') as f:
+        with open(loader.config_path) as f:
             data = yaml.safe_load(f)
         data['lurk_threshold_days'] = 10
         with open(loader.config_path, 'w') as f:
@@ -144,7 +144,7 @@ class TestConfigLoader:
             # Should log warning
             mock_logger.warning.assert_called()
 
-    def test_default_puzzles_generation(self):
+    def test_default_puzzles_generation(self) -> None:
         """Should generate a good set of default puzzles."""
         from telegram_antilurk_bot.config.defaults import get_default_puzzles
 
@@ -167,7 +167,7 @@ class TestConfigLoader:
             correct_count = sum(1 for c in puzzle.choices if c.is_correct)
             assert correct_count == 1
 
-    def test_config_persistence_format(self, temp_config_dir):
+    def test_config_persistence_format(self, temp_config_dir: Path) -> None:
         """Saved configs should be properly formatted YAML."""
         from telegram_antilurk_bot.config.loader import ConfigLoader
         from telegram_antilurk_bot.config.schemas import GlobalConfig
@@ -183,7 +183,7 @@ class TestConfigLoader:
         loader.save_global_config(config, "test")
 
         # Read back as raw YAML
-        with open(loader.config_path, 'r') as f:
+        with open(loader.config_path) as f:
             data = yaml.safe_load(f)
 
         # Check structure

@@ -1,9 +1,10 @@
 """Base database configuration - TDD implementation."""
 
 import os
-from sqlalchemy import create_engine
+
+from sqlalchemy import Engine, create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 Base = declarative_base()
 
@@ -21,14 +22,14 @@ def get_db_url() -> str:
     return db_url
 
 
-def get_engine():
+def get_engine() -> Engine:
     """Create and return database engine."""
     db_url = get_db_url()
     return create_engine(db_url, echo=False, pool_size=10, max_overflow=20)
 
 
-def get_session():
+def get_session() -> Session:
     """Create and return database session."""
     engine = get_engine()
-    Session = sessionmaker(bind=engine)
-    return Session()
+    SessionLocal = sessionmaker(bind=engine)
+    return SessionLocal()
