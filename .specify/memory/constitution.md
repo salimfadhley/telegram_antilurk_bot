@@ -68,6 +68,25 @@ notes in PRs.
   tools. Favor straightforward commands/subcommands with clear `--help` docs
   and consistent option names.
 
+### IX. Property‑Based Testing (Selective)
+- Use Hypothesis when it adds clear value (e.g., config parsing edge cases,
+  scheduling/rate‑limit logic, text/markup rendering). Keep it targeted to
+  critical logic rather than blanket usage. Reproduce found failures with
+  explicit examples.
+
+### X. Documentation Standard
+- Author and maintain hierarchical Markdown docs under `docs/` (top‑level
+  index plus subtopics). Each feature should update or add docs explaining
+  behavior, configuration, operations, and troubleshooting. Prefer runnable
+  snippets and clear examples.
+
+### XI. Typing Policy & Stubs
+- Strengthen typing over time. Prefer adding stub files (`.pyi`) or local stub
+  packages for third‑party libs over sprinkling `# type: ignore`.
+- Place project stubs in `stubs/` (or a dedicated typed package) and configure
+  mypy to include it. Include `py.typed` for this project to signal typed code.
+- Minimize `ignore` usage; if unavoidable, add a short justification.
+
 ## Additional Constraints & Security
 - Default runtime is workspace-write with restricted network; avoid networked
   dependencies unless explicitly approved.

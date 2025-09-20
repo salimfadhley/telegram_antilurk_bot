@@ -1,10 +1,11 @@
 # Implementation Plan — 001 Lurker Kicking Bot
 
-This plan outlines the phases to deliver the Telegram anti‑lurk bot (moderated/modlog model), aligned with the current spec. Testing methodology is Strict TDD using pytest.
+This plan outlines the phases to deliver the Telegram anti‑lurk bot (moderated/modlog model), aligned with the current spec. Testing methodology is Strict TDD using pytest, with Hypothesis used selectively where it adds value.
 
 ## Phase 1 — Config & Bootstrapping
 - Define schemas for `$CONFIG_DIR/config.yaml`, `channels.yaml`, `puzzles.yaml`.
 - Establish pytest baseline and folder structure (`tests/unit`, `tests/integration`, `tests/contract`). Add initial failing tests for config validation and checksum adoption.
+- Seed docs structure in `docs/` with high‑level overview and config file references.
 - Implement YAML load + schema validate; adopt valid configs by recomputing/writing checksums on startup; exit with clear errors on invalid files.
 - Seed default templates on first run (including ~50 puzzles) if files are missing.
 - Persist provenance: `updated_at`, `updated_by`, `checksum` in each config file.
@@ -14,7 +15,7 @@ This plan outlines the phases to deliver the Telegram anti‑lurk bot (moderated
 - Tables: `users`, `message_archive`, `provocations` (+ indexes on chat_id, user_id, sent_at).
 - View: `user_channel_activity` (per user/per chat aggregates: message_count, last_message_at, last_provocation_at).
 - Migrations + bootstrap (idempotent on startup).
- - Tests (pytest): unit tests for schema/migration generation and basic CRUD; integration tests for view correctness on sample fixtures.
+ - Tests (pytest): unit tests for schema/migration generation and basic CRUD; integration tests for view correctness on sample fixtures. Consider Hypothesis for aggregation edge cases.
 
 ## Phase 3 — Telegram Bot Core
 - Env + startup: validate `TELEGRAM_TOKEN`, `DATABASE_URL`; connect DB; load configs; post “bot is live” to modlogs.
@@ -27,7 +28,7 @@ This plan outlines the phases to deliver the Telegram anti‑lurk bot (moderated
 - Scheduler: run every `audit_cadence_minutes` (default 15).
 - Selection: identify lurkers per moderated chat (threshold days), skip anyone provoked within the current provocation interval; enforce rate limits (2/hour, 15/day per chat).
 - Backlog: carry over eligible users to later cycles when limits cap out (quietly; optional future notification).
- - Tests: unit tests for selection and rate-limit logic; integration tests simulating multiple chats and users.
+ - Tests: unit tests for selection and rate-limit logic; integration tests simulating multiple chats and users. Consider Hypothesis for rate‑limit/scheduler invariants.
 
 ## Phase 5 — Challenge Flow
 - Compose and post plain public puzzle messages in moderated chats (mention user; inline buttons; English‑only; choices randomized).
@@ -37,7 +38,7 @@ This plan outlines the phases to deliver the Telegram anti‑lurk bot (moderated
  - Tests: unit tests for puzzle selection/shuffle and callback handling; integration tests for end‑to‑end challenge lifecycle with a fake Telegram client.
 
 ## Phase 6 — Message & Event Logging
-- Ingest moderated chat messages into `message_archive` (full text + metadata); update `users.last_interaction_at`.
+- Ingest moderated chat messages into `message_archive` (full text + metadata); update `users. Consider Hypothesis for rate‑limit/scheduler invariants.last_interaction_at`.
 - Persist provocation lifecycle timestamps; maintain provocation history for rate limiting and reports.
 - Optional NATS: publish notable events if `NATS_URL` configured.
  - Tests: integration tests verifying DB rows and view updates as messages and provocations occur.
@@ -64,3 +65,6 @@ This plan outlines the phases to deliver the Telegram anti‑lurk bot (moderated
 - Config precedence: per‑chat overrides in `channels.yaml` > global in `config.yaml` > built‑ins.
 - Search/announcements are de‑scoped for v1 (data collected for future indexing).
  - Test Framework: pytest for all test types; maintain tests under `tests/unit`, `tests/integration`, and `tests/contract`.
+- Property‑based tests: Hypothesis used selectively for critical logic.
+- Docs: Maintain hierarchical Markdown under `docs/` and update alongside features.
+- Typing: Prefer adding stubs over ignores; include `py.typed` and local stubs to improve mypy signal.
