@@ -36,14 +36,20 @@ TDD is mandatory and strictly enforced:
   then fix.
 
 ### IV. Contracts & Integration Testing
-Generate contracts and integration scenarios from specs. Maintain tests under
-`tests/contract/`, `tests/integration/`, and `tests/unit/` as suggested by
-plan.md. Contract changes require updated tests.
+Generate contracts and integration scenarios from specs. The standard testing
+framework is pytest. Maintain tests under `tests/contract/`,
+`tests/integration/`, and `tests/unit/` as suggested by plan.md. Contract
+changes require updated tests.
 
 ### V. Simplicity, Observability, Versioning
 Prefer the simplest viable approach (YAGNI). Emit structured, readable logs.
 Breaking changes require semantic versioning (MAJOR.MINOR.PATCH) and migration
 notes in PRs.
+
+### VI. Test Tooling Standard
+- Framework: pytest for all unit/contract/integration tests.
+- Conventions: `pytest -q` default, `-k` for focused runs; prefer fixtures over
+  ad-hoc setup; use markers for slow/integration.
 
 ## Additional Constraints & Security
 - Default runtime is workspace-write with restricted network; avoid networked
