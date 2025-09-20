@@ -60,6 +60,14 @@ notes in PRs.
   must install and run hooks locally; CI should verify hooks (or equivalent
   commands) to prevent regressions.
 
+### VIII. Style Preferences
+- Unit tests: Prefer simple function-style pytest tests over class-based tests
+  (e.g., `test_*.py` with plain functions and fixtures). Use classes only when
+  shared state or parametrization patterns truly benefit from them.
+- CLI parsing: Prefer the Click library for command-line interfaces and admin
+  tools. Favor straightforward commands/subcommands with clear `--help` docs
+  and consistent option names.
+
 ## Additional Constraints & Security
 - Default runtime is workspace-write with restricted network; avoid networked
   dependencies unless explicitly approved.
