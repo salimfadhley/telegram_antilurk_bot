@@ -35,12 +35,10 @@ class BotRunner:
             logger.info("Configuration loaded successfully")
 
             # Initialize bot application
-            self.bot_app = BotApplication(
-                config_loader=self.config_loader
-            )
+            self.bot_app = BotApplication(config_loader=self.config_loader)
 
             # Get Telegram token
-            telegram_token = os.environ.get('TELEGRAM_TOKEN')
+            telegram_token = os.environ.get("TELEGRAM_TOKEN")
             if not telegram_token:
                 logger.error("TELEGRAM_TOKEN environment variable not set")
                 raise ValueError("TELEGRAM_TOKEN environment variable is required")
@@ -70,13 +68,20 @@ class BotRunner:
             signal.signal(sig, self._signal_handler)
 
         try:
-            # Start the bot
+            # Initialize and start the application using the async lifecycle
             logger.info("Bot is now running...")
-            await self.telegram_app.run_polling(
-                poll_interval=1.0,
-                drop_pending_updates=True,
-                close_loop=False
-            )
+            await self.telegram_app.initialize()
+            await self.telegram_app.start()
+
+            # Begin polling for updates asynchronously
+            if self.telegram_app.updater:
+                await self.telegram_app.updater.start_polling(
+                    poll_interval=1.0, drop_pending_updates=True
+                )
+
+            # Keep the task alive until a shutdown signal is received
+            while not self._shutdown_requested:
+                await asyncio.sleep(0.5)
 
         except KeyboardInterrupt:
             logger.info("Received keyboard interrupt")
@@ -104,7 +109,16 @@ class BotRunner:
 
             # Stop Telegram application
             if self.telegram_app and self.telegram_app.running:
-                await self.telegram_app.stop()
+                try:
+                    if self.telegram_app.updater:
+                        await self.telegram_app.updater.stop()
+                finally:
+                    await self.telegram_app.stop()
+                    # Ensure resources are released
+                    try:
+                        await self.telegram_app.shutdown()
+                    except Exception:
+                        pass
 
             logger.info("Bot shutdown completed successfully")
 
@@ -142,20 +156,18 @@ class BotRunner:
                 for modlog in modlog_channels:
                     try:
                         await self.telegram_app.bot.send_message(
-                            chat_id=modlog.chat_id,
-                            text=startup_message,
-                            parse_mode='Markdown'
+                            chat_id=modlog.chat_id, text=startup_message, parse_mode="Markdown"
                         )
                         logger.info(
                             "Startup notification sent",
                             modlog_chat_id=modlog.chat_id,
-                            modlog_name=modlog.chat_name
+                            modlog_name=modlog.chat_name,
                         )
                     except Exception as e:
                         logger.error(
                             "Failed to send startup notification",
                             modlog_chat_id=modlog.chat_id,
-                            error=str(e)
+                            error=str(e),
                         )
 
         except Exception as e:
@@ -182,20 +194,18 @@ class BotRunner:
             for modlog in modlog_channels:
                 try:
                     await self.telegram_app.bot.send_message(
-                        chat_id=modlog.chat_id,
-                        text=shutdown_message,
-                        parse_mode='Markdown'
+                        chat_id=modlog.chat_id, text=shutdown_message, parse_mode="Markdown"
                     )
                     logger.info(
                         "Shutdown notification sent",
                         modlog_chat_id=modlog.chat_id,
-                        modlog_name=modlog.chat_name
+                        modlog_name=modlog.chat_name,
                     )
                 except Exception as e:
                     logger.error(
                         "Failed to send shutdown notification",
                         modlog_chat_id=modlog.chat_id,
-                        error=str(e)
+                        error=str(e),
                     )
 
         except Exception as e:
@@ -209,10 +219,10 @@ async def main() -> None:
         processors=[
             structlog.processors.TimeStamper(fmt="iso"),
             structlog.processors.add_log_level,
-            structlog.processors.JSONRenderer()
+            structlog.processors.JSONRenderer(),
         ],
         wrapper_class=structlog.make_filtering_bound_logger(
-            min_level=os.environ.get('LOG_LEVEL', 'INFO').upper()
+            min_level=os.environ.get("LOG_LEVEL", "INFO").upper()
         ),
         logger_factory=structlog.PrintLoggerFactory(),
         cache_logger_on_first_use=True,

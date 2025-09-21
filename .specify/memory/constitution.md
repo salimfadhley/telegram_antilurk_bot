@@ -42,9 +42,11 @@ framework is pytest. Maintain tests under `tests/contract/`,
 changes require updated tests.
 
 ### V. Simplicity, Observability, Versioning
-Prefer the simplest viable approach (YAGNI). Emit structured, readable logs.
-Breaking changes require semantic versioning (MAJOR.MINOR.PATCH) and migration
-notes in PRs.
+Prefer the simplest viable approach (YAGNI). Emit structured, readable logs
+using the project logging framework (structlog). Do not use `print()` for
+runtime diagnostics in production code; prefer logger calls with useful
+context instead. Breaking changes require semantic versioning
+(MAJOR.MINOR.PATCH) and migration notes in PRs.
 
 ### VI. Test Tooling Standard
 - Framework: pytest for all unit/contract/integration tests.
@@ -142,11 +144,24 @@ fail before implementation; tasks.md fully executed; docs updated.
 - Prefer failing fast with clear assertions/messages over defensive
   try/except blocks that hide root causes.
 
+### XIII. Logging Policy (Enforced)
+- Framework: Use structlog for all application logging. Configure once at
+  process entry (e.g., `main`) and use module-level loggers via
+  `structlog.get_logger(__name__)`.
+- No print for logging: Do not use `print()` for operational or error
+  reporting in application code. If console output is explicitly required (e.g.,
+  a CLI producing results), keep it distinct from logging and write to stdout
+  intentionally.
+- Errors & exits: Log errors via the logger and exit with proper codes where
+  appropriate. Preserve exceptions and context; avoid silent failures.
+- Tests & tooling: Tests and one-off developer scripts may use `print()` for
+  human-readable progress, but production modules under `src/` must not.
+
 ## Governance
 This constitution supersedes ad-hoc practices. Amendments require a PR with
 rationale, version bump, and migration notes if behavior changes. Reviewers
 must verify compliance (principles, gates, structure). Deviations require a
 filled "Complexity Tracking" section in plan.md with explicit justification.
 
-**Version**: 1.2.0 | **Ratified**: 2025-09-20 | **Last Amended**: 2025-09-21
+**Version**: 1.2.1 | **Ratified**: 2025-09-20 | **Last Amended**: 2025-09-21
 <!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->

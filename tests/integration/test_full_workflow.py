@@ -1,8 +1,7 @@
 """Integration tests for complete bot workflow validation (Phase 9)."""
 
 from datetime import datetime, timedelta
-from pathlib import Path
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import Mock
 
 import pytest
 
@@ -71,7 +70,7 @@ class TestPhase9Validation:
             last_name="User",
             is_bot=False,
             last_message_at=datetime.utcnow() - timedelta(days=16),  # Inactive for 16 days
-            join_date=datetime.utcnow() - timedelta(days=30)
+            join_date=datetime.utcnow() - timedelta(days=30),
         )
 
         # Validate user data structure
@@ -100,11 +99,11 @@ class TestPhase9Validation:
         # Step 4: Simulated workflow validation
         # In a real scenario, this would test actual component interactions
         workflow_steps = [
-            'user_becomes_inactive',
-            'audit_detects_lurker',
-            'challenge_created',
-            'user_responds',
-            'result_processed'
+            "user_becomes_inactive",
+            "audit_detects_lurker",
+            "challenge_created",
+            "user_responds",
+            "result_processed",
         ]
 
         for step in workflow_steps:
@@ -118,29 +117,28 @@ class TestPhase9Validation:
         """Test the audit scheduling workflow simulation."""
         # Mock audit execution result
         mock_audit_result = {
-            'chats_processed': 1,
-            'lurkers_found': 2,
-            'challenges_created': 1,
-            'rate_limit_hits': 0,
-            'errors': []
+            "chats_processed": 1,
+            "lurkers_found": 2,
+            "challenges_created": 1,
+            "rate_limit_hits": 0,
+            "errors": [],
         }
 
         # Validate audit result structure
-        assert 'chats_processed' in mock_audit_result
-        assert 'lurkers_found' in mock_audit_result
-        assert 'challenges_created' in mock_audit_result
-        assert 'rate_limit_hits' in mock_audit_result
-        assert 'errors' in mock_audit_result
+        assert "chats_processed" in mock_audit_result
+        assert "lurkers_found" in mock_audit_result
+        assert "challenges_created" in mock_audit_result
+        assert "rate_limit_hits" in mock_audit_result
+        assert "errors" in mock_audit_result
 
         # Verify expected audit behavior
-        assert mock_audit_result['chats_processed'] >= 0
-        assert mock_audit_result['lurkers_found'] >= 0
-        assert mock_audit_result['challenges_created'] >= 0
-        assert isinstance(mock_audit_result['errors'], list)
+        assert mock_audit_result["chats_processed"] >= 0
+        assert mock_audit_result["lurkers_found"] >= 0
+        assert mock_audit_result["challenges_created"] >= 0
+        assert isinstance(mock_audit_result["errors"], list)
 
     async def test_rate_limiting_workflow(self, mock_config_loader: ConfigLoader) -> None:
         """Test rate limiting behavior simulation."""
-        chat_id = -1001234567890
         global_config, _, _ = mock_config_loader.load_all()
 
         # Verify rate limiting configuration
@@ -153,16 +151,16 @@ class TestPhase9Validation:
 
         # First challenge - should be allowed
         can_create_first = (
-            current_hour_count < global_config.rate_limit_per_hour and
-            current_day_count < global_config.rate_limit_per_day
+            current_hour_count < global_config.rate_limit_per_hour
+            and current_day_count < global_config.rate_limit_per_day
         )
         assert can_create_first is True
 
         # Simulate rate limit exceeded
         current_hour_count = global_config.rate_limit_per_hour
         can_create_after_limit = (
-            current_hour_count < global_config.rate_limit_per_hour and
-            current_day_count < global_config.rate_limit_per_day
+            current_hour_count < global_config.rate_limit_per_hour
+            and current_day_count < global_config.rate_limit_per_day
         )
         assert can_create_after_limit is False
 
@@ -171,102 +169,109 @@ class TestPhase9Validation:
         # Mock database view query result
         mock_activity_data = [
             {
-                'user_id': 12345,
-                'chat_id': -1001234567890,
-                'message_count': 10,
-                'last_message_at': datetime.utcnow() - timedelta(days=16),
-                'last_provocation_at': None
+                "user_id": 12345,
+                "chat_id": -1001234567890,
+                "message_count": 10,
+                "last_message_at": datetime.utcnow() - timedelta(days=16),
+                "last_provocation_at": None,
             },
             {
-                'user_id': 67890,
-                'chat_id': -1001234567890,
-                'message_count': 50,
-                'last_message_at': datetime.utcnow() - timedelta(hours=2),
-                'last_provocation_at': None
-            }
+                "user_id": 67890,
+                "chat_id": -1001234567890,
+                "message_count": 50,
+                "last_message_at": datetime.utcnow() - timedelta(hours=2),
+                "last_provocation_at": None,
+            },
         ]
 
         # Verify view structure and data integrity
         for activity in mock_activity_data:
-            assert 'user_id' in activity
-            assert 'chat_id' in activity
-            assert 'message_count' in activity
-            assert 'last_message_at' in activity
-            assert 'last_provocation_at' in activity
+            assert "user_id" in activity
+            assert "chat_id" in activity
+            assert "message_count" in activity
+            assert "last_message_at" in activity
+            assert "last_provocation_at" in activity
 
             # Validate data types
-            assert isinstance(activity['user_id'], int)
-            assert isinstance(activity['chat_id'], int)
-            assert isinstance(activity['message_count'], int)
-            assert activity['last_message_at'] is None or isinstance(activity['last_message_at'], datetime)
+            assert isinstance(activity["user_id"], int)
+            assert isinstance(activity["chat_id"], int)
+            assert isinstance(activity["message_count"], int)
+            assert activity["last_message_at"] is None or isinstance(
+                activity["last_message_at"], datetime
+            )
 
     async def test_admin_reports_workflow(self, mock_config_loader: ConfigLoader) -> None:
         """Test admin reporting functionality structure validation."""
         # Mock report data structure
         mock_report_data = {
-            'report_type': 'active',
-            'chat_id': -1001234567890,
-            'days_threshold': 14,
-            'limit': 10,
-            'users': [
+            "report_type": "active",
+            "chat_id": -1001234567890,
+            "days_threshold": 14,
+            "limit": 10,
+            "users": [
                 {
-                    'user_id': 11111,
-                    'username': 'active_user',
-                    'last_message_at': datetime.utcnow() - timedelta(hours=1),
-                    'message_count': 25
+                    "user_id": 11111,
+                    "username": "active_user",
+                    "last_message_at": datetime.utcnow() - timedelta(hours=1),
+                    "message_count": 25,
                 },
                 {
-                    'user_id': 22222,
-                    'username': 'recent_user',
-                    'last_message_at': datetime.utcnow() - timedelta(days=2),
-                    'message_count': 15
-                }
-            ]
+                    "user_id": 22222,
+                    "username": "recent_user",
+                    "last_message_at": datetime.utcnow() - timedelta(days=2),
+                    "message_count": 15,
+                },
+            ],
         }
 
         # Verify report structure
-        assert 'report_type' in mock_report_data
-        assert 'chat_id' in mock_report_data
-        assert 'users' in mock_report_data
-        assert isinstance(mock_report_data['users'], list)
+        assert "report_type" in mock_report_data
+        assert "chat_id" in mock_report_data
+        assert "users" in mock_report_data
+        assert isinstance(mock_report_data["users"], list)
 
         # Verify user data structure in reports
-        for user_data in mock_report_data['users']:
-            assert 'user_id' in user_data
-            assert 'username' in user_data
-            assert 'last_message_at' in user_data
-            assert isinstance(user_data['user_id'], int)
+        for user_data in mock_report_data["users"]:
+            assert "user_id" in user_data
+            assert "username" in user_data
+            assert "last_message_at" in user_data
+            assert isinstance(user_data["user_id"], int)
 
     async def test_checkuser_functionality(self, mock_config_loader: ConfigLoader) -> None:
         """Test user lookup functionality data structure."""
         # Mock user lookup result
         mock_user_info = {
-            'user_id': 12345,
-            'username': 'testuser',
-            'first_name': 'Test',
-            'last_name': 'User',
-            'is_bot': False,
-            'is_admin': False,
-            'last_message_at': datetime.utcnow() - timedelta(days=5),
-            'join_date': datetime.utcnow() - timedelta(days=30),
-            'message_count_current_chat': 25,
-            'activity_status': 'inactive'
+            "user_id": 12345,
+            "username": "testuser",
+            "first_name": "Test",
+            "last_name": "User",
+            "is_bot": False,
+            "is_admin": False,
+            "last_message_at": datetime.utcnow() - timedelta(days=5),
+            "join_date": datetime.utcnow() - timedelta(days=30),
+            "message_count_current_chat": 25,
+            "activity_status": "inactive",
         }
 
         # Verify user information structure
         required_fields = [
-            'user_id', 'username', 'first_name', 'is_bot', 'is_admin',
-            'last_message_at', 'message_count_current_chat'
+            "user_id",
+            "username",
+            "first_name",
+            "is_bot",
+            "is_admin",
+            "last_message_at",
+            "message_count_current_chat",
         ]
 
         for field in required_fields:
             assert field in mock_user_info
 
         # Verify data types
-        assert isinstance(mock_user_info['user_id'], int)
-        assert isinstance(mock_user_info['is_bot'], bool)
-        assert isinstance(mock_user_info['is_admin'], bool)
-        assert isinstance(mock_user_info['message_count_current_chat'], int)
+        assert isinstance(mock_user_info["user_id"], int)
+        assert isinstance(mock_user_info["is_bot"], bool)
+        assert isinstance(mock_user_info["is_admin"], bool)
+        assert isinstance(mock_user_info["message_count_current_chat"], int)
 
     async def test_linking_workflow_validation(self, mock_config_loader: ConfigLoader) -> None:
         """Test chat linking workflow between moderated and modlog chats."""
@@ -293,7 +298,9 @@ class TestPhase9Validation:
         # Verify linking integrity
         assert moderated_chat.modlog_ref == modlog_chat.chat_id
 
-    async def test_configuration_precedence_validation(self, mock_config_loader: ConfigLoader) -> None:
+    async def test_configuration_precedence_validation(
+        self, mock_config_loader: ConfigLoader
+    ) -> None:
         """Test configuration precedence: per-chat > global > built-in defaults."""
         global_config, channels_config, puzzles_config = mock_config_loader.load_all()
 
@@ -323,20 +330,20 @@ class TestPhase9DatabaseValidation:
         """Test that user_channel_activity view has correct structure."""
         # This would test the actual database view in a real scenario
         expected_columns = [
-            'user_id',
-            'chat_id',
-            'message_count',
-            'last_message_at',
-            'last_provocation_at'
+            "user_id",
+            "chat_id",
+            "message_count",
+            "last_message_at",
+            "last_provocation_at",
         ]
 
         # Simulate view query structure validation
         mock_view_result = {
-            'user_id': 12345,
-            'chat_id': -1001234567890,
-            'message_count': 10,
-            'last_message_at': datetime.utcnow() - timedelta(days=5),
-            'last_provocation_at': None
+            "user_id": 12345,
+            "chat_id": -1001234567890,
+            "message_count": 10,
+            "last_message_at": datetime.utcnow() - timedelta(days=5),
+            "last_provocation_at": None,
         }
 
         # Verify all expected columns exist
@@ -344,35 +351,31 @@ class TestPhase9DatabaseValidation:
             assert column in mock_view_result
 
         # Verify data types
-        assert isinstance(mock_view_result['user_id'], int)
-        assert isinstance(mock_view_result['chat_id'], int)
-        assert isinstance(mock_view_result['message_count'], int)
+        assert isinstance(mock_view_result["user_id"], int)
+        assert isinstance(mock_view_result["chat_id"], int)
+        assert isinstance(mock_view_result["message_count"], int)
 
     async def test_database_constraints_validation(self) -> None:
         """Test database constraints and referential integrity."""
         # This would test actual database constraints
 
         # User table constraints
-        user_constraints = [
-            'user_id_unique',
-            'username_format_check',
-            'last_message_at_not_future'
-        ]
+        user_constraints = ["user_id_unique", "username_format_check", "last_message_at_not_future"]
 
         # Message archive constraints
         message_constraints = [
-            'message_id_unique',
-            'user_id_foreign_key',
-            'chat_id_required',
-            'timestamp_not_future'
+            "message_id_unique",
+            "user_id_foreign_key",
+            "chat_id_required",
+            "timestamp_not_future",
         ]
 
         # Provocation constraints
         provocation_constraints = [
-            'provocation_id_unique',
-            'user_id_foreign_key',
-            'chat_id_required',
-            'valid_outcome_enum'
+            "provocation_id_unique",
+            "user_id_foreign_key",
+            "chat_id_required",
+            "valid_outcome_enum",
         ]
 
         # Simulate constraint validation
@@ -387,32 +390,46 @@ class TestPhase9DatabaseValidation:
         """Test data integrity across all tables."""
         # Mock data representing database state
         mock_users = [
-            {'user_id': 12345, 'username': 'user1', 'last_message_at': datetime.utcnow() - timedelta(days=5)},
-            {'user_id': 67890, 'username': 'user2', 'last_message_at': datetime.utcnow() - timedelta(days=20)}
+            {
+                "user_id": 12345,
+                "username": "user1",
+                "last_message_at": datetime.utcnow() - timedelta(days=5),
+            },
+            {
+                "user_id": 67890,
+                "username": "user2",
+                "last_message_at": datetime.utcnow() - timedelta(days=20),
+            },
         ]
 
         mock_messages = [
-            {'user_id': 12345, 'chat_id': -1001234567890, 'timestamp': datetime.utcnow() - timedelta(days=5)},
-            {'user_id': 67890, 'chat_id': -1001234567890, 'timestamp': datetime.utcnow() - timedelta(days=20)}
+            {
+                "user_id": 12345,
+                "chat_id": -1001234567890,
+                "timestamp": datetime.utcnow() - timedelta(days=5),
+            },
+            {
+                "user_id": 67890,
+                "chat_id": -1001234567890,
+                "timestamp": datetime.utcnow() - timedelta(days=20),
+            },
         ]
 
-        mock_provocations = [
-            {'user_id': 67890, 'chat_id': -1001234567890, 'outcome': 'failed'}
-        ]
+        mock_provocations = [{"user_id": 67890, "chat_id": -1001234567890, "outcome": "failed"}]
 
         # Verify referential integrity
-        user_ids = {user['user_id'] for user in mock_users}
+        user_ids = {user["user_id"] for user in mock_users}
 
         for message in mock_messages:
-            assert message['user_id'] in user_ids, "Message references non-existent user"
+            assert message["user_id"] in user_ids, "Message references non-existent user"
 
         for provocation in mock_provocations:
-            assert provocation['user_id'] in user_ids, "Provocation references non-existent user"
+            assert provocation["user_id"] in user_ids, "Provocation references non-existent user"
 
         # Verify data consistency
         for user in mock_users:
-            user_messages = [msg for msg in mock_messages if msg['user_id'] == user['user_id']]
+            user_messages = [msg for msg in mock_messages if msg["user_id"] == user["user_id"]]
             if user_messages:
-                latest_message = max(user_messages, key=lambda m: m['timestamp'])
+                latest_message = max(user_messages, key=lambda m: m["timestamp"])
                 # In a real test, verify user.last_message_at matches latest message timestamp
-                assert latest_message['timestamp'] is not None
+                assert latest_message["timestamp"] is not None

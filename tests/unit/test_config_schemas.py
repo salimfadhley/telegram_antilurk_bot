@@ -1,6 +1,5 @@
 """Unit tests for configuration schemas - written FIRST in TDD style."""
 
-
 import pytest
 from pydantic import ValidationError
 
@@ -31,7 +30,7 @@ class TestGlobalConfigSchema:
             provocation_interval_hours=24,
             audit_cadence_minutes=30,
             rate_limit_per_hour=5,
-            rate_limit_per_day=50
+            rate_limit_per_day=50,
         )
 
         assert config.lurk_threshold_days == 7
@@ -73,7 +72,7 @@ class TestGlobalConfigSchema:
         # Checksum should be a valid hex string
         checksum = config1.compute_checksum()
         assert len(checksum) == 64  # SHA256 produces 64 hex chars
-        assert all(c in '0123456789abcdef' for c in checksum)
+        assert all(c in "0123456789abcdef" for c in checksum)
 
     def test_global_config_provenance_update(self) -> None:
         """GlobalConfig should track provenance correctly."""
@@ -97,35 +96,27 @@ class TestPuzzleSchema:
 
     def test_valid_puzzle_creation(self) -> None:
         """Puzzle should accept valid configuration."""
-        from telegram_antilurk_bot.config.schemas import Puzzle, PuzzleChoice
+        from telegram_antilurk_bot.config.schemas import Puzzle
 
         puzzle = Puzzle(
             id="test_001",
             type="arithmetic",
             question="What is 2 + 2?",
-            choices=[
-                PuzzleChoice(text="3", is_correct=False),
-                PuzzleChoice(text="4", is_correct=True),
-                PuzzleChoice(text="5", is_correct=False),
-                PuzzleChoice(text="6", is_correct=False),
-            ]
+            choices=["4", "3", "5", "6"],  # First choice is correct
         )
 
         assert puzzle.id == "test_001"
         assert puzzle.type == "arithmetic"
         assert puzzle.question == "What is 2 + 2?"
         assert len(puzzle.choices) == 4
-        assert sum(1 for c in puzzle.choices if c.is_correct) == 1
+        assert puzzle.get_correct_answer() == "4"
+        assert puzzle.get_wrong_answers() == ["3", "5", "6"]
 
     def test_puzzle_type_validation(self) -> None:
         """Puzzle should only accept valid types."""
-        from telegram_antilurk_bot.config.schemas import Puzzle, PuzzleChoice
+        from telegram_antilurk_bot.config.schemas import Puzzle
 
-        choices = [
-            PuzzleChoice(text="A", is_correct=True),
-            PuzzleChoice(text="B", is_correct=False),
-            PuzzleChoice(text="C", is_correct=False),
-        ]
+        choices = ["A", "B", "C"]  # First choice is correct
 
         # Valid types
         puzzle1 = Puzzle(id="p1", type="arithmetic", question="Q?", choices=choices)
@@ -141,7 +132,7 @@ class TestPuzzleSchema:
 
     def test_puzzle_choices_validation(self) -> None:
         """Puzzle should validate choice requirements."""
-        from telegram_antilurk_bot.config.schemas import Puzzle, PuzzleChoice
+        from telegram_antilurk_bot.config.schemas import Puzzle
 
         # Too few choices
         with pytest.raises(ValidationError) as exc_info:
@@ -149,10 +140,7 @@ class TestPuzzleSchema:
                 id="p1",
                 type="arithmetic",
                 question="Q?",
-                choices=[
-                    PuzzleChoice(text="A", is_correct=True),
-                    PuzzleChoice(text="B", is_correct=False),
-                ]
+                choices=["A", "B"],  # Only 2 choices, need at least 3
             )
         assert "at least 3" in str(exc_info.value).lower()
 
@@ -162,40 +150,19 @@ class TestPuzzleSchema:
                 id="p2",
                 type="arithmetic",
                 question="Q?",
-                choices=[
-                    PuzzleChoice(text=str(i), is_correct=(i == 0))
-                    for i in range(5)
-                ]
+                choices=["A", "B", "C", "D", "E"],  # 5 choices, max is 4
             )
         assert "at most 4" in str(exc_info.value).lower()
 
-        # No correct answer
-        with pytest.raises(ValidationError) as exc_info:
-            Puzzle(
-                id="p3",
-                type="arithmetic",
-                question="Q?",
-                choices=[
-                    PuzzleChoice(text="A", is_correct=False),
-                    PuzzleChoice(text="B", is_correct=False),
-                    PuzzleChoice(text="C", is_correct=False),
-                ]
-            )
-        assert "exactly one correct choice required" in str(exc_info.value).lower()
-
-        # Multiple correct answers
-        with pytest.raises(ValidationError) as exc_info:
-            Puzzle(
-                id="p4",
-                type="arithmetic",
-                question="Q?",
-                choices=[
-                    PuzzleChoice(text="A", is_correct=True),
-                    PuzzleChoice(text="B", is_correct=True),
-                    PuzzleChoice(text="C", is_correct=False),
-                ]
-            )
-        assert "exactly one correct choice required" in str(exc_info.value).lower()
+        # Valid choices
+        puzzle = Puzzle(
+            id="p3",
+            type="arithmetic",
+            question="Q?",
+            choices=["A", "B", "C"],  # Minimum 3 choices
+        )
+        assert len(puzzle.choices) == 3
+        assert puzzle.get_correct_answer() == "A"
 
 
 class TestChannelSchema:
@@ -205,11 +172,7 @@ class TestChannelSchema:
         """ChannelEntry should store channel configuration."""
         from telegram_antilurk_bot.config.schemas import ChannelEntry
 
-        channel = ChannelEntry(
-            chat_id=-1001234567890,
-            chat_name="Test Channel",
-            mode="moderated"
-        )
+        channel = ChannelEntry(chat_id=-1001234567890, chat_name="Test Channel", mode="moderated")
 
         assert channel.chat_id == -1001234567890
         assert channel.chat_name == "Test Channel"
@@ -237,16 +200,10 @@ class TestChannelSchema:
         """ChannelEntry should accept per-channel overrides."""
         from telegram_antilurk_bot.config.schemas import ChannelEntry, ChannelOverride
 
-        override = ChannelOverride(
-            lurk_threshold_days=7,
-            rate_limit_per_hour=3
-        )
+        override = ChannelOverride(lurk_threshold_days=7, rate_limit_per_hour=3)
 
         channel = ChannelEntry(
-            chat_id=-1001234567890,
-            chat_name="Test Channel",
-            mode="moderated",
-            overrides=override
+            chat_id=-1001234567890, chat_name="Test Channel", mode="moderated", overrides=override
         )
 
         assert channel.overrides is not None
@@ -258,12 +215,14 @@ class TestChannelSchema:
         """ChannelsConfig should provide helper methods."""
         from telegram_antilurk_bot.config.schemas import ChannelEntry, ChannelsConfig
 
-        config = ChannelsConfig(channels=[
-            ChannelEntry(chat_id=1, chat_name="Mod1", mode="moderated", modlog_ref=3),
-            ChannelEntry(chat_id=2, chat_name="Mod2", mode="moderated", modlog_ref=3),
-            ChannelEntry(chat_id=3, chat_name="Log1", mode="modlog"),
-            ChannelEntry(chat_id=4, chat_name="Log2", mode="modlog"),
-        ])
+        config = ChannelsConfig(
+            channels=[
+                ChannelEntry(chat_id=1, chat_name="Mod1", mode="moderated", modlog_ref=3),
+                ChannelEntry(chat_id=2, chat_name="Mod2", mode="moderated", modlog_ref=3),
+                ChannelEntry(chat_id=3, chat_name="Log1", mode="modlog"),
+                ChannelEntry(chat_id=4, chat_name="Log2", mode="modlog"),
+            ]
+        )
 
         # Get moderated channels
         moderated = config.get_moderated_channels()

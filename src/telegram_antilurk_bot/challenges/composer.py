@@ -15,7 +15,9 @@ logger = structlog.get_logger(__name__)
 class ChallengeComposer:
     """Composes and posts challenge messages to Telegram."""
 
-    def compose_challenge_message(self, puzzle: Puzzle, user: User) -> tuple[str, InlineKeyboardMarkup]:
+    def compose_challenge_message(
+        self, puzzle: Puzzle, user: User
+    ) -> tuple[str, InlineKeyboardMarkup]:
         """Compose challenge message text and inline keyboard."""
         # Create user mention
         if user.username:
@@ -39,8 +41,7 @@ class ChallengeComposer:
         keyboard_buttons = []
         for i, choice in enumerate(choices):
             button = InlineKeyboardButton(
-                text=choice.text,
-                callback_data=f"provocation_{{provocation_id}}_choice_{i}"
+                text=choice, callback_data=f"provocation_{{provocation_id}}_choice_{i}"
             )
             keyboard_buttons.append([button])
 
@@ -54,7 +55,7 @@ class ChallengeComposer:
         puzzle: Puzzle,
         user: User,
         bot_token: str,
-        provocation_id: int | None = None
+        provocation_id: int | None = None,
     ) -> int:
         """Post challenge message to chat and return message ID."""
         message_text, reply_markup = self.compose_challenge_message(puzzle, user)
@@ -71,8 +72,7 @@ class ChallengeComposer:
                         "{provocation_id}", str(provocation_id)
                     )
                     new_button = InlineKeyboardButton(
-                        text=button.text,
-                        callback_data=new_callback_data
+                        text=button.text, callback_data=new_callback_data
                     )
                     new_row.append(new_button)
                 new_buttons.append(new_row)
@@ -82,10 +82,7 @@ class ChallengeComposer:
         app = Application.builder().token(bot_token).build()
 
         message = await app.bot.send_message(
-            chat_id=chat_id,
-            text=message_text,
-            reply_markup=reply_markup,
-            parse_mode='Markdown'
+            chat_id=chat_id, text=message_text, reply_markup=reply_markup, parse_mode="Markdown"
         )
 
         logger.info(
@@ -94,7 +91,7 @@ class ChallengeComposer:
             user_id=user.user_id,
             puzzle_id=puzzle.id,
             message_id=message.message_id,
-            provocation_id=provocation_id
+            provocation_id=provocation_id,
         )
 
         return message.message_id

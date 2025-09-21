@@ -4,8 +4,13 @@ import os
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from sqlalchemy import create_engine, Engine
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy import Engine, create_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 from sqlalchemy.orm import Session, sessionmaker
 
 
@@ -23,7 +28,7 @@ def get_engine() -> Engine:
     return create_engine(db_url)
 
 
-def get_async_engine():
+def get_async_engine() -> AsyncEngine:
     """Get async database engine."""
     db_url = get_database_url()
     # Convert postgresql:// to postgresql+asyncpg:// for async usage

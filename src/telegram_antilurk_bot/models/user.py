@@ -11,7 +11,7 @@ from .base import Base
 class User(Base):
     """Model for tracking users across all moderated channels."""
 
-    __tablename__ = 'users'
+    __tablename__ = "users"
 
     # Primary key is the Telegram user_id
     user_id = Column(BigInteger, primary_key=True)
@@ -30,8 +30,8 @@ class User(Base):
 
     # Indexes for performance
     __table_args__ = (
-        Index('ix_users_last_interaction', 'last_interaction_at'),
-        Index('ix_users_username', 'username'),
+        Index("ix_users_last_interaction", "last_interaction_at"),
+        Index("ix_users_username", "username"),
     )
 
     def __init__(self, **kwargs: Any) -> None:
@@ -68,9 +68,9 @@ class User(Base):
     def is_protected(self) -> bool:
         """Check if user is protected from moderation actions."""
         if self.flags:
-            if self.flags.get('is_admin') or self.flags.get('is_bot'):
+            if self.flags.get("is_admin") or self.flags.get("is_bot"):
                 return True
         if self.roles:
-            protected_roles = {'admin', 'moderator', 'vip', 'allowlisted'}
+            protected_roles = {"admin", "moderator", "vip", "allowlisted"}
             return any(role in protected_roles for role in self.roles)  # type: ignore[attr-defined]
         return False

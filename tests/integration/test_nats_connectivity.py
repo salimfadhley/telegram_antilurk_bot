@@ -8,9 +8,12 @@ import json
 import os
 import socket
 import time
-from typing import Dict, Any
 
 import pytest
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 class TestNATSConnectivity:
@@ -66,7 +69,7 @@ class TestNATSConnectivity:
             sock.connect((host, port))
 
             # Read NATS INFO message
-            info_data = sock.recv(4096).decode('utf-8')
+            info_data = sock.recv(4096).decode("utf-8")
             assert info_data.startswith("INFO"), f"Expected NATS INFO, got: {info_data[:50]}"
 
             # Parse server info
@@ -84,7 +87,7 @@ class TestNATSConnectivity:
             # Test PING/PONG
             sock.send(b"PING\r\n")
             time.sleep(0.1)
-            response = sock.recv(1024).decode('utf-8')
+            response = sock.recv(1024).decode("utf-8")
 
             if "PONG" not in response:
                 pytest.fail(f"NATS PING/PONG failed: {response}")
@@ -116,6 +119,7 @@ class TestNATSConnectivity:
         for port in monitoring_ports:
             try:
                 import urllib.request
+
                 url = f"http://{host}:{port}/varz"
 
                 with urllib.request.urlopen(url, timeout=5) as response:
@@ -123,7 +127,9 @@ class TestNATSConnectivity:
                         data = json.loads(response.read().decode())
                         print(f"✅ NATS monitoring available at {host}:{port}")
                         print(f"✅ NATS connections: {data.get('connections', 'unknown')}")
-                        print(f"✅ NATS messages in/out: {data.get('in_msgs', 0)}/{data.get('out_msgs', 0)}")
+                        print(
+                            f"✅ NATS messages in/out: {data.get('in_msgs', 0)}/{data.get('out_msgs', 0)}"
+                        )
                         return  # Success
 
             except Exception:
@@ -150,21 +156,17 @@ class TestNATSConnectivity:
             sock.connect((host, port))
 
             # Read INFO and send CONNECT
-            info_data = sock.recv(4096)
-            connect_msg = json.dumps({
-                "verbose": False,
-                "name": "antilurk_bot_integration_test",
-                "protocol": 1
-            })
+            _ = sock.recv(4096)
+            connect_msg = json.dumps(
+                {"verbose": False, "name": "antilurk_bot_integration_test", "protocol": 1}
+            )
             sock.send(f"CONNECT {connect_msg}\r\n".encode())
 
             # Publish a test message
             test_subject = "antilurk.test.integration"
-            test_message = json.dumps({
-                "test": "integration_test",
-                "timestamp": time.time(),
-                "component": "antilurk_bot"
-            })
+            test_message = json.dumps(
+                {"test": "integration_test", "timestamp": time.time(), "component": "antilurk_bot"}
+            )
 
             pub_command = f"PUB {test_subject} {len(test_message)}\r\n{test_message}\r\n"
             sock.send(pub_command.encode())
@@ -172,7 +174,7 @@ class TestNATSConnectivity:
             # Send PING to ensure message was processed
             sock.send(b"PING\r\n")
             time.sleep(0.1)
-            response = sock.recv(1024).decode('utf-8')
+            response = sock.recv(1024).decode("utf-8")
 
             if "PONG" in response:
                 print("✅ NATS message publishing successful")
@@ -203,12 +205,10 @@ class TestNATSConnectivity:
             sock.connect((host, port))
 
             # Read INFO and send CONNECT
-            info_data = sock.recv(4096)
-            connect_msg = json.dumps({
-                "verbose": False,
-                "name": "antilurk_bot_sub_test",
-                "protocol": 1
-            })
+            _ = sock.recv(4096)
+            connect_msg = json.dumps(
+                {"verbose": False, "name": "antilurk_bot_sub_test", "protocol": 1}
+            )
             sock.send(f"CONNECT {connect_msg}\r\n".encode())
 
             # Subscribe to test subject
@@ -225,12 +225,12 @@ class TestNATSConnectivity:
             # Try to receive the message (with timeout)
             sock.settimeout(2)
             try:
-                response = sock.recv(1024).decode('utf-8')
+                response = sock.recv(1024).decode("utf-8")
                 if f"MSG {test_subject}" in response and test_message in response:
                     print("✅ NATS subscription working")
                 else:
                     print(f"ℹ️  NATS subscription response: {response[:100]}")
-            except socket.timeout:
+            except TimeoutError:
                 print("ℹ️  NATS subscription test timeout (this may be normal)")
 
             # Unsubscribe and close
@@ -267,7 +267,7 @@ class TestNATSConnectivity:
                     if response.status == 200:
                         varz_data = json.loads(response.read().decode())
 
-                        print(f"✅ NATS Server Performance Info:")
+                        print("✅ NATS Server Performance Info:")
                         print(f"   Server ID: {varz_data.get('server_id', 'unknown')}")
                         print(f"   Version: {varz_data.get('version', 'unknown')}")
                         print(f"   Uptime: {varz_data.get('uptime', 'unknown')}")
@@ -300,6 +300,7 @@ class TestNATSIntegration:
         try:
             import sys
             from pathlib import Path
+
             sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
             from telegram_antilurk_bot.logging.nats_publisher import NATSPublisher
@@ -331,7 +332,7 @@ class TestNATSIntegration:
             "antilurk.challenge.created",
             "antilurk.challenge.completed",
             "antilurk.audit.completed",
-            "antilurk.moderation.action"
+            "antilurk.moderation.action",
         ]
 
         # Parse URL
@@ -347,7 +348,7 @@ class TestNATSIntegration:
             sock.connect((host, port))
 
             # Read INFO and connect
-            info_data = sock.recv(4096)
+            _ = sock.recv(4096)
             connect_msg = json.dumps({"verbose": False, "name": "antilurk_subjects_test"})
             sock.send(f"CONNECT {connect_msg}\r\n".encode())
 
@@ -360,7 +361,7 @@ class TestNATSIntegration:
             # PING to ensure all messages processed
             sock.send(b"PING\r\n")
             time.sleep(0.1)
-            response = sock.recv(1024).decode('utf-8')
+            response = sock.recv(1024).decode("utf-8")
 
             if "PONG" in response:
                 print(f"✅ All {len(expected_subjects)} NATS subjects accessible")

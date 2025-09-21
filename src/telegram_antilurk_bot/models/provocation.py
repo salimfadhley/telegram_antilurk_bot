@@ -13,6 +13,7 @@ from .base import Base
 
 class ProvocationOutcome(str, Enum):
     """Possible outcomes for a provocation challenge."""
+
     PENDING = "pending"
     CORRECT = "correct"
     INCORRECT = "incorrect"
@@ -23,14 +24,14 @@ class ProvocationOutcome(str, Enum):
 class Provocation(Base):
     """Model for tracking provocation/challenge sessions."""
 
-    __tablename__ = 'provocations'
+    __tablename__ = "provocations"
 
     # Primary key
     provocation_id = Column(BigInteger, primary_key=True, autoincrement=True)
 
     # Chat and user identifiers
     chat_id = Column(BigInteger, nullable=False)
-    user_id = Column(BigInteger, ForeignKey('users.user_id'), nullable=False)
+    user_id = Column(BigInteger, ForeignKey("users.user_id"), nullable=False)
 
     # Challenge details
     puzzle_id = Column(String(50), nullable=False)
@@ -47,9 +48,7 @@ class Provocation(Base):
 
     # Outcome
     outcome: Column[ProvocationOutcome] = Column(
-        SQLEnum(ProvocationOutcome),
-        default=ProvocationOutcome.PENDING,
-        nullable=False
+        SQLEnum(ProvocationOutcome), default=ProvocationOutcome.PENDING, nullable=False
     )
 
     # Telegram message ID for the challenge
@@ -63,11 +62,11 @@ class Provocation(Base):
 
     # Indexes for performance
     __table_args__ = (
-        Index('ix_provocations_chat_user', 'chat_id', 'user_id'),
-        Index('ix_provocations_user_created', 'user_id', 'created_at'),
-        Index('ix_provocations_chat_created', 'chat_id', 'created_at'),
-        Index('ix_provocations_outcome', 'outcome'),
-        Index('ix_provocations_expires', 'expires_at'),
+        Index("ix_provocations_chat_user", "chat_id", "user_id"),
+        Index("ix_provocations_user_created", "user_id", "created_at"),
+        Index("ix_provocations_chat_created", "chat_id", "created_at"),
+        Index("ix_provocations_outcome", "outcome"),
+        Index("ix_provocations_expires", "expires_at"),
     )
 
     def __init__(self, **kwargs: Any) -> None:

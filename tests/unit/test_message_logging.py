@@ -6,8 +6,6 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from telegram_antilurk_bot.database.models import MessageArchive, User
-
 
 class TestMessageArchiver:
     """Tests for message archiving functionality."""
@@ -54,13 +52,25 @@ class TestMessageArchiver:
         """Should handle various message types (photo, sticker, etc.)."""
         from telegram_antilurk_bot.logging.message_archiver import MessageArchiver
 
-        archiver = MessageArchiver()
+        # Mock configuration
+        mock_config_loader = Mock()
+        mock_channels_config = Mock()
+        mock_channel_entry = Mock()
+        mock_channel_entry.chat_id = -1001234567890
+        mock_channels_config.get_moderated_channels.return_value = [mock_channel_entry]
+        mock_config_loader.load_all.return_value = (Mock(), mock_channels_config, Mock())
+
+        # Mock user tracker
+        mock_user_tracker = AsyncMock()
+
+        archiver = MessageArchiver(config_loader=mock_config_loader, user_tracker=mock_user_tracker)
 
         # Test photo message
         mock_photo_update = Mock()
         mock_photo_update.message.message_id = 11111
         mock_photo_update.message.chat.id = -1001234567890
         mock_photo_update.message.from_user.id = 67890
+        mock_photo_update.message.from_user.is_bot = False
         mock_photo_update.message.text = None
         mock_photo_update.message.photo = [Mock()]
         mock_photo_update.message.caption = "Photo caption"
@@ -68,6 +78,7 @@ class TestMessageArchiver:
 
         photo_archive = await archiver.archive_message(mock_photo_update)
 
+        assert photo_archive is not None
         assert photo_archive.message_type == "photo"
         assert photo_archive.message_text == "Photo caption"
 
@@ -76,6 +87,7 @@ class TestMessageArchiver:
         mock_sticker_update.message.message_id = 22222
         mock_sticker_update.message.chat.id = -1001234567890
         mock_sticker_update.message.from_user.id = 67890
+        mock_sticker_update.message.from_user.is_bot = False
         mock_sticker_update.message.text = None
         mock_sticker_update.message.photo = None
         mock_sticker_update.message.sticker = Mock()
@@ -84,6 +96,7 @@ class TestMessageArchiver:
 
         sticker_archive = await archiver.archive_message(mock_sticker_update)
 
+        assert sticker_archive is not None
         assert sticker_archive.message_type == "sticker"
         assert sticker_archive.message_text == "😀"
 
@@ -92,27 +105,36 @@ class TestMessageArchiver:
         """Should update user's last interaction timestamp when archiving."""
         from telegram_antilurk_bot.logging.message_archiver import MessageArchiver
 
-        archiver = MessageArchiver()
+        # Mock configuration
+        mock_config_loader = Mock()
+        mock_channels_config = Mock()
+        mock_channel_entry = Mock()
+        mock_channel_entry.chat_id = -1001234567890
+        mock_channels_config.get_moderated_channels.return_value = [mock_channel_entry]
+        mock_config_loader.load_all.return_value = (Mock(), mock_channels_config, Mock())
+
+        # Mock user tracker
+        mock_user_tracker = AsyncMock()
+
+        archiver = MessageArchiver(config_loader=mock_config_loader, user_tracker=mock_user_tracker)
 
         mock_update = Mock()
         mock_update.message.message_id = 33333
         mock_update.message.chat.id = -1001234567890
         mock_update.message.from_user.id = 67890
+        mock_update.message.from_user.is_bot = False
         mock_update.message.text = "Activity message"
         mock_update.message.date = datetime.utcnow()
 
-        with patch('telegram_antilurk_bot.logging.message_archiver.UserTracker') as mock_tracker:
-            mock_tracker_instance = AsyncMock()
-            mock_tracker.return_value = mock_tracker_instance
+        await archiver.archive_message(mock_update)
 
-            await archiver.archive_message(mock_update)
-
-            # Should update user's last interaction
-            mock_tracker_instance.update_user_activity.assert_called_once_with(
-                user_id=67890,
-                chat_id=-1001234567890,
-                timestamp=mock_update.message.date
-            )
+        # Should update user's last interaction
+        mock_user_tracker.update_user_activity.assert_called_once_with(
+            user_id=67890,
+            chat_id=-1001234567890,
+            timestamp=mock_update.message.date,
+            telegram_user=mock_update.message.from_user,
+        )
 
     @pytest.mark.asyncio
     async def test_ignores_bot_messages(self, temp_config_dir: Path) -> None:
@@ -142,7 +164,7 @@ class TestMessageArchiver:
         mock_update.message.from_user.is_bot = False
         mock_update.message.text = "Message from non-moderated chat"
 
-        with patch('telegram_antilurk_bot.logging.message_archiver.ConfigLoader') as mock_config:
+        with patch("telegram_antilurk_bot.logging.message_archiver.ConfigLoader") as mock_config:
             mock_config_instance = Mock()
             mock_config.return_value = mock_config_instance
             mock_channels_config = Mock()
@@ -165,11 +187,11 @@ class TestUserTracker:
         tracker = UserTracker()
 
         user_data = {
-            'id': 12345,
-            'username': 'newuser',
-            'first_name': 'New',
-            'last_name': 'User',
-            'is_bot': False
+            "id": 12345,
+            "username": "newuser",
+            "first_name": "New",
+            "last_name": "User",
+            "is_bot": False,
         }
 
         mock_telegram_user = Mock()
@@ -180,17 +202,14 @@ class TestUserTracker:
         timestamp = datetime.utcnow()
 
         user = await tracker.update_user_activity(
-            user_id=12345,
-            chat_id=chat_id,
-            timestamp=timestamp,
-            telegram_user=mock_telegram_user
+            user_id=12345, chat_id=chat_id, timestamp=timestamp, telegram_user=mock_telegram_user
         )
 
         assert user is not None
         assert user.user_id == 12345
-        assert user.username == 'newuser'
-        assert user.first_name == 'New'
-        assert user.last_name == 'User'
+        assert user.username == "newuser"
+        assert user.first_name == "New"
+        assert user.last_name == "User"
         assert user.last_message_at == timestamp
 
     @pytest.mark.asyncio
@@ -202,18 +221,14 @@ class TestUserTracker:
 
         # First message
         first_timestamp = datetime.utcnow() - timedelta(hours=1)
-        user1 = await tracker.update_user_activity(
-            user_id=67890,
-            chat_id=-1001234567890,
-            timestamp=first_timestamp
+        await tracker.update_user_activity(
+            user_id=67890, chat_id=-1001234567890, timestamp=first_timestamp
         )
 
         # Second message (more recent)
         second_timestamp = datetime.utcnow()
         user2 = await tracker.update_user_activity(
-            user_id=67890,
-            chat_id=-1001234567890,
-            timestamp=second_timestamp
+            user_id=67890, chat_id=-1001234567890, timestamp=second_timestamp
         )
 
         assert user2.last_message_at == second_timestamp
@@ -228,9 +243,7 @@ class TestUserTracker:
 
         join_time = datetime.utcnow()
         user = await tracker.update_user_activity(
-            user_id=11111,
-            chat_id=-1001234567890,
-            timestamp=join_time
+            user_id=11111, chat_id=-1001234567890, timestamp=join_time
         )
 
         assert user.join_date is not None
@@ -249,21 +262,21 @@ class TestProvocationLogger:
         logger = ProvocationLogger()
 
         provocation_data = {
-            'provocation_id': 123,
-            'chat_id': -1001234567890,
-            'user_id': 67890,
-            'puzzle_id': 'math_001',
-            'created_at': datetime.utcnow(),
-            'expires_at': datetime.utcnow() + timedelta(minutes=30)
+            "provocation_id": 123,
+            "chat_id": -1001234567890,
+            "user_id": 67890,
+            "puzzle_id": "math_001",
+            "created_at": datetime.utcnow(),
+            "expires_at": datetime.utcnow() + timedelta(minutes=30),
         }
 
         await logger.log_provocation_created(**provocation_data)
 
         # Verify log entry was created
-        entries = await logger.get_provocation_history(provocation_data['provocation_id'])
+        entries = await logger.get_provocation_history(provocation_data["provocation_id"])
         assert len(entries) == 1
-        assert entries[0]['event'] == 'created'
-        assert entries[0]['provocation_id'] == 123
+        assert entries[0]["event"] == "created"
+        assert entries[0]["provocation_id"] == 123
 
     @pytest.mark.asyncio
     async def test_logs_provocation_responses(self, temp_config_dir: Path) -> None:
@@ -274,21 +287,21 @@ class TestProvocationLogger:
 
         provocation_id = 456
         response_data = {
-            'provocation_id': provocation_id,
-            'user_id': 67890,
-            'response_time': datetime.utcnow(),
-            'choice_selected': 2,
-            'is_correct': True
+            "provocation_id": provocation_id,
+            "user_id": 67890,
+            "response_time": datetime.utcnow(),
+            "choice_selected": 2,
+            "is_correct": True,
         }
 
         await logger.log_provocation_response(**response_data)
 
         entries = await logger.get_provocation_history(provocation_id)
-        response_entry = next((e for e in entries if e['event'] == 'response'), None)
+        response_entry = next((e for e in entries if e["event"] == "response"), None)
 
         assert response_entry is not None
-        assert response_entry['choice_selected'] == 2
-        assert response_entry['is_correct'] is True
+        assert response_entry["choice_selected"] == 2
+        assert response_entry["is_correct"] is True
 
     @pytest.mark.asyncio
     async def test_logs_provocation_expiration(self, temp_config_dir: Path) -> None:
@@ -299,18 +312,18 @@ class TestProvocationLogger:
 
         provocation_id = 789
         expiration_data = {
-            'provocation_id': provocation_id,
-            'expired_at': datetime.utcnow(),
-            'final_status': 'expired'
+            "provocation_id": provocation_id,
+            "expired_at": datetime.utcnow(),
+            "final_status": "expired",
         }
 
         await logger.log_provocation_expired(**expiration_data)
 
         entries = await logger.get_provocation_history(provocation_id)
-        expiry_entry = next((e for e in entries if e['event'] == 'expired'), None)
+        expiry_entry = next((e for e in entries if e["event"] == "expired"), None)
 
         assert expiry_entry is not None
-        assert expiry_entry['final_status'] == 'expired'
+        assert expiry_entry["final_status"] == "expired"
 
     @pytest.mark.asyncio
     async def test_provides_rate_limiting_data(self, temp_config_dir: Path) -> None:
@@ -328,14 +341,13 @@ class TestProvocationLogger:
                 provocation_id=1000 + i,
                 chat_id=chat_id,
                 user_id=67890 + i,
-                puzzle_id=f'test_{i}',
-                created_at=current_time - timedelta(minutes=i * 15)
+                puzzle_id=f"test_{i}",
+                created_at=current_time - timedelta(minutes=i * 15),
             )
 
         # Get provocation count for last hour
         hourly_count = await logger.get_provocation_count_since(
-            chat_id=chat_id,
-            since=current_time - timedelta(hours=1)
+            chat_id=chat_id, since=current_time - timedelta(hours=1)
         )
 
         assert hourly_count >= 3  # Should include all recent provocations
@@ -349,57 +361,59 @@ class TestNATSEventPublisher:
         """Should publish events to NATS when NATS_URL is configured."""
         from telegram_antilurk_bot.logging.nats_publisher import NATSEventPublisher
 
-        with patch.dict('os.environ', {'NATS_URL': 'nats://localhost:4222'}):
+        with patch.dict("os.environ", {"NATS_URL": "nats://localhost:4222"}):
             publisher = NATSEventPublisher()
 
             event_data = {
-                'event_type': 'challenge_failed',
-                'chat_id': -1001234567890,
-                'user_id': 67890,
-                'provocation_id': 123,
-                'timestamp': datetime.utcnow().isoformat()
+                "event_type": "challenge_failed",
+                "chat_id": -1001234567890,
+                "user_id": 67890,
+                "provocation_id": 123,
+                "timestamp": datetime.utcnow().isoformat(),
             }
 
-            with patch('telegram_antilurk_bot.logging.nats_publisher.nats') as mock_nats:
+            with patch("nats.connect") as mock_connect:
                 mock_client = AsyncMock()
-                mock_nats.connect.return_value = mock_client
+                mock_connect.return_value = mock_client
 
-                await publisher.publish_event('antilurk.challenge.failed', event_data)
+                result = await publisher.publish_event("challenge.failed", event_data)
 
-                mock_nats.connect.assert_called_once_with('nats://localhost:4222')
+                assert result is True
+                mock_connect.assert_called_once_with("nats://localhost:4222")
                 mock_client.publish.assert_called_once()
+                mock_client.close.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_skips_publishing_when_nats_disabled(self, temp_config_dir: Path) -> None:
         """Should skip publishing when NATS_URL is not configured."""
         from telegram_antilurk_bot.logging.nats_publisher import NATSEventPublisher
 
-        # No NATS_URL environment variable
-        publisher = NATSEventPublisher()
+        # Ensure no NATS_URL environment variable
+        with patch.dict("os.environ", {"NATS_URL": ""}, clear=True):
+            publisher = NATSEventPublisher()
 
-        event_data = {'test': 'data'}
+            event_data = {"test": "data"}
 
-        # Should not attempt to connect to NATS
-        with patch('telegram_antilurk_bot.logging.nats_publisher.nats') as mock_nats:
-            await publisher.publish_event('test.subject', event_data)
-            mock_nats.connect.assert_not_called()
+            # Should not attempt to connect to NATS
+            with patch("nats.connect") as mock_connect:
+                result = await publisher.publish_event("test.subject", event_data)
+                assert result is False
+                mock_connect.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_handles_nats_connection_failures_gracefully(self, temp_config_dir: Path) -> None:
         """Should handle NATS connection failures without crashing."""
         from telegram_antilurk_bot.logging.nats_publisher import NATSEventPublisher
 
-        with patch.dict('os.environ', {'NATS_URL': 'nats://invalid:4222'}):
+        with patch.dict("os.environ", {"NATS_URL": "nats://invalid:4222"}):
             publisher = NATSEventPublisher()
 
-            with patch('telegram_antilurk_bot.logging.nats_publisher.nats') as mock_nats:
-                mock_nats.connect.side_effect = Exception("Connection failed")
+            with patch("nats.connect") as mock_connect:
+                mock_connect.side_effect = Exception("Connection failed")
 
-                # Should not raise exception
-                try:
-                    await publisher.publish_event('test.subject', {'test': 'data'})
-                except Exception:
-                    pytest.fail("Should handle NATS connection failures gracefully")
+                # Should not raise exception and should return False
+                result = await publisher.publish_event("test.subject", {"test": "data"})
+                assert result is False
 
 
 class TestMessageLoggingIntegration:
@@ -410,40 +424,40 @@ class TestMessageLoggingIntegration:
         """Should handle complete message processing from ingestion to archiving."""
         from telegram_antilurk_bot.logging.message_processor import MessageProcessor
 
-        processor = MessageProcessor()
+        # Create mock components
+        mock_archiver = Mock()
+        mock_tracker = Mock()
+        mock_publisher = Mock()
+
+        mock_archived_message = Mock()
+        mock_archived_message.message_type = "text"
+        mock_archiver.archive_message = AsyncMock(return_value=mock_archived_message)
+        mock_tracker.update_user_activity = AsyncMock(return_value=Mock())
+        mock_publisher.publish_event = AsyncMock()
+
+        # Create processor with mocked dependencies
+        processor = MessageProcessor(
+            archiver=mock_archiver, user_tracker=mock_tracker, nats_publisher=mock_publisher
+        )
 
         mock_update = Mock()
         mock_update.message.message_id = 99999
         mock_update.message.chat.id = -1001234567890
         mock_update.message.from_user.id = 55555
-        mock_update.message.from_user.username = 'testuser'
-        mock_update.message.from_user.first_name = 'Test'
+        mock_update.message.from_user.username = "testuser"
+        mock_update.message.from_user.first_name = "Test"
         mock_update.message.from_user.is_bot = False
         mock_update.message.text = "Integration test message"
         mock_update.message.date = datetime.utcnow()
 
-        with patch.multiple(
-            'telegram_antilurk_bot.logging.message_processor',
-            MessageArchiver=Mock(),
-            UserTracker=Mock(),
-            NATSEventPublisher=Mock()
-        ) as mocks:
-            mock_archiver = mocks['MessageArchiver'].return_value
-            mock_tracker = mocks['UserTracker'].return_value
-            mock_publisher = mocks['NATSEventPublisher'].return_value
+        result = await processor.process_message(mock_update)
 
-            mock_archiver.archive_message = AsyncMock(return_value=Mock())
-            mock_tracker.update_user_activity = AsyncMock(return_value=Mock())
-            mock_publisher.publish_event = AsyncMock()
+        assert result is True
 
-            result = await processor.process_message(mock_update)
-
-            assert result is True
-
-            # All components should be called
-            mock_archiver.archive_message.assert_called_once_with(mock_update)
-            mock_tracker.update_user_activity.assert_called_once()
-            mock_publisher.publish_event.assert_called_once()
+        # All components should be called
+        mock_archiver.archive_message.assert_called_once_with(mock_update)
+        mock_tracker.update_user_activity.assert_called_once()
+        mock_publisher.publish_event.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_database_view_updates_with_message_activity(self, temp_config_dir: Path) -> None:
@@ -459,18 +473,16 @@ class TestMessageLoggingIntegration:
         # Simulate multiple messages from user
         for i in range(message_count):
             await updater.record_user_activity(
-                user_id=user_id,
-                chat_id=chat_id,
-                timestamp=datetime.utcnow() - timedelta(minutes=i)
+                user_id=user_id, chat_id=chat_id, timestamp=datetime.utcnow() - timedelta(minutes=i)
             )
 
         # Check view reflects activity
         activity_stats = await updater.get_user_channel_activity(user_id, chat_id)
 
         assert activity_stats is not None
-        assert activity_stats['user_id'] == user_id
-        assert activity_stats['chat_id'] == chat_id
-        assert activity_stats['message_count'] >= message_count
+        assert activity_stats["user_id"] == user_id
+        assert activity_stats["chat_id"] == chat_id
+        assert activity_stats["message_count"] >= message_count
 
     @pytest.mark.asyncio
     async def test_provocation_lifecycle_complete_logging(self, temp_config_dir: Path) -> None:
@@ -488,27 +500,24 @@ class TestMessageLoggingIntegration:
             provocation_id=provocation_id,
             chat_id=chat_id,
             user_id=user_id,
-            puzzle_id='lifecycle_test'
+            puzzle_id="lifecycle_test",
         )
 
         # Log response
         await logger.log_provocation_response(
-            provocation_id=provocation_id,
-            user_id=user_id,
-            is_correct=False
+            provocation_id=provocation_id, user_id=user_id, is_correct=False
         )
 
         # Log modlog notification
         await logger.log_modlog_notification_sent(
-            provocation_id=provocation_id,
-            modlog_chat_id=-1009876543210
+            provocation_id=provocation_id, modlog_chat_id=-1009876543210
         )
 
         # Get complete history
         history = await logger.get_complete_history(provocation_id)
 
         assert len(history) == 3
-        events = [entry['event'] for entry in history]
-        assert 'created' in events
-        assert 'response' in events
-        assert 'modlog_notified' in events
+        events = [entry["event"] for entry in history]
+        assert "created" in events
+        assert "response" in events
+        assert "modlog_notified" in events

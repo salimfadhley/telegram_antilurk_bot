@@ -15,11 +15,16 @@ logger = structlog.get_logger(__name__)
 class MessageProcessor:
     """Main processor for handling message logging workflow."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        archiver: MessageArchiver | None = None,
+        user_tracker: UserTracker | None = None,
+        nats_publisher: NATSEventPublisher | None = None,
+    ) -> None:
         """Initialize message processor."""
-        self.archiver = MessageArchiver()
-        self.user_tracker = UserTracker()
-        self.nats_publisher = NATSEventPublisher()
+        self.archiver = archiver or MessageArchiver()
+        self.user_tracker = user_tracker or UserTracker()
+        self.nats_publisher = nats_publisher or NATSEventPublisher()
 
     async def process_message(self, update: Update) -> bool:
         """Process incoming message through all logging components."""
@@ -40,24 +45,27 @@ class MessageProcessor:
                 user_id=update.message.from_user.id,
                 chat_id=update.message.chat.id,
                 timestamp=update.message.date,
-                telegram_user=update.message.from_user
+                telegram_user=update.message.from_user,
             )
 
             # Publish to NATS if enabled
-            await self.nats_publisher.publish_event('message.received', {
-                'event_type': 'message_received',
-                'chat_id': update.message.chat.id,
-                'user_id': update.message.from_user.id,
-                'message_id': update.message.message_id,
-                'message_type': archived_message.message_type,
-                'timestamp': update.message.date.isoformat()
-            })
+            await self.nats_publisher.publish_event(
+                "message.received",
+                {
+                    "event_type": "message_received",
+                    "chat_id": update.message.chat.id,
+                    "user_id": update.message.from_user.id,
+                    "message_id": update.message.message_id,
+                    "message_type": archived_message.message_type,
+                    "timestamp": update.message.date.isoformat(),
+                },
+            )
 
             logger.info(
                 "Message processed successfully",
                 message_id=update.message.message_id,
                 chat_id=update.message.chat.id,
-                user_id=update.message.from_user.id
+                user_id=update.message.from_user.id,
             )
 
             return True
@@ -65,8 +73,8 @@ class MessageProcessor:
         except Exception as e:
             logger.error(
                 "Failed to process message",
-                message_id=getattr(update.message, 'message_id', None),
-                error=str(e)
+                message_id=getattr(update.message, "message_id", None),
+                error=str(e),
             )
             return False
 
@@ -75,9 +83,9 @@ class MessageProcessor:
         user_stats = await self.user_tracker.get_user_stats()
 
         stats = {
-            'total_archived_messages': len(self.archiver._message_archive),
-            'nats_enabled': self.nats_publisher.enabled,
-            **user_stats
+            "total_archived_messages": len(self.archiver._message_archive),
+            "nats_enabled": self.nats_publisher.enabled,
+            **user_stats,
         }
 
         return stats

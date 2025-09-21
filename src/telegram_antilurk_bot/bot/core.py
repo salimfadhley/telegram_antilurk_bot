@@ -23,19 +23,20 @@ class TelegramBot:
     def __init__(self) -> None:
         """Initialize the bot with environment validation."""
         # Validate required environment variables
-        token = os.environ.get('TELEGRAM_TOKEN')
+        token = os.environ.get("TELEGRAM_TOKEN")
         if not token:
             raise ValueError("TELEGRAM_TOKEN environment variable is required")
         self.token: str = token
 
-        database_url = os.environ.get('DATABASE_URL')
+        database_url = os.environ.get("DATABASE_URL")
         if not database_url:
             raise ValueError("DATABASE_URL environment variable is required")
 
         # Initialize configuration
-        config_dir = os.environ.get('CONFIG_DIR')
+        config_dir = os.environ.get("CONFIG_DIR")
         if config_dir:
             from pathlib import Path
+
             self.config_loader = ConfigLoader(config_dir=Path(config_dir))
         else:
             self.config_loader = ConfigLoader()
@@ -64,18 +65,14 @@ class TelegramBot:
             try:
                 await app.bot.send_message(
                     chat_id=channel.chat_id,
-                    text="🤖 Telegram Anti-Lurk Bot is now online and monitoring."
+                    text="🤖 Telegram Anti-Lurk Bot is now online and monitoring.",
                 )
                 logger.info(
-                    "Posted startup message",
-                    chat_id=channel.chat_id,
-                    chat_name=channel.chat_name
+                    "Posted startup message", chat_id=channel.chat_id, chat_name=channel.chat_name
                 )
             except Exception as e:
                 logger.error(
-                    "Failed to post startup message",
-                    chat_id=channel.chat_id,
-                    error=str(e)
+                    "Failed to post startup message", chat_id=channel.chat_id, error=str(e)
                 )
 
     async def handle_mode_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -118,12 +115,10 @@ class TelegramBot:
             "• **Moderated**: Monitor user activity and send challenges\n"
             "• **Modlog**: Receive admin notifications and reports",
             reply_markup=reply_markup,
-            parse_mode='Markdown'
+            parse_mode="Markdown",
         )
 
-    async def _set_chat_mode(
-        self, chat_id: int, chat_name: str, mode: str, update: Update
-    ) -> None:
+    async def _set_chat_mode(self, chat_id: int, chat_name: str, mode: str, update: Update) -> None:
         """Set chat mode and update configuration."""
         # Find existing channel or create new one
         existing_channel = None
@@ -138,11 +133,7 @@ class TelegramBot:
             existing_channel.chat_name = chat_name
         else:
             # Create new channel entry
-            new_channel = ChannelEntry(
-                chat_id=chat_id,
-                chat_name=chat_name,
-                mode=mode
-            )
+            new_channel = ChannelEntry(chat_id=chat_id, chat_name=chat_name, mode=mode)
             self.channels_config.channels.append(new_channel)
 
         # Save configuration
@@ -154,15 +145,10 @@ class TelegramBot:
             await update.message.reply_text(
                 f"{emoji} Chat mode set to **{mode}**.\n\n"
                 f"This chat will now operate as a {mode} channel.",
-                parse_mode='Markdown'
+                parse_mode="Markdown",
             )
 
-        logger.info(
-            "Chat mode updated",
-            chat_id=chat_id,
-            chat_name=chat_name,
-            mode=mode
-        )
+        logger.info("Chat mode updated", chat_id=chat_id, chat_name=chat_name, mode=mode)
 
     async def handle_link_request(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Generate link code for moderated chat to connect with modlog."""
@@ -177,10 +163,10 @@ class TelegramBot:
 
         # Store active link with 10-minute expiry
         self._active_links[link_code] = {
-            'chat_id': chat_id,
-            'chat_name': chat_name,
-            'expires_at': datetime.utcnow() + timedelta(minutes=10),
-            'message_id': None  # Will be set after sending
+            "chat_id": chat_id,
+            "chat_name": chat_name,
+            "expires_at": datetime.utcnow() + timedelta(minutes=10),
+            "message_id": None,  # Will be set after sending
         }
 
         # Send link message
@@ -190,19 +176,21 @@ class TelegramBot:
             f"⏰ This link expires in 10 minutes."
         )
 
-        message = await update.message.reply_text(link_text, parse_mode='Markdown')
+        message = await update.message.reply_text(link_text, parse_mode="Markdown")
 
         # Store message ID for potential deletion
-        self._active_links[link_code]['message_id'] = message.message_id
+        self._active_links[link_code]["message_id"] = message.message_id
 
         logger.info(
             "Link code generated",
             chat_id=chat_id,
             link_code=link_code,
-            expires_at=self._active_links[link_code]['expires_at']
+            expires_at=self._active_links[link_code]["expires_at"],
         )
 
-    async def handle_forwarded_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def handle_forwarded_message(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> None:
         """Process forwarded link messages in modlog chats."""
         if not update.message or not update.effective_chat:
             return
@@ -221,8 +209,8 @@ class TelegramBot:
 
         # Get original chat info
         link_info = self._active_links[link_code]
-        moderated_chat_id = link_info['chat_id']
-        moderated_chat_name = link_info['chat_name']
+        moderated_chat_id = link_info["chat_id"]
+        moderated_chat_name = link_info["chat_name"]
 
         # Create the channel link
         await self._create_channel_link(
@@ -230,7 +218,7 @@ class TelegramBot:
             moderated_chat_name=moderated_chat_name,
             modlog_chat_id=modlog_chat_id,
             modlog_chat_name=modlog_chat_name,
-            link_code=link_code
+            link_code=link_code,
         )
 
     async def _create_channel_link(
@@ -239,7 +227,7 @@ class TelegramBot:
         moderated_chat_name: str,
         modlog_chat_id: int,
         modlog_chat_name: str,
-        link_code: str
+        link_code: str,
     ) -> None:
         """Create bidirectional link between moderated and modlog chats."""
         # Update channels configuration
@@ -259,15 +247,13 @@ class TelegramBot:
                 chat_id=moderated_chat_id,
                 chat_name=moderated_chat_name,
                 mode="moderated",
-                modlog_ref=modlog_chat_id
+                modlog_ref=modlog_chat_id,
             )
             self.channels_config.channels.append(moderated_channel)
 
         if not modlog_found:
             modlog_channel = ChannelEntry(
-                chat_id=modlog_chat_id,
-                chat_name=modlog_chat_name,
-                mode="modlog"
+                chat_id=modlog_chat_id, chat_name=modlog_chat_name, mode="modlog"
             )
             self.channels_config.channels.append(modlog_channel)
 
@@ -283,7 +269,7 @@ class TelegramBot:
             moderated_chat_name=moderated_chat_name,
             modlog_chat_id=modlog_chat_id,
             modlog_chat_name=modlog_chat_name,
-            link_code=link_code
+            link_code=link_code,
         )
 
     async def handle_help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -308,19 +294,19 @@ class TelegramBot:
             "Need more help? Check the documentation or contact your administrator."
         )
 
-        await update.message.reply_text(help_text, parse_mode='Markdown')
+        await update.message.reply_text(help_text, parse_mode="Markdown")
 
     def _generate_link_code(self) -> str:
         """Generate a unique 6-character alphanumeric link code."""
         while True:
-            code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+            code = "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
             if code not in self._active_links:
                 return code
 
     def _extract_link_code(self, message_text: str) -> str | None:
         """Extract link code from forwarded message text."""
         # Look for pattern: "Link Code: ABC123"
-        match = re.search(r'Link Code: ([A-Z0-9]{6})', message_text)
+        match = re.search(r"Link Code: ([A-Z0-9]{6})", message_text)
         return match.group(1) if match else None
 
     def _is_link_valid(self, link_code: str) -> bool:
@@ -329,5 +315,5 @@ class TelegramBot:
             return False
 
         link_info = self._active_links[link_code]
-        expires_at = link_info['expires_at']
+        expires_at = link_info["expires_at"]
         return bool(datetime.utcnow() < expires_at)

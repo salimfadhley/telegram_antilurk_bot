@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certifi
 COPY src ./src
 
 # Copy project metadata and lockfile, install dependencies (no dev)
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock README.md ./
 RUN uv sync --frozen --no-dev
 
 # Defaults (overridable at runtime)
@@ -31,4 +31,3 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 
 # Entrypoint: run the package main (using the project's virtualenv)
 CMD ["python", "-m", "telegram_antilurk_bot"]
-

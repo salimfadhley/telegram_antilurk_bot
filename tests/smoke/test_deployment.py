@@ -1,6 +1,5 @@
 """Smoke tests for deployment validation."""
 
-import os
 import subprocess
 from pathlib import Path
 
@@ -34,18 +33,21 @@ class TestDeploymentSmoke:
         """Main module should be importable."""
         try:
             from telegram_antilurk_bot.main import main
+
             assert callable(main), "Main function should be callable"
         except ImportError as e:
             pytest.fail(f"Could not import main module: {e}")
 
     def test_package_entry_point_exists(self) -> None:
         """Package should have __main__.py entry point."""
-        main_path = Path(__file__).parent.parent.parent / "src" / "telegram_antilurk_bot" / "__main__.py"
+        main_path = (
+            Path(__file__).parent.parent.parent / "src" / "telegram_antilurk_bot" / "__main__.py"
+        )
         assert main_path.exists(), "__main__.py not found in package"
 
     @pytest.mark.skipif(
         subprocess.run(["which", "docker"], capture_output=True).returncode != 0,
-        reason="Docker not available"
+        reason="Docker not available",
     )
     def test_dockerfile_builds(self) -> None:
         """Dockerfile should build successfully."""
@@ -56,7 +58,7 @@ class TestDeploymentSmoke:
             ["docker", "build", "-t", "telegram-antilurk-bot:test", "."],
             cwd=project_root,
             capture_output=True,
-            text=True
+            text=True,
         )
 
         if result.returncode != 0:
@@ -64,17 +66,14 @@ class TestDeploymentSmoke:
 
     @pytest.mark.skipif(
         subprocess.run(["which", "docker-compose"], capture_output=True).returncode != 0,
-        reason="Docker Compose not available"
+        reason="Docker Compose not available",
     )
     def test_docker_compose_validates(self) -> None:
         """Docker compose configuration should be valid."""
         deploy_dir = Path(__file__).parent.parent.parent / "deploy"
 
         result = subprocess.run(
-            ["docker-compose", "config"],
-            cwd=deploy_dir,
-            capture_output=True,
-            text=True
+            ["docker-compose", "config"], cwd=deploy_dir, capture_output=True, text=True
         )
 
         if result.returncode != 0:
@@ -92,7 +91,9 @@ class TestDeploymentSmoke:
 
     def test_startup_script_executable(self) -> None:
         """Main module should be executable."""
-        main_path = Path(__file__).parent.parent.parent / "src" / "telegram_antilurk_bot" / "__main__.py"
+        main_path = (
+            Path(__file__).parent.parent.parent / "src" / "telegram_antilurk_bot" / "__main__.py"
+        )
         content = main_path.read_text()
 
         # Check for async main execution
@@ -130,13 +131,6 @@ class TestEnvironmentValidation:
         """Should validate Telegram token format."""
         # Valid format: bot_id:secret_key
         valid_token = "123456789:ABCdefGhIJKlmNoPQRstuVwxyZ-1234567890"
-        invalid_tokens = [
-            "",
-            "invalid",
-            "123456789",  # Missing secret
-            ":ABCdefGhI",  # Missing bot ID
-            "not-a-number:secret"  # Invalid bot ID
-        ]
 
         # This would be tested in the actual application
         # Here we just document the expected format
@@ -153,13 +147,6 @@ class TestEnvironmentValidation:
             "postgresql://user:pass@host/db",  # Default port
         ]
 
-        invalid_urls = [
-            "",
-            "invalid",
-            "mysql://user:pass@host/db",  # Wrong engine
-            "postgresql://host/db",  # Missing credentials
-        ]
-
         for url in valid_urls:
             assert url.startswith(("postgresql://", "postgres://"))
             assert "@" in url  # Has credentials
@@ -171,12 +158,12 @@ class TestEnvironmentValidation:
             "DATA_DIR": "/data",
             "CONFIG_DIR": "/data/config",
             "TZ": "UTC",
-            "LOG_LEVEL": "INFO"
+            "LOG_LEVEL": "INFO",
         }
 
         # These would be tested in the actual configuration loading
         # Here we just document expected behavior
-        for var, default in defaults.items():
+        for _var, default in defaults.items():
             assert default is not None
             assert isinstance(default, str)
             assert len(default) > 0
@@ -189,7 +176,6 @@ class TestHealthChecks:
         """Basic health check should be simple and fast."""
         # Simple Python import test - this is what our health check does
         try:
-            import sys
             result = 0  # Success
         except Exception:
             result = 1  # Failure

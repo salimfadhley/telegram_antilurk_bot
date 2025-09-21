@@ -15,22 +15,28 @@ logger = structlog.get_logger(__name__)
 class CheckUserCommandHandler:
     """Handles /antlurk checkuser command for user activity lookup."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        user_tracker: UserTracker | None = None,
+        message_archiver: MessageArchiver | None = None,
+    ) -> None:
         """Initialize checkuser command handler."""
-        self.user_tracker = UserTracker()
-        self.message_archiver = MessageArchiver()
+        self.user_tracker = user_tracker or UserTracker()
+        self.message_archiver = message_archiver or MessageArchiver()
 
-    async def handle_checkuser_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def handle_checkuser_command(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> None:
         """Handle /antlurk checkuser <username|user_id> command."""
         if not update.message or not context.args:
             if update.message:
                 await update.message.reply_text(
-                "❌ Usage: `/antlurk checkuser <username|user_id>`\n\n"
-                "Examples:\n"
-                "• `/antlurk checkuser @username`\n"
-                "• `/antlurk checkuser 123456789`",
-                parse_mode='Markdown'
-            )
+                    "❌ Usage: `/antlurk checkuser <username|user_id>`\n\n"
+                    "Examples:\n"
+                    "• `/antlurk checkuser @username`\n"
+                    "• `/antlurk checkuser 123456789`",
+                    parse_mode="Markdown",
+                )
             return
 
         user_identifier = context.args[0]
@@ -38,7 +44,7 @@ class CheckUserCommandHandler:
         try:
             # Determine if input is username or user ID
             user = None
-            if user_identifier.startswith('@'):
+            if user_identifier.startswith("@"):
                 # Username lookup
                 username = user_identifier[1:]  # Remove @ prefix
                 user = await self.user_tracker.get_user_by_username(username)
@@ -55,16 +61,14 @@ class CheckUserCommandHandler:
 
             if not user:
                 await update.message.reply_text(
-                    f"❌ User `{user_identifier}` not found in system.",
-                    parse_mode='Markdown'
+                    f"❌ User `{user_identifier}` not found in system.", parse_mode="Markdown"
                 )
                 return
 
             # Get message count for current chat
             current_chat_id = update.effective_chat.id if update.effective_chat else 0
             message_count = await self.message_archiver.get_user_message_count(
-                user_id=user.user_id,
-                chat_id=current_chat_id
+                user_id=user.user_id, chat_id=current_chat_id
             )
 
             # Format user information
@@ -104,13 +108,13 @@ class CheckUserCommandHandler:
                 join_diff = datetime.utcnow() - user.join_date
                 user_info += f"• Member since: {join_diff.days} days ago\n"
 
-            await update.message.reply_text(user_info, parse_mode='Markdown')
+            await update.message.reply_text(user_info, parse_mode="Markdown")
 
             logger.info(
                 "User lookup completed",
                 lookup_user=user_identifier,
                 found_user_id=user.user_id,
-                chat_id=current_chat_id
+                chat_id=current_chat_id,
             )
 
         except Exception as e:

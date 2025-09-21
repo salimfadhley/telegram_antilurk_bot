@@ -3,6 +3,7 @@
 
 import os
 import sys
+
 from sqlalchemy import create_engine, text
 
 
@@ -14,18 +15,18 @@ def test_connection(db_url: str) -> bool:
         engine = create_engine(db_url)
         with engine.connect() as conn:
             result = conn.execute(text("SELECT version()")).first()
-            print(f"✅ Connection successful!")
+            print("✅ Connection successful!")
             print(f"   PostgreSQL version: {result[0]}")
 
             # Test basic operations
             conn.execute(text("SELECT 1 + 1 as test")).first()
-            print(f"   ✅ Basic queries working")
+            print("   ✅ Basic queries working")
 
             # Test database permissions
             try:
                 conn.execute(text("CREATE TEMP TABLE test_permissions (id int)"))
                 conn.execute(text("DROP TABLE test_permissions"))
-                print(f"   ✅ Table creation/deletion permissions working")
+                print("   ✅ Table creation/deletion permissions working")
             except Exception as e:
                 print(f"   ⚠️  Limited permissions: {e}")
 
@@ -65,20 +66,20 @@ def main():
     test_scenarios = [
         {
             "name": "Halob with hostname (postgres superuser)",
-            "url": "postgresql://postgres:postgres@halob:5432/postgres"
+            "url": "postgresql://postgres:postgres@halob:5432/postgres",
         },
         {
             "name": "Halob with IP (postgres superuser)",
-            "url": "postgresql://postgres:postgres@192.168.86.31:5432/postgres"
+            "url": "postgresql://postgres:postgres@192.168.86.31:5432/postgres",
         },
         {
             "name": "Bot user (if created)",
-            "url": "postgresql://antilurk_bot:AntiLurk2024!SecurePass@halob:5432/antilurk"
+            "url": "postgresql://antilurk_bot:AntiLurk2024!SecurePass@halob:5432/antilurk",
         },
         {
             "name": "Custom DATABASE_URL (from environment)",
-            "url": os.environ.get("DATABASE_URL", "")
-        }
+            "url": os.environ.get("DATABASE_URL", ""),
+        },
     ]
 
     print("🔍 Testing PostgreSQL External Connectivity")
@@ -97,7 +98,9 @@ def main():
             success_count += 1
 
     print(f"\n{'=' * 50}")
-    print(f"Summary: {success_count}/{len([s for s in test_scenarios if s['url']])} connections successful")
+    print(
+        f"Summary: {success_count}/{len([s for s in test_scenarios if s['url']])} connections successful"
+    )
 
     if success_count == 0:
         print("\n🚨 No successful connections!")
@@ -108,7 +111,7 @@ def main():
         print("   4. Restart PostgreSQL service")
         sys.exit(1)
     else:
-        print(f"\n✅ External connectivity verified!")
+        print("\n✅ External connectivity verified!")
 
 
 if __name__ == "__main__":

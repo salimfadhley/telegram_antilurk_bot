@@ -7,7 +7,7 @@ from pathlib import Path
 # Add project root to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from telegram_antilurk_bot.main import main  # type: ignore[import-not-found]
+from telegram_antilurk_bot.main import main
 
 if __name__ == "__main__":
     asyncio.run(main())

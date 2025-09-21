@@ -12,7 +12,7 @@ from .base import Base
 class MessageArchive(Base):
     """Model for archiving messages from moderated channels."""
 
-    __tablename__ = 'message_archive'
+    __tablename__ = "message_archive"
 
     # Primary key
     id = Column(BigInteger, primary_key=True, autoincrement=True)
@@ -20,11 +20,11 @@ class MessageArchive(Base):
     # Chat and message identifiers
     chat_id = Column(BigInteger, nullable=False)
     message_id = Column(BigInteger, nullable=False)
-    user_id = Column(BigInteger, ForeignKey('users.user_id'), nullable=False)
+    user_id = Column(BigInteger, ForeignKey("users.user_id"), nullable=False)
 
     # Message content
     text = Column(Text, nullable=True)
-    message_type = Column(String(50), nullable=False, default='text')
+    message_type = Column(String(50), nullable=False, default="text")
 
     # Timestamps
     sent_at = Column(DateTime, nullable=False)
@@ -45,10 +45,10 @@ class MessageArchive(Base):
 
     # Indexes for performance
     __table_args__ = (
-        Index('ix_message_archive_chat_user', 'chat_id', 'user_id'),
-        Index('ix_message_archive_chat_sent', 'chat_id', 'sent_at'),
-        Index('ix_message_archive_user_sent', 'user_id', 'sent_at'),
-        Index('ix_message_archive_chat_message', 'chat_id', 'message_id', unique=True),
+        Index("ix_message_archive_chat_user", "chat_id", "user_id"),
+        Index("ix_message_archive_chat_sent", "chat_id", "sent_at"),
+        Index("ix_message_archive_user_sent", "user_id", "sent_at"),
+        Index("ix_message_archive_chat_message", "chat_id", "message_id", unique=True),
     )
 
     def __init__(self, **kwargs: Any) -> None:

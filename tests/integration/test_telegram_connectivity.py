@@ -6,8 +6,8 @@ Tests connectivity to actual Telegram Bot API using TELEGRAM_TOKEN environment v
 
 import os
 
-import pytest
 import aiohttp
+import pytest
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -52,8 +52,12 @@ class TestTelegramBotAPI:
                 print(f"✅ Bot username: @{bot_info.get('username')}")
                 print(f"✅ Bot ID: {bot_info.get('id')}")
                 print(f"✅ Can join groups: {bot_info.get('can_join_groups', False)}")
-                print(f"✅ Can read all messages: {bot_info.get('can_read_all_group_messages', False)}")
-                print(f"✅ Supports inline queries: {bot_info.get('supports_inline_queries', False)}")
+                print(
+                    f"✅ Can read all messages: {bot_info.get('can_read_all_group_messages', False)}"
+                )
+                print(
+                    f"✅ Supports inline queries: {bot_info.get('supports_inline_queries', False)}"
+                )
 
     @pytest.mark.asyncio
     async def test_telegram_webhook_info(self) -> None:
@@ -75,7 +79,9 @@ class TestTelegramBotAPI:
                 data = await response.json()
 
                 if not data.get("ok"):
-                    pytest.fail(f"Telegram webhook API error: {data.get('description', 'Unknown error')}")
+                    pytest.fail(
+                        f"Telegram webhook API error: {data.get('description', 'Unknown error')}"
+                    )
 
                 webhook_info = data.get("result", {})
                 webhook_url = webhook_info.get("url", "")
@@ -112,7 +118,9 @@ class TestTelegramBotAPI:
                 data = await response.json()
 
                 if not data.get("ok"):
-                    pytest.fail(f"Telegram commands API error: {data.get('description', 'Unknown error')}")
+                    pytest.fail(
+                        f"Telegram commands API error: {data.get('description', 'Unknown error')}"
+                    )
 
                 commands = data.get("result", [])
                 print(f"✅ Bot commands configured: {len(commands)}")
@@ -139,7 +147,7 @@ class TestTelegramBotAPI:
         async with aiohttp.ClientSession() as session:
             responses = []
 
-            for i in range(3):  # Conservative test - just 3 requests
+            for _ in range(3):  # Conservative test - just 3 requests
                 async with session.get(url, timeout=aiohttp.ClientTimeout(total=5)) as response:
                     responses.append(response.status)
 
@@ -175,17 +183,23 @@ class TestTelegramBotAPI:
                 can_join_groups = bot_info.get("can_join_groups", False)
                 can_read_all_messages = bot_info.get("can_read_all_group_messages", False)
 
-                print(f"✅ Bot permissions check:")
+                print("✅ Bot permissions check:")
                 print(f"   Can join groups: {can_join_groups}")
                 print(f"   Can read all group messages: {can_read_all_messages}")
-                print(f"   Supports inline queries: {bot_info.get('supports_inline_queries', False)}")
+                print(
+                    f"   Supports inline queries: {bot_info.get('supports_inline_queries', False)}"
+                )
 
                 # For an anti-lurk bot, we need to be able to join groups
-                assert can_join_groups, "Bot must be able to join groups for anti-lurk functionality"
+                assert can_join_groups, (
+                    "Bot must be able to join groups for anti-lurk functionality"
+                )
 
                 # Note: can_read_all_messages might be False if privacy mode is enabled
                 if not can_read_all_messages:
-                    print("ℹ️  Privacy mode may be enabled - bot will only see messages addressed to it")
+                    print(
+                        "ℹ️  Privacy mode may be enabled - bot will only see messages addressed to it"
+                    )
 
 
 class TestTelegramIntegration:
@@ -198,13 +212,13 @@ class TestTelegramIntegration:
             pytest.fail("TELEGRAM_TOKEN not set - required for integration tests")
 
         # Basic token format validation
-        if not token.startswith(('1', '2', '3', '4', '5', '6', '7', '8', '9')):
+        if not token.startswith(("1", "2", "3", "4", "5", "6", "7", "8", "9")):
             pytest.fail("TELEGRAM_TOKEN doesn't start with valid bot ID")
 
-        if ':' not in token:
+        if ":" not in token:
             pytest.fail("TELEGRAM_TOKEN missing ':' separator")
 
-        parts = token.split(':')
+        parts = token.split(":")
         if len(parts) != 2:
             pytest.fail("TELEGRAM_TOKEN should have exactly one ':' separator")
 
@@ -220,7 +234,7 @@ class TestTelegramIntegration:
         # Bot token should be long enough
         assert len(bot_token) >= 35, "Bot token portion appears too short"
 
-        print(f"✅ Token format validation passed")
+        print("✅ Token format validation passed")
         print(f"   Bot ID: {bot_id}")
         print(f"   Token length: {len(bot_token)} characters")
 
@@ -243,7 +257,7 @@ class TestTelegramIntegration:
                 assert not data.get("ok"), "Invalid API call should have ok=false"
                 assert "description" in data, "Error response should include description"
 
-                print(f"✅ Error handling test passed")
+                print("✅ Error handling test passed")
                 print(f"   Error description: {data.get('description', 'Unknown')}")
 
     @pytest.mark.asyncio

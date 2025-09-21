@@ -24,7 +24,7 @@ class ProvocationTracker:
         user_id: int,
         puzzle_id: str,
         message_id: int,
-        expiration_minutes: int = 30
+        expiration_minutes: int = 30,
     ) -> int:
         """Create new provocation record."""
         provocation_id = self._next_id
@@ -39,7 +39,7 @@ class ProvocationTracker:
             puzzle_id=puzzle_id,
             provocation_date=datetime.utcnow(),
             expiration_date=expiration_date,
-            status="pending"
+            status="pending",
         )
 
         self._provocations[provocation_id] = provocation
@@ -50,7 +50,7 @@ class ProvocationTracker:
             chat_id=chat_id,
             user_id=user_id,
             puzzle_id=puzzle_id,
-            expires_at=expiration_date
+            expires_at=expiration_date,
         )
 
         return provocation_id
@@ -68,10 +68,7 @@ class ProvocationTracker:
         return datetime.utcnow() > provocation.expiration_date
 
     async def update_provocation_status(
-        self,
-        provocation_id: int,
-        status: str,
-        response_user_id: int | None = None
+        self, provocation_id: int, status: str, response_user_id: int | None = None
     ) -> bool:
         """Update provocation status."""
         provocation = self._provocations.get(provocation_id)
@@ -86,17 +83,12 @@ class ProvocationTracker:
             "Provocation status updated",
             provocation_id=provocation_id,
             status=status,
-            response_user_id=response_user_id
+            response_user_id=response_user_id,
         )
 
         return True
 
-    async def validate_callback(
-        self,
-        provocation_id: int,
-        user_id: int,
-        choice_index: int
-    ) -> bool:
+    async def validate_callback(self, provocation_id: int, user_id: int, choice_index: int) -> bool:
         """Validate that callback is from the correct user."""
         provocation = self._provocations.get(provocation_id)
         if not provocation:
@@ -108,7 +100,7 @@ class ProvocationTracker:
                 "Unauthorized callback attempt",
                 provocation_id=provocation_id,
                 expected_user=provocation.user_id,
-                actual_user=user_id
+                actual_user=user_id,
             )
             return False
 
@@ -117,16 +109,13 @@ class ProvocationTracker:
             logger.warning(
                 "Callback for non-pending provocation",
                 provocation_id=provocation_id,
-                status=provocation.status
+                status=provocation.status,
             )
             return False
 
         # Check if expired
         if await self.is_provocation_expired(provocation_id):
-            logger.warning(
-                "Callback for expired provocation",
-                provocation_id=provocation_id
-            )
+            logger.warning("Callback for expired provocation", provocation_id=provocation_id)
             return False
 
         return True
@@ -143,8 +132,7 @@ class ProvocationTracker:
         expired = []
 
         for provocation in self._provocations.values():
-            if (provocation.status == "pending" and
-                current_time > provocation.expiration_date):
+            if provocation.status == "pending" and current_time > provocation.expiration_date:
                 expired.append(provocation)
 
         return expired

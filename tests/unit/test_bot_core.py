@@ -15,12 +15,12 @@ class TestBotStartup:
         from telegram_antilurk_bot.bot.core import TelegramBot
 
         # Missing TELEGRAM_TOKEN should raise error
-        with patch.dict('os.environ', {}, clear=True):
+        with patch.dict("os.environ", {}, clear=True):
             with pytest.raises(ValueError, match="TELEGRAM_TOKEN"):
                 TelegramBot()
 
         # Missing DATABASE_URL should raise error
-        with patch.dict('os.environ', {'TELEGRAM_TOKEN': 'test_token'}, clear=True):
+        with patch.dict("os.environ", {"TELEGRAM_TOKEN": "test_token"}, clear=True):
             with pytest.raises(ValueError, match="DATABASE_URL"):
                 TelegramBot()
 
@@ -28,13 +28,16 @@ class TestBotStartup:
         """Bot should initialize successfully with valid environment."""
         from telegram_antilurk_bot.bot.core import TelegramBot
 
-        with patch.dict('os.environ', {
-            'TELEGRAM_TOKEN': 'test_token_123456789:ABCdefGhIJKlmNoPQRstuVwxyZ',
-            'DATABASE_URL': 'postgresql://test:test@localhost:5432/test_antilurk',
-            'CONFIG_DIR': str(temp_config_dir)
-        }):
+        with patch.dict(
+            "os.environ",
+            {
+                "TELEGRAM_TOKEN": "test_token_123456789:ABCdefGhIJKlmNoPQRstuVwxyZ",
+                "DATABASE_URL": "postgresql://test:test@localhost:5432/test_antilurk",
+                "CONFIG_DIR": str(temp_config_dir),
+            },
+        ):
             bot = TelegramBot()
-            assert bot.token == 'test_token_123456789:ABCdefGhIJKlmNoPQRstuVwxyZ'
+            assert bot.token == "test_token_123456789:ABCdefGhIJKlmNoPQRstuVwxyZ"
             assert bot.config_loader is not None
 
     @pytest.mark.asyncio
@@ -45,24 +48,19 @@ class TestBotStartup:
 
         # Create mock channels config with modlog channels
         modlog_channels = [
-            ChannelEntry(
-                chat_id=-1001234567890,
-                chat_name="Test Modlog 1",
-                mode="modlog"
-            ),
-            ChannelEntry(
-                chat_id=-1009876543210,
-                chat_name="Test Modlog 2",
-                mode="modlog"
-            )
+            ChannelEntry(chat_id=-1001234567890, chat_name="Test Modlog 1", mode="modlog"),
+            ChannelEntry(chat_id=-1009876543210, chat_name="Test Modlog 2", mode="modlog"),
         ]
 
-        with patch.dict('os.environ', {
-            'TELEGRAM_TOKEN': 'test_token',
-            'DATABASE_URL': 'postgresql://test:test@localhost/test',
-            'CONFIG_DIR': str(temp_config_dir)
-        }):
-            with patch('telegram_antilurk_bot.bot.core.Application') as mock_app:
+        with patch.dict(
+            "os.environ",
+            {
+                "TELEGRAM_TOKEN": "test_token",
+                "DATABASE_URL": "postgresql://test:test@localhost/test",
+                "CONFIG_DIR": str(temp_config_dir),
+            },
+        ):
+            with patch("telegram_antilurk_bot.bot.core.Application") as mock_app:
                 mock_bot = AsyncMock()
                 mock_app.builder().token().build.return_value.bot = mock_bot
 
@@ -77,11 +75,11 @@ class TestBotStartup:
                 assert mock_bot.send_message.call_count == 2
                 mock_bot.send_message.assert_any_call(
                     chat_id=-1001234567890,
-                    text="🤖 Telegram Anti-Lurk Bot is now online and monitoring."
+                    text="🤖 Telegram Anti-Lurk Bot is now online and monitoring.",
                 )
                 mock_bot.send_message.assert_any_call(
                     chat_id=-1009876543210,
-                    text="🤖 Telegram Anti-Lurk Bot is now online and monitoring."
+                    text="🤖 Telegram Anti-Lurk Bot is now online and monitoring.",
                 )
 
 
@@ -98,14 +96,17 @@ class TestModeCommands:
         mock_context = Mock()
         mock_context.args = None  # No arguments
 
-        with patch.dict('os.environ', {
-            'TELEGRAM_TOKEN': 'test_token',
-            'DATABASE_URL': 'postgresql://test:test@localhost/test',
-            'CONFIG_DIR': str(temp_config_dir)
-        }):
+        with patch.dict(
+            "os.environ",
+            {
+                "TELEGRAM_TOKEN": "test_token",
+                "DATABASE_URL": "postgresql://test:test@localhost/test",
+                "CONFIG_DIR": str(temp_config_dir),
+            },
+        ):
             bot = TelegramBot()
 
-            with patch.object(bot, '_send_mode_selection_buttons') as mock_send:
+            with patch.object(bot, "_send_mode_selection_buttons") as mock_send:
                 await bot.handle_mode_command(mock_update, mock_context)
                 mock_send.assert_called_once_with(mock_update, mock_context)
 
@@ -120,14 +121,17 @@ class TestModeCommands:
         mock_context = Mock()
         mock_context.args = ["moderated"]
 
-        with patch.dict('os.environ', {
-            'TELEGRAM_TOKEN': 'test_token',
-            'DATABASE_URL': 'postgresql://test:test@localhost/test',
-            'CONFIG_DIR': str(temp_config_dir)
-        }):
+        with patch.dict(
+            "os.environ",
+            {
+                "TELEGRAM_TOKEN": "test_token",
+                "DATABASE_URL": "postgresql://test:test@localhost/test",
+                "CONFIG_DIR": str(temp_config_dir),
+            },
+        ):
             bot = TelegramBot()
 
-            with patch.object(bot, '_set_chat_mode') as mock_set_mode:
+            with patch.object(bot, "_set_chat_mode") as mock_set_mode:
                 await bot.handle_mode_command(mock_update, mock_context)
                 mock_set_mode.assert_called_once_with(
                     -1001234567890, "Test Channel", "moderated", mock_update
@@ -144,14 +148,17 @@ class TestModeCommands:
         mock_context = Mock()
         mock_context.args = ["modlog"]
 
-        with patch.dict('os.environ', {
-            'TELEGRAM_TOKEN': 'test_token',
-            'DATABASE_URL': 'postgresql://test:test@localhost/test',
-            'CONFIG_DIR': str(temp_config_dir)
-        }):
+        with patch.dict(
+            "os.environ",
+            {
+                "TELEGRAM_TOKEN": "test_token",
+                "DATABASE_URL": "postgresql://test:test@localhost/test",
+                "CONFIG_DIR": str(temp_config_dir),
+            },
+        ):
             bot = TelegramBot()
 
-            with patch.object(bot, '_set_chat_mode') as mock_set_mode:
+            with patch.object(bot, "_set_chat_mode") as mock_set_mode:
                 await bot.handle_mode_command(mock_update, mock_context)
                 mock_set_mode.assert_called_once_with(
                     -1009876543210, "Test Modlog", "modlog", mock_update
@@ -167,14 +174,17 @@ class TestModeCommands:
         mock_context = Mock()
         mock_context.args = ["invalid"]
 
-        with patch.dict('os.environ', {
-            'TELEGRAM_TOKEN': 'test_token',
-            'DATABASE_URL': 'postgresql://test:test@localhost/test',
-            'CONFIG_DIR': str(temp_config_dir)
-        }):
+        with patch.dict(
+            "os.environ",
+            {
+                "TELEGRAM_TOKEN": "test_token",
+                "DATABASE_URL": "postgresql://test:test@localhost/test",
+                "CONFIG_DIR": str(temp_config_dir),
+            },
+        ):
             bot = TelegramBot()
 
-            with patch.object(mock_update, 'message') as mock_message:
+            with patch.object(mock_update, "message") as mock_message:
                 mock_message.reply_text = AsyncMock()
                 await bot.handle_mode_command(mock_update, mock_context)
                 mock_message.reply_text.assert_called_once_with(
@@ -195,15 +205,18 @@ class TestLinkingHandshake:
         mock_update.effective_chat.title = "Test Moderated"
         mock_context = Mock()
 
-        with patch.dict('os.environ', {
-            'TELEGRAM_TOKEN': 'test_token',
-            'DATABASE_URL': 'postgresql://test:test@localhost/test',
-            'CONFIG_DIR': str(temp_config_dir)
-        }):
+        with patch.dict(
+            "os.environ",
+            {
+                "TELEGRAM_TOKEN": "test_token",
+                "DATABASE_URL": "postgresql://test:test@localhost/test",
+                "CONFIG_DIR": str(temp_config_dir),
+            },
+        ):
             bot = TelegramBot()
 
-            with patch.object(bot, '_generate_link_code', return_value="ABC123"):
-                with patch.object(mock_update, 'message') as mock_message:
+            with patch.object(bot, "_generate_link_code", return_value="ABC123"):
+                with patch.object(mock_update, "message") as mock_message:
                     # Mock the reply_text to return a coroutine with message_id
                     mock_reply = Mock()
                     mock_reply.message_id = 12345
@@ -224,11 +237,14 @@ class TestLinkingHandshake:
 
         from telegram_antilurk_bot.bot.core import TelegramBot
 
-        with patch.dict('os.environ', {
-            'TELEGRAM_TOKEN': 'test_token',
-            'DATABASE_URL': 'postgresql://test:test@localhost/test',
-            'CONFIG_DIR': str(temp_config_dir)
-        }):
+        with patch.dict(
+            "os.environ",
+            {
+                "TELEGRAM_TOKEN": "test_token",
+                "DATABASE_URL": "postgresql://test:test@localhost/test",
+                "CONFIG_DIR": str(temp_config_dir),
+            },
+        ):
             bot = TelegramBot()
 
             # Create mock link entry
@@ -236,17 +252,17 @@ class TestLinkingHandshake:
             chat_id = -1001234567890
 
             bot._active_links[link_code] = {
-                'chat_id': chat_id,
-                'chat_name': 'Test Channel',
-                'expires_at': datetime.utcnow() + timedelta(minutes=10),
-                'message_id': 12345
+                "chat_id": chat_id,
+                "chat_name": "Test Channel",
+                "expires_at": datetime.utcnow() + timedelta(minutes=10),
+                "message_id": 12345,
             }
 
             # Test that fresh link is valid
             assert bot._is_link_valid(link_code) is True
 
             # Test that expired link is invalid
-            bot._active_links[link_code]['expires_at'] = datetime.utcnow() - timedelta(minutes=1)
+            bot._active_links[link_code]["expires_at"] = datetime.utcnow() - timedelta(minutes=1)
             assert bot._is_link_valid(link_code) is False
 
     @pytest.mark.asyncio
@@ -260,22 +276,25 @@ class TestLinkingHandshake:
         mock_update.message.forward_origin = Mock()  # indicates forwarded message
         mock_update.message.text = "🔗 Link Code: ABC123"
 
-        with patch.dict('os.environ', {
-            'TELEGRAM_TOKEN': 'test_token',
-            'DATABASE_URL': 'postgresql://test:test@localhost/test',
-            'CONFIG_DIR': str(temp_config_dir)
-        }):
+        with patch.dict(
+            "os.environ",
+            {
+                "TELEGRAM_TOKEN": "test_token",
+                "DATABASE_URL": "postgresql://test:test@localhost/test",
+                "CONFIG_DIR": str(temp_config_dir),
+            },
+        ):
             bot = TelegramBot()
 
             # Setup active link
             bot._active_links["ABC123"] = {
-                'chat_id': -1001234567890,
-                'chat_name': 'Test Moderated',
-                'expires_at': datetime.utcnow() + timedelta(minutes=5),
-                'message_id': 12345
+                "chat_id": -1001234567890,
+                "chat_name": "Test Moderated",
+                "expires_at": datetime.utcnow() + timedelta(minutes=5),
+                "message_id": 12345,
             }
 
-            with patch.object(bot, '_create_channel_link') as mock_create_link:
+            with patch.object(bot, "_create_channel_link") as mock_create_link:
                 await bot.handle_forwarded_message(mock_update, Mock())
 
                 mock_create_link.assert_called_once_with(
@@ -283,7 +302,7 @@ class TestLinkingHandshake:
                     moderated_chat_name="Test Moderated",
                     modlog_chat_id=-1009876543210,
                     modlog_chat_name="Test Modlog",
-                    link_code="ABC123"
+                    link_code="ABC123",
                 )
 
 
@@ -299,14 +318,17 @@ class TestHelpCommand:
         mock_update.effective_chat.id = -1001234567890
         mock_context = Mock()
 
-        with patch.dict('os.environ', {
-            'TELEGRAM_TOKEN': 'test_token',
-            'DATABASE_URL': 'postgresql://test:test@localhost/test',
-            'CONFIG_DIR': str(temp_config_dir)
-        }):
+        with patch.dict(
+            "os.environ",
+            {
+                "TELEGRAM_TOKEN": "test_token",
+                "DATABASE_URL": "postgresql://test:test@localhost/test",
+                "CONFIG_DIR": str(temp_config_dir),
+            },
+        ):
             bot = TelegramBot()
 
-            with patch.object(mock_update, 'message') as mock_message:
+            with patch.object(mock_update, "message") as mock_message:
                 mock_message.reply_text = AsyncMock()
                 await bot.handle_help_command(mock_update, mock_context)
 
@@ -327,14 +349,17 @@ class TestHelpCommand:
         mock_update = Mock()
         mock_context = Mock()
 
-        with patch.dict('os.environ', {
-            'TELEGRAM_TOKEN': 'test_token',
-            'DATABASE_URL': 'postgresql://test:test@localhost/test',
-            'CONFIG_DIR': str(temp_config_dir)
-        }):
+        with patch.dict(
+            "os.environ",
+            {
+                "TELEGRAM_TOKEN": "test_token",
+                "DATABASE_URL": "postgresql://test:test@localhost/test",
+                "CONFIG_DIR": str(temp_config_dir),
+            },
+        ):
             bot = TelegramBot()
 
-            with patch.object(mock_update, 'message') as mock_message:
+            with patch.object(mock_update, "message") as mock_message:
                 mock_message.reply_text = AsyncMock()
                 await bot.handle_help_command(mock_update, mock_context)
 
@@ -352,11 +377,14 @@ class TestUtilityMethods:
         """_generate_link_code should create unique alphanumeric codes."""
         from telegram_antilurk_bot.bot.core import TelegramBot
 
-        with patch.dict('os.environ', {
-            'TELEGRAM_TOKEN': 'test_token',
-            'DATABASE_URL': 'postgresql://test:test@localhost/test',
-            'CONFIG_DIR': str(temp_config_dir)
-        }):
+        with patch.dict(
+            "os.environ",
+            {
+                "TELEGRAM_TOKEN": "test_token",
+                "DATABASE_URL": "postgresql://test:test@localhost/test",
+                "CONFIG_DIR": str(temp_config_dir),
+            },
+        ):
             bot = TelegramBot()
 
             # Generate multiple codes
@@ -376,11 +404,14 @@ class TestUtilityMethods:
         """_extract_link_code should parse link code from forwarded messages."""
         from telegram_antilurk_bot.bot.core import TelegramBot
 
-        with patch.dict('os.environ', {
-            'TELEGRAM_TOKEN': 'test_token',
-            'DATABASE_URL': 'postgresql://test:test@localhost/test',
-            'CONFIG_DIR': str(temp_config_dir)
-        }):
+        with patch.dict(
+            "os.environ",
+            {
+                "TELEGRAM_TOKEN": "test_token",
+                "DATABASE_URL": "postgresql://test:test@localhost/test",
+                "CONFIG_DIR": str(temp_config_dir),
+            },
+        ):
             bot = TelegramBot()
 
             # Test valid link message

@@ -16,30 +16,36 @@ logger = structlog.get_logger(__name__)
 class ReportCommandHandler:
     """Handles /antlurk report commands for activity reports."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        config_loader: ConfigLoader | None = None,
+        user_tracker: UserTracker | None = None,
+        lurker_selector: LurkerSelector | None = None,
+    ) -> None:
         """Initialize report command handler."""
-        self.config_loader = ConfigLoader()
-        self.user_tracker = UserTracker()
+        self.config_loader = config_loader or ConfigLoader()
+        self.user_tracker = user_tracker or UserTracker()
+        self.lurker_selector = lurker_selector
 
-    async def handle_report_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def handle_report_command(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> None:
         """Handle /antlurk report active|inactive|lurkers [--days N] [--limit M] command."""
         if not update.message or not update.effective_chat or not context.args:
             if update.message:
                 await update.message.reply_text(
-                "❌ Usage: `/antlurk report active|inactive|lurkers [--days N] [--limit M]`\n\n"
-                "Examples:\n"
-                "• `/antlurk report active --limit 10`\n"
-                "• `/antlurk report lurkers --days 7 --limit 5`\n"
-                "• `/antlurk report inactive --days 30`",
-                parse_mode='Markdown'
-            )
+                    "❌ Usage: `/antlurk report active|inactive|lurkers [--days N] [--limit M]`\n\n"
+                    "Examples:\n"
+                    "• `/antlurk report active --limit 10`\n"
+                    "• `/antlurk report lurkers --days 7 --limit 5`\n"
+                    "• `/antlurk report inactive --days 30`",
+                    parse_mode="Markdown",
+                )
             return
 
         # Verify this is a moderated chat
         if not await self._is_moderated_chat(update.effective_chat.id):
-            await update.message.reply_text(
-                "❌ Reports can only be generated in moderated chats."
-            )
+            await update.message.reply_text("❌ Reports can only be generated in moderated chats.")
             return
 
         # Parse arguments
@@ -61,7 +67,7 @@ class ReportCommandHandler:
             else:
                 await update.message.reply_text(
                     "❌ Invalid report type. Use: `active`, `inactive`, or `lurkers`",
-                    parse_mode='Markdown'
+                    parse_mode="Markdown",
                 )
 
         except Exception as e:
@@ -75,15 +81,11 @@ class ReportCommandHandler:
 
         since_date = datetime.utcnow() - timedelta(days=days)
         active_users = await self.user_tracker.get_users_by_activity(
-            chat_id=update.effective_chat.id,
-            since=since_date
+            chat_id=update.effective_chat.id, since=since_date
         )
 
         # Sort by last message time (most recent first)
-        active_users.sort(
-            key=lambda u: u.last_message_at or datetime.min,
-            reverse=True
-        )
+        active_users.sort(key=lambda u: u.last_message_at or datetime.min, reverse=True)
         active_users = active_users[:limit]
 
         report_text = "📊 **Active Users Report**\n\n"
@@ -107,7 +109,7 @@ class ReportCommandHandler:
 
                 report_text += f"{i}. {username} - Last: {last_seen}\n"
 
-        await update.message.reply_text(report_text, parse_mode='Markdown')
+        await update.message.reply_text(report_text, parse_mode="Markdown")
 
     async def _generate_inactive_report(self, update: Update, days: int, limit: int) -> None:
         """Generate report of inactive users."""
@@ -116,18 +118,17 @@ class ReportCommandHandler:
 
         inactive_since = datetime.utcnow() - timedelta(days=days)
         inactive_users = await self.user_tracker.get_inactive_users(
-            chat_id=update.effective_chat.id,
-            inactive_since=inactive_since
+            chat_id=update.effective_chat.id, inactive_since=inactive_since
         )
 
         # Sort by last message time (least recent first)
-        inactive_users.sort(
-            key=lambda u: u.last_message_at or datetime.min
-        )
+        inactive_users.sort(key=lambda u: u.last_message_at or datetime.min)
         inactive_users = inactive_users[:limit]
 
         report_text = "📊 **Inactive Users Report**\n\n"
-        report_text += f"Users inactive for more than {days} days (showing {len(inactive_users)}):\n\n"
+        report_text += (
+            f"Users inactive for more than {days} days (showing {len(inactive_users)}):\n\n"
+        )
 
         if not inactive_users:
             report_text += "No inactive users found matching the criteria."
@@ -142,26 +143,30 @@ class ReportCommandHandler:
 
                 report_text += f"{i}. {username} - Inactive: {inactive_for}\n"
 
-        await update.message.reply_text(report_text, parse_mode='Markdown')
+        await update.message.reply_text(report_text, parse_mode="Markdown")
 
     async def _generate_lurkers_report(self, update: Update, days: int, limit: int) -> None:
         """Generate report of lurkers (users eligible for challenges)."""
         if not update.message or not update.effective_chat:
             return
 
-        # Load configuration for lurker selection
-        global_config, channels_config, puzzles_config = self.config_loader.load_all()
-        lurker_selector = LurkerSelector(global_config)
+        # Use injected lurker selector or create one
+        if self.lurker_selector:
+            lurker_selector = self.lurker_selector
+        else:
+            global_config, channels_config, puzzles_config = self.config_loader.load_all()
+            lurker_selector = LurkerSelector(global_config)
 
         lurkers = await lurker_selector.get_lurkers_for_chat(
-            chat_id=update.effective_chat.id,
-            days_threshold=days
+            chat_id=update.effective_chat.id, days_threshold=days
         )
 
         lurkers = lurkers[:limit]
 
         report_text = "🎯 **Lurkers Report**\n\n"
-        report_text += f"Users eligible for challenges ({days}+ days inactive, showing {len(lurkers)}):\n\n"
+        report_text += (
+            f"Users eligible for challenges ({days}+ days inactive, showing {len(lurkers)}):\n\n"
+        )
 
         if not lurkers:
             report_text += "No lurkers found matching the criteria."
@@ -176,7 +181,7 @@ class ReportCommandHandler:
 
                 report_text += f"{i}. {username} - Inactive: {inactive_for}\n"
 
-        await update.message.reply_text(report_text, parse_mode='Markdown')
+        await update.message.reply_text(report_text, parse_mode="Markdown")
 
     def _parse_arg_value(self, args: list[str], flag: str, default: int) -> int:
         """Parse a --flag value from command arguments."""

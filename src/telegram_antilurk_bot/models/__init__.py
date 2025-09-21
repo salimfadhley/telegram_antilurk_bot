@@ -6,12 +6,12 @@ from .provocation import Provocation, ProvocationOutcome
 from .user import User
 
 __all__ = [
-    'Base',
-    'get_db_url',
-    'get_engine',
-    'get_session',
-    'User',
-    'MessageArchive',
-    'Provocation',
-    'ProvocationOutcome',
+    "Base",
+    "get_db_url",
+    "get_engine",
+    "get_session",
+    "User",
+    "MessageArchive",
+    "Provocation",
+    "ProvocationOutcome",
 ]

@@ -40,9 +40,7 @@ class PermissionValidator:
                 return True
 
             # User is not admin
-            await update.message.reply_text(
-                "❌ This command requires administrator permissions."
-            )
+            await update.message.reply_text("❌ This command requires administrator permissions.")
             return False
 
         except Exception as e:
@@ -55,19 +53,18 @@ class PermissionValidator:
             return False
 
         try:
-            bot_token = os.environ.get('TELEGRAM_TOKEN')
+            bot_token = os.environ.get("TELEGRAM_TOKEN")
             if not bot_token:
                 return False
 
             app = Application.builder().token(bot_token).build()
 
             chat_member = await app.bot.get_chat_member(
-                chat_id=update.effective_chat.id,
-                user_id=update.effective_user.id
+                chat_id=update.effective_chat.id, user_id=update.effective_user.id
             )
 
             # Check if user is admin or creator
-            admin_statuses = ['administrator', 'creator']
+            admin_statuses = ["administrator", "creator"]
             is_admin = chat_member.status in admin_statuses
 
             logger.debug(
@@ -75,7 +72,7 @@ class PermissionValidator:
                 user_id=update.effective_user.id,
                 chat_id=update.effective_chat.id,
                 status=chat_member.status,
-                is_admin=is_admin
+                is_admin=is_admin,
             )
 
             return is_admin
@@ -85,7 +82,7 @@ class PermissionValidator:
                 "Failed to validate Telegram admin status",
                 user_id=update.effective_user.id if update.effective_user else None,
                 chat_id=update.effective_chat.id if update.effective_chat else None,
-                error=str(e)
+                error=str(e),
             )
             return False
 
@@ -114,10 +111,7 @@ class PermissionValidator:
             return False
 
     async def validate_command_permissions(
-        self,
-        update: Update,
-        require_admin: bool = True,
-        require_moderated_chat: bool = False
+        self, update: Update, require_admin: bool = True, require_moderated_chat: bool = False
     ) -> bool:
         """Combined permission validation for commands."""
         if require_admin:
