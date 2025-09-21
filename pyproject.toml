@@ -29,6 +29,7 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "faker>=37.8.0",
+    "hypothesis>=6.139.2",
     "mypy>=1.18.2",
     "pytest>=8.4.2",
     "pytest-asyncio>=1.2.0",
