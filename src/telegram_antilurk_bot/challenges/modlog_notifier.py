@@ -15,21 +15,28 @@ logger = structlog.get_logger(__name__)
 class ModlogNotifier:
     """Sends notifications to modlog channels for failed challenges."""
 
-    def __init__(self) -> None:
-        """Initialize modlog notifier."""
-        self.tracker = ProvocationTracker()
-        self.config_loader = ConfigLoader()
+    def __init__(self, tracker: ProvocationTracker | None = None, config_loader: ConfigLoader | None = None) -> None:
+        """Initialize modlog notifier.
+
+        Dependencies are lazily instantiated to support test patching.
+        """
+        self.tracker = tracker
+        self.config_loader = config_loader
 
     async def schedule_kick_notification(self, provocation_id: int) -> None:
         """Send kick notification to linked modlog channel."""
+        # Resolve dependencies lazily to honor runtime patches
+        tracker = self.tracker or ProvocationTracker()
+        config_loader = self.config_loader or ConfigLoader()
+
         # Get provocation details
-        provocation = await self.tracker.get_provocation(provocation_id)
+        provocation = await tracker.get_provocation(provocation_id)
         if not provocation:
             logger.error("Provocation not found", provocation_id=provocation_id)
             return
 
         # Load configuration to find linked modlog
-        global_config, channels_config, puzzles_config = self.config_loader.load_all()
+        global_config, channels_config, puzzles_config = config_loader.load_all()
         modlog_channel = channels_config.get_linked_modlog(provocation.chat_id)
 
         if not modlog_channel:

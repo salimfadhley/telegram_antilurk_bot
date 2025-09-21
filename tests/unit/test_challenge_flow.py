@@ -371,7 +371,9 @@ class TestChallengeIntegration:
                 CallbackHandler=Mock(),
                 ModlogNotifier=Mock()
             ) as mocks:
-                mock_notifier = mocks['ModlogNotifier'].return_value
+                # Access patched class via module to avoid patch.multiple return dict nuances
+                from telegram_antilurk_bot.challenges import challenge_engine as _ce
+                mock_notifier = _ce.ModlogNotifier
 
                 # Start challenge
                 challenge_id = await engine.start_challenge(chat_id, user)
@@ -381,7 +383,7 @@ class TestChallengeIntegration:
                 assert success is True  # Handler executed successfully
 
                 # Should trigger modlog notification
-                mock_notifier.schedule_kick_notification.assert_called_once_with(challenge_id)
+                mock_notifier.return_value.schedule_kick_notification.assert_called_once_with(challenge_id)
 
     @pytest.mark.asyncio
     async def test_challenge_timeout_handling(self, temp_config_dir: Path) -> None:
@@ -402,8 +404,9 @@ class TestChallengeIntegration:
                 ProvocationTracker=Mock(),
                 ModlogNotifier=Mock()
             ) as mocks:
-                mock_tracker = mocks['ProvocationTracker'].return_value
-                mock_notifier = mocks['ModlogNotifier'].return_value
+                from telegram_antilurk_bot.challenges import challenge_engine as _ce
+                mock_tracker = _ce.ProvocationTracker.return_value
+                mock_notifier = _ce.ModlogNotifier.return_value
 
                 # Mock expiration check
                 mock_tracker.is_provocation_expired.return_value = True
