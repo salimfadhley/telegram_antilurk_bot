@@ -114,7 +114,9 @@ community stays engaged and admins stay informed.
 6. Given the bot is invited to a new Telegram chat, when it joins, then it
    posts a welcome message with inline buttons to select a mode (`moderated` or
    `modlog`) and also mentions the root command `/antlurk mode <moderated|modlog>`;
-   if no selection is made, it defaults to `moderated`.
+   additionally, when a user runs `/start` in a chat where the bot is present,
+   it MUST present the same welcome message with inline mode selection. If no
+   selection is made, it defaults to `moderated`.
 7. Given an admin sets a chat to `moderated` mode and no modlog link exists,
    when the admin runs `/antlurk mode moderated`, then the bot generates and
    posts a linking message in that chat (containing a unique code) instructing
@@ -142,6 +144,9 @@ community stays engaged and admins stay informed.
     same inline mode selection buttons so the admin can quickly switch modes; if
     the admin runs `/antlurk mode moderated` or `/antlurk mode modlog`, the bot
     switches immediately without showing the button.
+13. Given a user runs `/start` in a chat where the bot is a member, then the
+    bot MUST present the same inline mode selection welcome message as when it
+    is first added to a chat.
 12. Given an admin wants activity insights, when they run
     `/antlurk report active [--days 7|30|N] [--limit M]` in a moderated
     channel, then the bot returns the most active users within the time window,
@@ -237,6 +242,8 @@ community stays engaged and admins stay informed.
  - **FR-006a**: MUST provide a help command `/antlurk help` accessible in both
   moderated and modlog chats that lists available commands, required roles, and
   where each command can be used.
+ - **FR-006b**: MUST provide a `/start` command that displays the welcome
+  message and inline mode selection in any chat where the bot is present.
 - **FR-007**: MUST support sending prompts and notifications at any time (no
   quiet hours) and provide a dry‑run mode for bulk operations.
 - **FR-008**: MUST maintain audit logs of actions (challenge, acknowledge,

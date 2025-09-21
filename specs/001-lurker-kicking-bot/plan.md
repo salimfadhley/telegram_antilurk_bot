@@ -19,7 +19,7 @@ This plan outlines the phases to deliver the Telegram anti‑lurk bot (moderated
 
 ## Phase 3 — Telegram Bot Core
 - Env + startup: validate `TELEGRAM_TOKEN`, `DATABASE_URL`; connect DB; load configs; post “bot is live” to modlogs.
-- Modes: `/antlurk mode` (buttons) and `/antlurk mode moderated|modlog` (direct set).
+- Modes: `/antlurk mode` (buttons) and `/antlurk mode moderated|modlog` (direct set). `/start` also triggers the same welcome/mode-selection UI.
 - Linking: forward‑code handshake (generate link message in moderated; forward to modlog; 10‑min TTL; auto‑delete; persist link to `channels.yaml`).
 - Help: `/antlurk help` lists commands, roles, and where they apply.
  - Tests: unit tests for command parsing; integration tests for mode change flows (mocks/stubs for Telegram API).

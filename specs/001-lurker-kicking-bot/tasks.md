@@ -71,6 +71,8 @@ This is a granular task list derived from the implementation plan. Use it to tra
 - [ ] `/antlurk report active|inactive|lurkers [--days N] [--limit M]` — only moderated chats.
 - [ ] `/antlurk reboot` — post shutdown notice; persist state; exit 0.
 
+- [x] `/start` command — show the same welcome with inline mode selection.
+
 ## Phase 9 — Deployment & Ops
 - [ ] Provide Portainer stack (deploy/portainer-stack.yaml) + `.env.example`.
 - [ ] README: envs, Portainer mapping, config edit/reboot flow, checksum warnings, limits behavior.
@@ -85,4 +87,3 @@ This is a granular task list derived from the implementation plan. Use it to tra
 - [ ] Message and provocation logs populate DB; `user_channel_activity` view returns expected aggregates.
 - [ ] Admin commands function and enforce chat/role constraints.
 - [ ] Startup/shutdown notices delivered to modlog chats.
-

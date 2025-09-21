@@ -43,6 +43,9 @@ class BotApplication:
         # Primary command dispatcher: /antlurk [subcommand]
         app.add_handler(CommandHandler("antlurk", self._dispatch_antlurk))
 
+        # Onboarding shortcut: /start shows the same mode selection welcome
+        app.add_handler(CommandHandler("start", self._start_command))
+
         # Forwarded code handler to link moderated ↔ modlog chats
         app.add_handler(MessageHandler(filters.FORWARDED & filters.TEXT, self.telegram_bot.handle_forwarded_message))
 
@@ -128,3 +131,8 @@ class BotApplication:
             logger.info("Welcome message sent", chat_id=chat_id)
         except Exception as e:
             logger.error("Failed to send welcome message", chat_id=chat_id, error=str(e))
+
+    async def _start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """Handle /start by presenting the mode selection welcome message."""
+        # Reuse the same UI we show on onboarding and `/antlurk` with no args
+        await self.telegram_bot._send_mode_selection_buttons(update, context)
