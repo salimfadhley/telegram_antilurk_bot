@@ -49,16 +49,23 @@ class Puzzle(BaseModel):
     id: str
     type: str = Field(..., pattern="^(arithmetic|common_sense)$")
     question: str
-    choices: list[PuzzleChoice] = Field(..., min_length=3, max_length=4)
+    choices: list[str] = Field(..., min_length=3, max_length=4)
 
     @field_validator('choices')
     @classmethod
-    def validate_choices(cls, v: list[PuzzleChoice]) -> list[PuzzleChoice]:
-        """Ensure exactly one correct choice."""
-        correct_count = sum(1 for choice in v if choice.is_correct)
-        if correct_count != 1:
-            raise ValueError(f"Exactly one correct choice required, found {correct_count}")
+    def validate_choices(cls, v: list[str]) -> list[str]:
+        """Validate that there are enough choices."""
+        if len(v) < 3:
+            raise ValueError(f"At least 3 choices required, found {len(v)}")
         return v
+
+    def get_correct_answer(self) -> str:
+        """Get the correct answer (always the first choice)."""
+        return self.choices[0]
+
+    def get_wrong_answers(self) -> list[str]:
+        """Get the wrong answers (all choices except the first)."""
+        return self.choices[1:]
 
 
 class ChannelOverride(BaseModel):

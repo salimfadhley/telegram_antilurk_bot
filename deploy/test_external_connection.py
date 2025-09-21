@@ -3,6 +3,7 @@
 
 import os
 import sys
+
 from sqlalchemy import create_engine, text
 
 
@@ -14,18 +15,18 @@ def test_connection(db_url: str) -> bool:
         engine = create_engine(db_url)
         with engine.connect() as conn:
             result = conn.execute(text("SELECT version()")).first()
-            print(f"✅ Connection successful!")
+            print("✅ Connection successful!")
             print(f"   PostgreSQL version: {result[0]}")
 
             # Test basic operations
             conn.execute(text("SELECT 1 + 1 as test")).first()
-            print(f"   ✅ Basic queries working")
+            print("   ✅ Basic queries working")
 
             # Test database permissions
             try:
                 conn.execute(text("CREATE TEMP TABLE test_permissions (id int)"))
                 conn.execute(text("DROP TABLE test_permissions"))
-                print(f"   ✅ Table creation/deletion permissions working")
+                print("   ✅ Table creation/deletion permissions working")
             except Exception as e:
                 print(f"   ⚠️  Limited permissions: {e}")
 
@@ -108,7 +109,7 @@ def main():
         print("   4. Restart PostgreSQL service")
         sys.exit(1)
     else:
-        print(f"\n✅ External connectivity verified!")
+        print("\n✅ External connectivity verified!")
 
 
 if __name__ == "__main__":

@@ -200,7 +200,7 @@ class TestUserTracker:
 
         # First message
         first_timestamp = datetime.utcnow() - timedelta(hours=1)
-        user1 = await tracker.update_user_activity(
+        await tracker.update_user_activity(
             user_id=67890,
             chat_id=-1001234567890,
             timestamp=first_timestamp

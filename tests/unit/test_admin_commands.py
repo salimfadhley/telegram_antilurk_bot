@@ -545,7 +545,7 @@ class TestRebootCommand:
 
         with patch('telegram_antilurk_bot.admin.reboot_command.ConfigLoader') as mock_config:
             with patch('telegram_antilurk_bot.admin.reboot_command.Application') as mock_app:
-                with patch('telegram_antilurk_bot.admin.reboot_command.sys.exit') as mock_exit:
+                with patch('telegram_antilurk_bot.admin.reboot_command.sys.exit'):
                     mock_config_instance = Mock()
                     mock_config.return_value = mock_config_instance
                     mock_channels_config = Mock()

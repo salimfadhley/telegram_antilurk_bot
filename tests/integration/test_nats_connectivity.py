@@ -153,7 +153,7 @@ class TestNATSConnectivity:
             sock.connect((host, port))
 
             # Read INFO and send CONNECT
-            info_data = sock.recv(4096)
+            _ = sock.recv(4096)
             connect_msg = json.dumps({
                 "verbose": False,
                 "name": "antilurk_bot_integration_test",
@@ -206,7 +206,7 @@ class TestNATSConnectivity:
             sock.connect((host, port))
 
             # Read INFO and send CONNECT
-            info_data = sock.recv(4096)
+            _ = sock.recv(4096)
             connect_msg = json.dumps({
                 "verbose": False,
                 "name": "antilurk_bot_sub_test",
@@ -350,7 +350,7 @@ class TestNATSIntegration:
             sock.connect((host, port))
 
             # Read INFO and connect
-            info_data = sock.recv(4096)
+            _ = sock.recv(4096)
             connect_msg = json.dumps({"verbose": False, "name": "antilurk_subjects_test"})
             sock.send(f"CONNECT {connect_msg}\r\n".encode())
 

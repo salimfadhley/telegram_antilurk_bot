@@ -139,7 +139,6 @@ class TestPhase9Validation:
 
     async def test_rate_limiting_workflow(self, mock_config_loader: ConfigLoader) -> None:
         """Test rate limiting behavior simulation."""
-        chat_id = -1001234567890
         global_config, _, _ = mock_config_loader.load_all()
 
         # Verify rate limiting configuration

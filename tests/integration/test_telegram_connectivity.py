@@ -139,7 +139,7 @@ class TestTelegramBotAPI:
         async with aiohttp.ClientSession() as session:
             responses = []
 
-            for i in range(3):  # Conservative test - just 3 requests
+            for _ in range(3):  # Conservative test - just 3 requests
                 async with session.get(url, timeout=aiohttp.ClientTimeout(total=5)) as response:
                     responses.append(response.status)
 

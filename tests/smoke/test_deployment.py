@@ -129,13 +129,6 @@ class TestEnvironmentValidation:
         """Should validate Telegram token format."""
         # Valid format: bot_id:secret_key
         valid_token = "123456789:ABCdefGhIJKlmNoPQRstuVwxyZ-1234567890"
-        invalid_tokens = [
-            "",
-            "invalid",
-            "123456789",  # Missing secret
-            ":ABCdefGhI",  # Missing bot ID
-            "not-a-number:secret"  # Invalid bot ID
-        ]
 
         # This would be tested in the actual application
         # Here we just document the expected format
@@ -150,13 +143,6 @@ class TestEnvironmentValidation:
             "postgresql://user:pass@host:5432/db",
             "postgres://user:pass@host:5432/db",
             "postgresql://user:pass@host/db",  # Default port
-        ]
-
-        invalid_urls = [
-            "",
-            "invalid",
-            "mysql://user:pass@host/db",  # Wrong engine
-            "postgresql://host/db",  # Missing credentials
         ]
 
         for url in valid_urls:
@@ -175,7 +161,7 @@ class TestEnvironmentValidation:
 
         # These would be tested in the actual configuration loading
         # Here we just document expected behavior
-        for var, default in defaults.items():
+        for _var, default in defaults.items():
             assert default is not None
             assert isinstance(default, str)
             assert len(default) > 0

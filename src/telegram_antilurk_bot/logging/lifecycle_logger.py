@@ -1,6 +1,6 @@
 """Complete lifecycle logger for provocation events."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import structlog
@@ -57,7 +57,7 @@ class LifecycleLogger:
             'event': 'modlog_notified',
             'provocation_id': provocation_id,
             'modlog_chat_id': modlog_chat_id,
-            'timestamp': datetime.now(datetime.UTC)
+            'timestamp': datetime.now(timezone.utc)
         }
 
         self._additional_events.append(event)
@@ -76,7 +76,7 @@ class LifecycleLogger:
     ) -> None:
         """Log when admin confirms manual kick."""
         if confirmation_timestamp is None:
-            confirmation_timestamp = datetime.now(datetime.UTC)
+            confirmation_timestamp = datetime.now(timezone.utc)
 
         event = {
             'event': 'kick_confirmed',
@@ -105,7 +105,7 @@ class LifecycleLogger:
             'provocation_id': provocation_id,
             'admin_user_id': admin_user_id,
             'dismissal_reason': dismissal_reason,
-            'timestamp': datetime.now(datetime.UTC)
+            'timestamp': datetime.now(timezone.utc)
         }
 
         self._additional_events.append(event)

@@ -39,7 +39,7 @@ class ChallengeComposer:
         keyboard_buttons = []
         for i, choice in enumerate(choices):
             button = InlineKeyboardButton(
-                text=choice.text,
+                text=choice,
                 callback_data=f"provocation_{{provocation_id}}_choice_{i}"
             )
             keyboard_buttons.append([button])

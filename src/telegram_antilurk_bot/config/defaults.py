@@ -1,7 +1,7 @@
 """Default puzzles for the bot."""
 
 
-from .schemas import Puzzle, PuzzleChoice
+from .schemas import Puzzle
 
 
 def get_default_puzzles() -> list[Puzzle]:
@@ -615,15 +615,15 @@ def get_default_puzzles() -> list[Puzzle]:
     ]
 
     for i, (question, choices_text, correct_idx) in enumerate(data):
-        choices = [
-            PuzzleChoice(text=text, is_correct=(j == correct_idx))
-            for j, text in enumerate(choices_text)
+        # Reorder choices so correct answer is first
+        reordered_choices = [choices_text[correct_idx]] + [
+            choice for j, choice in enumerate(choices_text) if j != correct_idx
         ]
         puzzles.append(Puzzle(
             id=f"common_{i+1:03d}",
             type="common_sense",
             question=question,
-            choices=choices
+            choices=reordered_choices
         ))
 
     # If fewer than 100 were defined, duplicate varied items with minor indexing
