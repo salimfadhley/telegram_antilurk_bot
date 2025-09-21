@@ -65,6 +65,13 @@ class UserTracker:
         """Get user by ID."""
         return self._users.get(user_id)
 
+    async def get_user_by_username(self, username: str) -> User | None:
+        """Get user by username."""
+        for user in self._users.values():
+            if user.username and user.username.lower() == username.lower():
+                return user
+        return None
+
     async def get_users_by_activity(
         self,
         chat_id: int,
