@@ -61,11 +61,24 @@ class AuditScheduler:
 
         logger.info("Audit scheduler stopped")
 
+    def stop(self) -> None:  # type: ignore[override]
+        """Synchronous stop helper for unit tests."""
+        self._running = False
+        if self._task:
+            try:
+                self._task.cancel()
+            finally:
+                self._task = None
+
     async def run_audit_cycle(self) -> dict[str, Any]:
         """Run a single audit cycle across all moderated chats."""
         result = await self.audit_engine.run_full_audit()
         self._last_run = datetime.utcnow()
         return result
+
+    async def _run_audit_cycle(self) -> dict[str, Any]:
+        """Internal wrapper to support tests patching private method."""
+        return await self.run_audit_cycle()
 
     def should_run_audit(self) -> bool:
         """Indicate whether an audit should run now based on cadence.

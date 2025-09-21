@@ -144,7 +144,15 @@ class TestCallbackHandler:
         """Should handle correct answer callback and update provocation status."""
         from telegram_antilurk_bot.challenges.callback_handler import CallbackHandler
 
-        handler = CallbackHandler()
+        # Create mocked dependencies
+        mock_tracker = AsyncMock()
+        mock_notifier = AsyncMock()
+
+        # Mock correct answer flow
+        mock_tracker.validate_callback.return_value = True
+        mock_tracker.is_correct_choice.return_value = True
+
+        handler = CallbackHandler(tracker=mock_tracker, notifier=mock_notifier)
         callback_data = "provocation_123_choice_1"  # Format: provocation_{id}_choice_{index}
 
         mock_update = Mock()
@@ -152,21 +160,15 @@ class TestCallbackHandler:
         mock_update.callback_query.from_user.id = 12345
         mock_update.effective_chat.id = -1001234567890
         mock_update.callback_query.message.message_id = 67890
+        mock_update.callback_query.message.edit_text = AsyncMock()
+        mock_update.callback_query.answer = AsyncMock()
 
         mock_context = Mock()
 
-        with patch('telegram_antilurk_bot.challenges.callback_handler.ProvocationTracker') as mock_tracker:
-            mock_tracker_instance = AsyncMock()
-            mock_tracker.return_value = mock_tracker_instance
+        result = await handler.handle_callback(mock_update, mock_context)
 
-            # Mock correct answer
-            mock_tracker_instance.validate_callback.return_value = True
-            mock_tracker_instance.is_correct_choice.return_value = True
-
-            result = await handler.handle_callback(mock_update, mock_context)
-
-            assert result is True
-            mock_tracker_instance.update_provocation_status.assert_called_once_with(
+        assert result is True
+        mock_tracker.update_provocation_status.assert_called_once_with(
                 123, "completed", response_user_id=12345
             )
 
@@ -182,6 +184,7 @@ class TestCallbackHandler:
         mock_update.callback_query.data = callback_data
         mock_update.callback_query.from_user.id = 12345
         mock_update.effective_chat.id = -1001234567890
+        mock_update.callback_query.answer = AsyncMock()
 
         mock_context = Mock()
 
@@ -215,6 +218,7 @@ class TestCallbackHandler:
         mock_update = Mock()
         mock_update.callback_query.data = callback_data
         mock_update.callback_query.from_user.id = 99999  # Different user
+        mock_update.callback_query.answer = AsyncMock()
 
         mock_context = Mock()
 

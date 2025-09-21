@@ -15,10 +15,10 @@ logger = structlog.get_logger(__name__)
 class CallbackHandler:
     """Handles inline keyboard button callbacks for challenges."""
 
-    def __init__(self) -> None:
+    def __init__(self, tracker: ProvocationTracker | None = None, notifier: ModlogNotifier | None = None) -> None:
         """Initialize callback handler."""
-        self.tracker = ProvocationTracker()
-        self.notifier = ModlogNotifier()
+        self.tracker = tracker or ProvocationTracker()
+        self.notifier = notifier or ModlogNotifier()
 
     async def handle_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
         """Handle callback query from inline keyboard button."""
