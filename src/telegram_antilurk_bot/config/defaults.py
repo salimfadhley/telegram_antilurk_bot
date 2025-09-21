@@ -73,7 +73,7 @@ def get_default_puzzles() -> list[Puzzle]:
             0,
         ),
         (
-            "Who does Mind of Steele roast for claiming nicotine isn't addictive?",
+            "Who claimed nicotine isn't addictive?",
             ["Bryan Ardis", "Andrew Wakefield", "David Icke", "Sasha Stone"],
             0,
         ),
@@ -123,7 +123,7 @@ def get_default_puzzles() -> list[Puzzle]:
             0,
         ),
         (
-            "Mind of Steele lampoons which claim about 5G streetlights?",
+            "Which claim about 5G streetlights do conspiracy influencers promote?",
             ["They are secret energy weapons", "They harvest rainwater", "They detect flat tyres", "They contain petrol"],
             0,
         ),
@@ -258,8 +258,8 @@ def get_default_puzzles() -> list[Puzzle]:
             0,
         ),
         (
-            "What community does Mind of Steele satirize most?",
-            ["UK conspiracy and sov-cit scene", "Professional chess players", "Canal restoration clubs", "Railway timetabling fans"],
+            "What do UK conspiracy activists often claim about recent persistent fog?",
+            ["It contains harmful chemicals or 'nanobots'", "It's cold soot from vintage planes", "It's harmless water droplets", "It's invisible 7G foam"],
             0,
         ),
         (
@@ -278,8 +278,8 @@ def get_default_puzzles() -> list[Puzzle]:
             0,
         ),
         (
-            "Vobes's business model is compared to what?",
-            ["A QVC for scams", "A university seminar", "A parish council", "An MOT test lane"],
+            "What do product promoters on conspiracy shows often do during interviews?",
+            ["Flog unproven products to the audience", "Provide balanced technical briefings", "Discourage purchases as unsafe", "Offer free MOT vouchers"],
             0,
         ),
         (
@@ -318,7 +318,7 @@ def get_default_puzzles() -> list[Puzzle]:
             0,
         ),
         (
-            "Mind of Steele highlights what pattern in Vobes's guests?",
+            "What pattern is seen among product‑promoting guests on Richard Vobes's channel?",
             ["Charlatans flogging products", "Qualified experts only", "Neutral historians", "Meteorologists debating weather"],
             0,
         ),
@@ -438,8 +438,8 @@ def get_default_puzzles() -> list[Puzzle]:
             0,
         ),
         (
-            "Why does Mind of Steele harp on 'basic science'?",
-            ["It punctures elaborate myths", "It's entertaining trivia", "It flatters insiders", "It avoids ethics"],
+            "How do conspiracy promoters often react when basic science contradicts them?",
+            ["Dismiss it as part of the cover‑up", "Submit to peer review", "Immediately retract the claim", "Report themselves to trading standards"],
             0,
         ),
         (
@@ -603,7 +603,7 @@ def get_default_puzzles() -> list[Puzzle]:
             0,
         ),
         (
-            "How does Mind of Steele suggest you spot a grift?",
+            "What's a reliable sign you're looking at a grift?",
             ["Big promises, no mechanism", "Short videos only", "Too many footnotes", "Refusing interviews"],
             0,
         ),

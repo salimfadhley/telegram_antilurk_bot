@@ -1,7 +1,7 @@
 """Database session management."""
 
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 
 # Placeholder database session for Phase 4

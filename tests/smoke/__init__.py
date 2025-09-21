@@ -1,0 +1,1 @@
+"""Smoke tests for deployment and basic functionality validation."""

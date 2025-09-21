@@ -1,0 +1,1 @@
+"""Core bot application components."""
