@@ -7,10 +7,13 @@ Tests connectivity to actual external services: PostgreSQL, NATS, Telegram API.
 import os
 
 import pytest
-import aiohttp
 from sqlalchemy import create_engine, text
+from dotenv import load_dotenv
 
 from telegram_antilurk_bot.database.session import get_engine
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 class TestEnvironmentVariables:
@@ -165,77 +168,7 @@ class TestPostgreSQLConnectivity:
 # NATS connectivity tests have been moved to tests/integration/test_nats_connectivity.py
 
 
-class TestTelegramBotAPI:
-    """Test Telegram Bot API connectivity and token validation."""
-
-    @pytest.mark.asyncio
-    async def test_telegram_bot_token_validation(self) -> None:
-        """Test Telegram bot token by calling getMe API."""
-        token = os.environ.get("TELEGRAM_TOKEN")
-        if not token:
-            pytest.skip("TELEGRAM_TOKEN not set; skipping Telegram API test")
-
-        if "test" in token.lower() or len(token) < 30:
-            pytest.skip("TELEGRAM_TOKEN appears to be a test token")
-
-        try:
-            url = f"https://api.telegram.org/bot{token}/getMe"
-
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
-                    if response.status == 401:
-                        pytest.fail("Telegram bot token is invalid (401 Unauthorized)")
-                    elif response.status == 404:
-                        pytest.fail("Telegram bot token format is incorrect (404 Not Found)")
-                    elif response.status != 200:
-                        pytest.skip(f"Telegram API returned status {response.status}")
-
-                    data = await response.json()
-
-                    if not data.get("ok"):
-                        pytest.fail(f"Telegram API error: {data.get('description', 'Unknown error')}")
-
-                    bot_info = data.get("result", {})
-                    print(f"✅ Bot name: {bot_info.get('first_name', 'Unknown')}")
-                    print(f"✅ Bot username: @{bot_info.get('username', 'unknown')}")
-                    print(f"✅ Bot ID: {bot_info.get('id', 'unknown')}")
-                    print(f"✅ Can join groups: {bot_info.get('can_join_groups', False)}")
-                    print(f"✅ Can read all messages: {bot_info.get('can_read_all_group_messages', False)}")
-
-        except aiohttp.ClientError as e:
-            pytest.skip(f"Network error connecting to Telegram API: {e}")
-        except Exception as e:
-            pytest.skip(f"Telegram API test failed: {e}")
-
-    @pytest.mark.asyncio
-    async def test_telegram_webhook_info(self) -> None:
-        """Test getting webhook information."""
-        token = os.environ.get("TELEGRAM_TOKEN")
-        if not token or "test" in token.lower():
-            pytest.skip("No valid TELEGRAM_TOKEN for webhook test")
-
-        try:
-            url = f"https://api.telegram.org/bot{token}/getWebhookInfo"
-
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
-                    if response.status != 200:
-                        pytest.skip(f"Telegram webhook API returned status {response.status}")
-
-                    data = await response.json()
-
-                    if data.get("ok"):
-                        webhook_info = data.get("result", {})
-                        webhook_url = webhook_info.get("url", "")
-
-                        if webhook_url:
-                            print(f"ℹ️  Webhook URL: {webhook_url}")
-                            print(f"ℹ️  Pending updates: {webhook_info.get('pending_update_count', 0)}")
-                        else:
-                            print("ℹ️  No webhook configured (polling mode)")
-
-        except Exception as e:
-            print(f"ℹ️  Webhook info check failed (non-critical): {e}")
+# Telegram connectivity tests have been moved to tests/integration/test_telegram_connectivity.py
 
 
 class TestServiceIntegration:

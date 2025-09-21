@@ -9,8 +9,12 @@ import os
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from sqlalchemy import text
+from dotenv import load_dotenv
 
 from telegram_antilurk_bot.database.session import get_engine
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 @pytest.mark.integration
