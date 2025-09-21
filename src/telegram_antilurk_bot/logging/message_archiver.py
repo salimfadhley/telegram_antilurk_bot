@@ -15,10 +15,10 @@ logger = structlog.get_logger(__name__)
 class MessageArchiver:
     """Archives messages from moderated chats to the database."""
 
-    def __init__(self, config_loader: ConfigLoader | None = None) -> None:
+    def __init__(self, config_loader: ConfigLoader | None = None, user_tracker: UserTracker | None = None) -> None:
         """Initialize message archiver."""
         self.config_loader = config_loader or ConfigLoader()
-        self.user_tracker = UserTracker()
+        self.user_tracker = user_tracker or UserTracker()
         # In-memory storage for Phase 6 - will be replaced with database in Phase 2
         self._message_archive: list[MessageArchive] = []
         self._next_archive_id = 1

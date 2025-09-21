@@ -46,3 +46,15 @@ class LurkerSelector:
 
         logger.info("Selected lurkers for all chats", total_chats=len(result))
         return result
+
+    def is_lurker(self, user: User, days_threshold: int | None = None) -> bool:
+        """Determine if a user is considered a lurker.
+
+        A user is a lurker if their last_message_at is None or older than
+        the configured threshold (in days).
+        """
+        threshold_days = days_threshold or self.global_config.lurk_threshold_days
+        cutoff_date = datetime.utcnow() - timedelta(days=threshold_days)
+        if user.last_message_at is None:
+            return True
+        return user.last_message_at < cutoff_date

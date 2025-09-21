@@ -57,7 +57,7 @@ class LifecycleLogger:
             'event': 'modlog_notified',
             'provocation_id': provocation_id,
             'modlog_chat_id': modlog_chat_id,
-            'timestamp': datetime.now(datetime.UTC)  # type: ignore[attr-defined]
+            'timestamp': datetime.utcnow()
         }
 
         self._additional_events.append(event)
@@ -76,7 +76,7 @@ class LifecycleLogger:
     ) -> None:
         """Log when admin confirms manual kick."""
         if confirmation_timestamp is None:
-            confirmation_timestamp = datetime.now(datetime.UTC)  # type: ignore[attr-defined]
+            confirmation_timestamp = datetime.utcnow()
 
         event = {
             'event': 'kick_confirmed',
@@ -105,7 +105,7 @@ class LifecycleLogger:
             'provocation_id': provocation_id,
             'admin_user_id': admin_user_id,
             'dismissal_reason': dismissal_reason,
-            'timestamp': datetime.now(datetime.UTC)  # type: ignore[attr-defined]
+            'timestamp': datetime.utcnow()
         }
 
         self._additional_events.append(event)

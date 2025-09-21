@@ -52,13 +52,25 @@ class TestMessageArchiver:
         """Should handle various message types (photo, sticker, etc.)."""
         from telegram_antilurk_bot.logging.message_archiver import MessageArchiver
 
-        archiver = MessageArchiver()
+        # Mock configuration
+        mock_config_loader = Mock()
+        mock_channels_config = Mock()
+        mock_channel_entry = Mock()
+        mock_channel_entry.chat_id = -1001234567890
+        mock_channels_config.get_moderated_channels.return_value = [mock_channel_entry]
+        mock_config_loader.load_all.return_value = (Mock(), mock_channels_config, Mock())
+
+        # Mock user tracker
+        mock_user_tracker = AsyncMock()
+
+        archiver = MessageArchiver(config_loader=mock_config_loader, user_tracker=mock_user_tracker)
 
         # Test photo message
         mock_photo_update = Mock()
         mock_photo_update.message.message_id = 11111
         mock_photo_update.message.chat.id = -1001234567890
         mock_photo_update.message.from_user.id = 67890
+        mock_photo_update.message.from_user.is_bot = False
         mock_photo_update.message.text = None
         mock_photo_update.message.photo = [Mock()]
         mock_photo_update.message.caption = "Photo caption"
@@ -66,6 +78,7 @@ class TestMessageArchiver:
 
         photo_archive = await archiver.archive_message(mock_photo_update)
 
+        assert photo_archive is not None
         assert photo_archive.message_type == "photo"
         assert photo_archive.message_text == "Photo caption"
 
@@ -74,6 +87,7 @@ class TestMessageArchiver:
         mock_sticker_update.message.message_id = 22222
         mock_sticker_update.message.chat.id = -1001234567890
         mock_sticker_update.message.from_user.id = 67890
+        mock_sticker_update.message.from_user.is_bot = False
         mock_sticker_update.message.text = None
         mock_sticker_update.message.photo = None
         mock_sticker_update.message.sticker = Mock()
@@ -82,6 +96,7 @@ class TestMessageArchiver:
 
         sticker_archive = await archiver.archive_message(mock_sticker_update)
 
+        assert sticker_archive is not None
         assert sticker_archive.message_type == "sticker"
         assert sticker_archive.message_text == "😀"
 
@@ -90,27 +105,36 @@ class TestMessageArchiver:
         """Should update user's last interaction timestamp when archiving."""
         from telegram_antilurk_bot.logging.message_archiver import MessageArchiver
 
-        archiver = MessageArchiver()
+        # Mock configuration
+        mock_config_loader = Mock()
+        mock_channels_config = Mock()
+        mock_channel_entry = Mock()
+        mock_channel_entry.chat_id = -1001234567890
+        mock_channels_config.get_moderated_channels.return_value = [mock_channel_entry]
+        mock_config_loader.load_all.return_value = (Mock(), mock_channels_config, Mock())
+
+        # Mock user tracker
+        mock_user_tracker = AsyncMock()
+
+        archiver = MessageArchiver(config_loader=mock_config_loader, user_tracker=mock_user_tracker)
 
         mock_update = Mock()
         mock_update.message.message_id = 33333
         mock_update.message.chat.id = -1001234567890
         mock_update.message.from_user.id = 67890
+        mock_update.message.from_user.is_bot = False
         mock_update.message.text = "Activity message"
         mock_update.message.date = datetime.utcnow()
 
-        with patch('telegram_antilurk_bot.logging.message_archiver.UserTracker') as mock_tracker:
-            mock_tracker_instance = AsyncMock()
-            mock_tracker.return_value = mock_tracker_instance
+        await archiver.archive_message(mock_update)
 
-            await archiver.archive_message(mock_update)
-
-            # Should update user's last interaction
-            mock_tracker_instance.update_user_activity.assert_called_once_with(
-                user_id=67890,
-                chat_id=-1001234567890,
-                timestamp=mock_update.message.date
-            )
+        # Should update user's last interaction
+        mock_user_tracker.update_user_activity.assert_called_once_with(
+            user_id=67890,
+            chat_id=-1001234567890,
+            timestamp=mock_update.message.date,
+            telegram_user=mock_update.message.from_user
+        )
 
     @pytest.mark.asyncio
     async def test_ignores_bot_messages(self, temp_config_dir: Path) -> None:
@@ -358,29 +382,33 @@ class TestNATSEventPublisher:
                 'timestamp': datetime.utcnow().isoformat()
             }
 
-            with patch('telegram_antilurk_bot.logging.nats_publisher.nats') as mock_nats:
+            with patch('nats.connect') as mock_connect:
                 mock_client = AsyncMock()
-                mock_nats.connect.return_value = mock_client
+                mock_connect.return_value = mock_client
 
-                await publisher.publish_event('antilurk.challenge.failed', event_data)
+                result = await publisher.publish_event('challenge.failed', event_data)
 
-                mock_nats.connect.assert_called_once_with('nats://localhost:4222')
+                assert result is True
+                mock_connect.assert_called_once_with('nats://localhost:4222')
                 mock_client.publish.assert_called_once()
+                mock_client.close.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_skips_publishing_when_nats_disabled(self, temp_config_dir: Path) -> None:
         """Should skip publishing when NATS_URL is not configured."""
         from telegram_antilurk_bot.logging.nats_publisher import NATSEventPublisher
 
-        # No NATS_URL environment variable
-        publisher = NATSEventPublisher()
+        # Ensure no NATS_URL environment variable
+        with patch.dict('os.environ', {'NATS_URL': ''}, clear=True):
+            publisher = NATSEventPublisher()
 
-        event_data = {'test': 'data'}
+            event_data = {'test': 'data'}
 
-        # Should not attempt to connect to NATS
-        with patch('telegram_antilurk_bot.logging.nats_publisher.nats') as mock_nats:
-            await publisher.publish_event('test.subject', event_data)
-            mock_nats.connect.assert_not_called()
+            # Should not attempt to connect to NATS
+            with patch('nats.connect') as mock_connect:
+                result = await publisher.publish_event('test.subject', event_data)
+                assert result is False
+                mock_connect.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_handles_nats_connection_failures_gracefully(self, temp_config_dir: Path) -> None:
@@ -390,14 +418,12 @@ class TestNATSEventPublisher:
         with patch.dict('os.environ', {'NATS_URL': 'nats://invalid:4222'}):
             publisher = NATSEventPublisher()
 
-            with patch('telegram_antilurk_bot.logging.nats_publisher.nats') as mock_nats:
-                mock_nats.connect.side_effect = Exception("Connection failed")
+            with patch('nats.connect') as mock_connect:
+                mock_connect.side_effect = Exception("Connection failed")
 
-                # Should not raise exception
-                try:
-                    await publisher.publish_event('test.subject', {'test': 'data'})
-                except Exception:
-                    pytest.fail("Should handle NATS connection failures gracefully")
+                # Should not raise exception and should return False
+                result = await publisher.publish_event('test.subject', {'test': 'data'})
+                assert result is False
 
 
 class TestMessageLoggingIntegration:
@@ -408,7 +434,23 @@ class TestMessageLoggingIntegration:
         """Should handle complete message processing from ingestion to archiving."""
         from telegram_antilurk_bot.logging.message_processor import MessageProcessor
 
-        processor = MessageProcessor()
+        # Create mock components
+        mock_archiver = Mock()
+        mock_tracker = Mock()
+        mock_publisher = Mock()
+
+        mock_archived_message = Mock()
+        mock_archived_message.message_type = 'text'
+        mock_archiver.archive_message = AsyncMock(return_value=mock_archived_message)
+        mock_tracker.update_user_activity = AsyncMock(return_value=Mock())
+        mock_publisher.publish_event = AsyncMock()
+
+        # Create processor with mocked dependencies
+        processor = MessageProcessor(
+            archiver=mock_archiver,
+            user_tracker=mock_tracker,
+            nats_publisher=mock_publisher
+        )
 
         mock_update = Mock()
         mock_update.message.message_id = 99999
@@ -420,28 +462,14 @@ class TestMessageLoggingIntegration:
         mock_update.message.text = "Integration test message"
         mock_update.message.date = datetime.utcnow()
 
-        with patch.multiple(
-            'telegram_antilurk_bot.logging.message_processor',
-            MessageArchiver=Mock(),
-            UserTracker=Mock(),
-            NATSEventPublisher=Mock()
-        ) as mocks:
-            mock_archiver = mocks['MessageArchiver'].return_value
-            mock_tracker = mocks['UserTracker'].return_value
-            mock_publisher = mocks['NATSEventPublisher'].return_value
+        result = await processor.process_message(mock_update)
 
-            mock_archiver.archive_message = AsyncMock(return_value=Mock())
-            mock_tracker.update_user_activity = AsyncMock(return_value=Mock())
-            mock_publisher.publish_event = AsyncMock()
+        assert result is True
 
-            result = await processor.process_message(mock_update)
-
-            assert result is True
-
-            # All components should be called
-            mock_archiver.archive_message.assert_called_once_with(mock_update)
-            mock_tracker.update_user_activity.assert_called_once()
-            mock_publisher.publish_event.assert_called_once()
+        # All components should be called
+        mock_archiver.archive_message.assert_called_once_with(mock_update)
+        mock_tracker.update_user_activity.assert_called_once()
+        mock_publisher.publish_event.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_database_view_updates_with_message_activity(self, temp_config_dir: Path) -> None:

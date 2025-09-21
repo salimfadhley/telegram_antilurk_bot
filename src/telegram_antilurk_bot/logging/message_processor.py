@@ -15,11 +15,16 @@ logger = structlog.get_logger(__name__)
 class MessageProcessor:
     """Main processor for handling message logging workflow."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        archiver: MessageArchiver | None = None,
+        user_tracker: UserTracker | None = None,
+        nats_publisher: NATSEventPublisher | None = None
+    ) -> None:
         """Initialize message processor."""
-        self.archiver = MessageArchiver()
-        self.user_tracker = UserTracker()
-        self.nats_publisher = NATSEventPublisher()
+        self.archiver = archiver or MessageArchiver()
+        self.user_tracker = user_tracker or UserTracker()
+        self.nats_publisher = nats_publisher or NATSEventPublisher()
 
     async def process_message(self, update: Update) -> bool:
         """Process incoming message through all logging components."""

@@ -61,6 +61,26 @@ class UserTracker:
 
         return user
 
+    async def track_user_activity(
+        self,
+        user_id: int,
+        chat_id: int,
+        timestamp: datetime,
+        telegram_user: Any | None = None
+    ) -> User:
+        """Contract alias for updating user activity.
+
+        Maintains backwards-compatibility with tests expecting a
+        `track_user_activity` API while delegating to the main
+        `update_user_activity` implementation.
+        """
+        return await self.update_user_activity(
+            user_id=user_id,
+            chat_id=chat_id,
+            timestamp=timestamp,
+            telegram_user=telegram_user,
+        )
+
     async def get_user(self, user_id: int) -> User | None:
         """Get user by ID."""
         return self._users.get(user_id)

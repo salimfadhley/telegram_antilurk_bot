@@ -53,6 +53,31 @@ class RateLimiter:
 
         return can_provoke
 
+    async def can_send_provocation(self, chat_id: int) -> bool:
+        """Contract method: whether any provocation can be sent in this chat now."""
+        hourly_count = await self.get_current_hourly_count(chat_id)
+        daily_count = await self.get_current_daily_count(chat_id)
+        return hourly_count < self.hourly_limit and daily_count < self.daily_limit
+
+    async def record_provocation(self, chat_id: int, user_id: int) -> None:
+        """Record a provocation event for accounting purposes.
+
+        In this phase, persistence is not implemented; this is a no-op with logging
+        to satisfy the interface contract.
+        """
+        logger.info("Recorded provocation", chat_id=chat_id, user_id=user_id)
+
+    async def get_remaining_allowance(self, chat_id: int) -> dict[str, int]:
+        """Return remaining hourly and daily allowance for this chat."""
+        hourly_count = await self.get_current_hourly_count(chat_id)
+        daily_count = await self.get_current_daily_count(chat_id)
+        remaining_hourly = max(0, self.hourly_limit - hourly_count)
+        remaining_daily = max(0, self.daily_limit - daily_count)
+        return {
+            'hourly': remaining_hourly,
+            'daily': remaining_daily,
+        }
+
     async def filter_users_by_rate_limit(self, chat_id: int, users: list[User]) -> tuple[list[User], list[User]]:
         """Filter users based on rate limits, returning (allowed, blocked)."""
         allowed = []

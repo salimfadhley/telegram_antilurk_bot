@@ -17,6 +17,7 @@ class NATSEventPublisher:
         self.nats_url = os.environ.get('NATS_URL')
         self.subject_prefix = os.environ.get('NATS_SUBJECT_PREFIX', 'antilurk')
         self.enabled = bool(self.nats_url)
+        self._nc = None  # Lazy NATS connection (if available)
 
         if self.enabled:
             logger.info("NATS publishing enabled", nats_url=self.nats_url)
@@ -33,9 +34,13 @@ class NATSEventPublisher:
             # Import nats here to avoid dependency if not used
             import nats
 
-            # Connect to NATS
-            assert self.nats_url is not None  # mypy: we already checked self.enabled
-            nc = await nats.connect(self.nats_url)
+            # Use existing connection if present; else create a short-lived one
+            nc = self._nc
+            created_local_connection = False
+            if nc is None:
+                assert self.nats_url is not None
+                nc = await nats.connect(self.nats_url)
+                created_local_connection = True
 
             # Prepare subject with prefix
             full_subject = f"{self.subject_prefix}.{subject}"
@@ -45,7 +50,8 @@ class NATSEventPublisher:
 
             # Publish message
             await nc.publish(full_subject, message_data)
-            await nc.close()
+            if created_local_connection:
+                await nc.close()
 
             logger.info(
                 "Event published to NATS",
@@ -66,6 +72,30 @@ class NATSEventPublisher:
                 nats_url=self.nats_url
             )
             return False
+
+    async def connect(self) -> bool:
+        """Establish and retain a NATS connection if enabled."""
+        if not self.enabled:
+            return False
+        if self._nc is not None:
+            return True
+        try:
+            import nats
+            assert self.nats_url is not None
+            self._nc = await nats.connect(self.nats_url)
+            logger.info("Connected to NATS", nats_url=self.nats_url)
+            return True
+        except Exception as e:
+            logger.error("Failed to connect to NATS", error=str(e))
+            return False
+
+    async def close(self) -> None:
+        """Close any retained NATS connection."""
+        try:
+            if self._nc is not None:
+                await self._nc.close()
+        finally:
+            self._nc = None
 
     async def publish_challenge_failed(
         self,

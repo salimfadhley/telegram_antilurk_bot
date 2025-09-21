@@ -24,6 +24,7 @@ class AuditScheduler:
         self.audit_engine = AuditEngine()
         self._running = False
         self._task: asyncio.Task[None] | None = None
+        self._last_run: datetime | None = None
 
         logger.info(
             "AuditScheduler initialized",
@@ -57,7 +58,21 @@ class AuditScheduler:
 
     async def run_audit_cycle(self) -> dict[str, Any]:
         """Run a single audit cycle across all moderated chats."""
-        return await self.audit_engine.run_full_audit()
+        result = await self.audit_engine.run_full_audit()
+        self._last_run = datetime.utcnow()
+        return result
+
+    def should_run_audit(self) -> bool:
+        """Indicate whether an audit should run now based on cadence.
+
+        This lightweight check is used by contracts to verify the presence
+        of a scheduling decision method. It returns True if no audit has
+        ever run, or if the configured cadence interval has elapsed.
+        """
+        if self._last_run is None:
+            return True
+        elapsed = (datetime.utcnow() - self._last_run).total_seconds()
+        return elapsed >= self.audit_cadence_minutes * 60
 
     async def _run_scheduler(self) -> None:
         """Main scheduler loop."""

@@ -9,6 +9,7 @@
 
 ## Build, Test, and Development Commands
 - Run commands via Codex CLI: `/specify <feature>`, `/plan`, `/tasks`, `/implement`.
+- Run tests with uv: `uv run pytest <directory_or_file>` (e.g., `uv run pytest tests/contract`).
 - Direct scripts (from repo root):
   - `bash .specify/scripts/bash/create-new-feature.sh "My feature"`: Create `specs/NNN-slug/` and (if git) a branch.
   - `bash .specify/scripts/bash/setup-plan.sh [--json]`: Initialize `plan.md` for the current feature branch.
@@ -36,4 +37,3 @@
 - Scripts write under `/specs/` and expect a git repo; they gracefully degrade without git.
 - Review templates before bulk generation to ensure sensitive defaults aren’t propagated.
 - Keep `.specify/memory/constitution.md` aligned with templates; update together via the `/constitution` flow.
-
