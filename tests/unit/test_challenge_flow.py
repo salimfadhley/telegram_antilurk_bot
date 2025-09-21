@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from telegram import InlineKeyboardMarkup
 
-from telegram_antilurk_bot.config.schemas import Puzzle, PuzzleChoice
+from telegram_antilurk_bot.config.schemas import Puzzle
 from telegram_antilurk_bot.database.models import User
 
 
@@ -25,11 +25,7 @@ class TestChallengeComposer:
             id="test_puzzle_1",
             type="arithmetic",
             question="What is 2 + 2?",
-            choices=[
-                PuzzleChoice(text="3", is_correct=False),
-                PuzzleChoice(text="4", is_correct=True),
-                PuzzleChoice(text="5", is_correct=False)
-            ]
+            choices=["4", "3", "5"]  # First choice is correct
         )
         user = User(user_id=12345, username="testuser", first_name="Test")
 
@@ -60,11 +56,7 @@ class TestChallengeComposer:
             id="test_puzzle_2",
             type="common_sense",
             question="Which animal barks?",
-            choices=[
-                PuzzleChoice(text="Cat", is_correct=False),
-                PuzzleChoice(text="Dog", is_correct=True),
-                PuzzleChoice(text="Bird", is_correct=False)
-            ]
+            choices=["Dog", "Cat", "Bird"]  # First choice is correct
         )
         user = User(user_id=67890, username="lurker123")
         chat_id = -1001234567890

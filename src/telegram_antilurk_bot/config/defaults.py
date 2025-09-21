@@ -8,6 +8,43 @@ def get_default_puzzles() -> list[Puzzle]:
     """Generate 100 Mind of Steele-themed multiple-choice puzzles."""
     puzzles: list[Puzzle] = []
 
+    # Add some basic arithmetic puzzles first
+    arithmetic_data = [
+        ("What is 7 + 8?", ["15", "14", "16", "13"]),
+        ("What is 12 × 3?", ["36", "35", "39", "33"]),
+        ("What is 45 ÷ 9?", ["5", "4", "6", "7"]),
+        ("What is 23 - 8?", ["15", "14", "16", "17"]),
+        ("What is 6 × 7?", ["42", "41", "43", "40"]),
+        ("What is 81 ÷ 9?", ["9", "8", "10", "7"]),
+        ("What is 15 + 27?", ["42", "41", "43", "40"]),
+        ("What is 64 ÷ 8?", ["8", "7", "9", "6"]),
+        ("What is 9 × 4?", ["36", "35", "37", "34"]),
+        ("What is 56 - 19?", ["37", "36", "38", "35"]),
+        ("What is 13 + 29?", ["42", "41", "43", "40"]),
+        ("What is 72 ÷ 6?", ["12", "11", "13", "10"]),
+        ("What is 8 × 9?", ["72", "71", "73", "70"]),
+        ("What is 91 - 28?", ["63", "62", "64", "61"]),
+        ("What is 25 + 17?", ["42", "41", "43", "40"]),
+        ("What is 54 ÷ 6?", ["9", "8", "10", "7"]),
+        ("What is 7 × 8?", ["56", "55", "57", "54"]),
+        ("What is 83 - 26?", ["57", "56", "58", "55"]),
+        ("What is 19 + 24?", ["43", "42", "44", "41"]),
+        ("What is 48 ÷ 8?", ["6", "5", "7", "4"]),
+        ("What is 11 × 6?", ["66", "65", "67", "64"]),
+        ("What is 75 - 31?", ["44", "43", "45", "42"]),
+        ("What is 16 + 35?", ["51", "50", "52", "49"]),
+        ("What is 63 ÷ 7?", ["9", "8", "10", "7"]),
+        ("What is 5 × 12?", ["60", "59", "61", "58"]),
+    ]
+
+    for i, (question, choices) in enumerate(arithmetic_data):
+        puzzles.append(Puzzle(
+            id=f"arith_{i+1:03d}",
+            type="arithmetic",
+            question=question,
+            choices=choices  # First choice is correct
+        ))
+
     # All puzzles below are derived from themes, quotes, and satire found in the
     # Mind of Steele scripts under scripts/mind_of_steele_*.md (chemtrails/fog,
     # sovereign citizens, Vobesology, TPR/Banaman, fuel-catalyst grifts, etc.).

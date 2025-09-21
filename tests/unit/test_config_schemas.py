@@ -97,35 +97,27 @@ class TestPuzzleSchema:
 
     def test_valid_puzzle_creation(self) -> None:
         """Puzzle should accept valid configuration."""
-        from telegram_antilurk_bot.config.schemas import Puzzle, PuzzleChoice
+        from telegram_antilurk_bot.config.schemas import Puzzle
 
         puzzle = Puzzle(
             id="test_001",
             type="arithmetic",
             question="What is 2 + 2?",
-            choices=[
-                PuzzleChoice(text="3", is_correct=False),
-                PuzzleChoice(text="4", is_correct=True),
-                PuzzleChoice(text="5", is_correct=False),
-                PuzzleChoice(text="6", is_correct=False),
-            ]
+            choices=["4", "3", "5", "6"]  # First choice is correct
         )
 
         assert puzzle.id == "test_001"
         assert puzzle.type == "arithmetic"
         assert puzzle.question == "What is 2 + 2?"
         assert len(puzzle.choices) == 4
-        assert sum(1 for c in puzzle.choices if c.is_correct) == 1
+        assert puzzle.get_correct_answer() == "4"
+        assert puzzle.get_wrong_answers() == ["3", "5", "6"]
 
     def test_puzzle_type_validation(self) -> None:
         """Puzzle should only accept valid types."""
-        from telegram_antilurk_bot.config.schemas import Puzzle, PuzzleChoice
+        from telegram_antilurk_bot.config.schemas import Puzzle
 
-        choices = [
-            PuzzleChoice(text="A", is_correct=True),
-            PuzzleChoice(text="B", is_correct=False),
-            PuzzleChoice(text="C", is_correct=False),
-        ]
+        choices = ["A", "B", "C"]  # First choice is correct
 
         # Valid types
         puzzle1 = Puzzle(id="p1", type="arithmetic", question="Q?", choices=choices)
@@ -141,7 +133,7 @@ class TestPuzzleSchema:
 
     def test_puzzle_choices_validation(self) -> None:
         """Puzzle should validate choice requirements."""
-        from telegram_antilurk_bot.config.schemas import Puzzle, PuzzleChoice
+        from telegram_antilurk_bot.config.schemas import Puzzle
 
         # Too few choices
         with pytest.raises(ValidationError) as exc_info:
@@ -149,10 +141,7 @@ class TestPuzzleSchema:
                 id="p1",
                 type="arithmetic",
                 question="Q?",
-                choices=[
-                    PuzzleChoice(text="A", is_correct=True),
-                    PuzzleChoice(text="B", is_correct=False),
-                ]
+                choices=["A", "B"]  # Only 2 choices, need at least 3
             )
         assert "at least 3" in str(exc_info.value).lower()
 
@@ -162,40 +151,20 @@ class TestPuzzleSchema:
                 id="p2",
                 type="arithmetic",
                 question="Q?",
-                choices=[
-                    PuzzleChoice(text=str(i), is_correct=(i == 0))
-                    for i in range(5)
-                ]
+                choices=["A", "B", "C", "D", "E"]  # 5 choices, max is 4
             )
         assert "at most 4" in str(exc_info.value).lower()
 
-        # No correct answer
-        with pytest.raises(ValidationError) as exc_info:
-            Puzzle(
-                id="p3",
-                type="arithmetic",
-                question="Q?",
-                choices=[
-                    PuzzleChoice(text="A", is_correct=False),
-                    PuzzleChoice(text="B", is_correct=False),
-                    PuzzleChoice(text="C", is_correct=False),
-                ]
-            )
-        assert "exactly one correct choice required" in str(exc_info.value).lower()
+        # Valid choices
+        puzzle = Puzzle(
+            id="p3",
+            type="arithmetic",
+            question="Q?",
+            choices=["A", "B", "C"]  # Minimum 3 choices
+        )
+        assert len(puzzle.choices) == 3
+        assert puzzle.get_correct_answer() == "A"
 
-        # Multiple correct answers
-        with pytest.raises(ValidationError) as exc_info:
-            Puzzle(
-                id="p4",
-                type="arithmetic",
-                question="Q?",
-                choices=[
-                    PuzzleChoice(text="A", is_correct=True),
-                    PuzzleChoice(text="B", is_correct=True),
-                    PuzzleChoice(text="C", is_correct=False),
-                ]
-            )
-        assert "exactly one correct choice required" in str(exc_info.value).lower()
 
 
 class TestChannelSchema:

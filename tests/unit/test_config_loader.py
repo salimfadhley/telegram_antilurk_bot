@@ -164,8 +164,9 @@ class TestConfigLoader:
             assert puzzle.id
             assert puzzle.question
             assert 3 <= len(puzzle.choices) <= 4
-            correct_count = sum(1 for c in puzzle.choices if c.is_correct)
-            assert correct_count == 1
+            # First choice is always correct in new format
+            assert puzzle.get_correct_answer() == puzzle.choices[0]
+            assert len(puzzle.get_wrong_answers()) == len(puzzle.choices) - 1
 
     def test_config_persistence_format(self, temp_config_dir: Path) -> None:
         """Saved configs should be properly formatted YAML."""
