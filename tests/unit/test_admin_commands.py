@@ -381,7 +381,28 @@ class TestReportCommand:
         """Should generate report of active users in moderated chat."""
         from telegram_antilurk_bot.admin.report_command import ReportCommandHandler
 
-        handler = ReportCommandHandler()
+        # Mock dependencies
+        mock_config_loader = Mock()
+        mock_user_tracker = AsyncMock()
+
+        # Mock channel configuration
+        mock_channels_config = Mock()
+        mock_channel = Mock()
+        mock_channel.chat_id = -1001234567890
+        mock_channels_config.get_moderated_channels.return_value = [mock_channel]
+        mock_config_loader.load_all.return_value = (Mock(), mock_channels_config, Mock())
+
+        # Mock active users
+        active_users = [
+            User(user_id=11111, username="active1"),
+            User(user_id=22222, username="active2")
+        ]
+        mock_user_tracker.get_users_by_activity.return_value = active_users
+
+        handler = ReportCommandHandler(
+            config_loader=mock_config_loader,
+            user_tracker=mock_user_tracker
+        )
 
         mock_update = Mock()
         mock_update.effective_chat.id = -1001234567890
@@ -389,42 +410,44 @@ class TestReportCommand:
         mock_context = Mock()
         mock_context.args = ["active", "--limit", "10"]
 
-        # Ensure this is a moderated chat
-        with patch('telegram_antilurk_bot.admin.report_command.ConfigLoader') as mock_config:
-            mock_config_instance = Mock()
-            mock_config.return_value = mock_config_instance
-            mock_channels_config = Mock()
-            mock_channel = Mock()
-            mock_channel.chat_id = -1001234567890
-            mock_channels_config.get_moderated_channels.return_value = [mock_channel]
-            mock_config_instance.load_all.return_value = (Mock(), mock_channels_config, Mock())
+        await handler.handle_report_command(mock_update, mock_context)
 
-            with patch('telegram_antilurk_bot.admin.report_command.UserTracker') as mock_tracker:
-                mock_tracker_instance = Mock()
-                mock_tracker.return_value = mock_tracker_instance
-
-                # Mock active users
-                active_users = [
-                    User(user_id=11111, username="active1", last_message_at=datetime.utcnow()),
-                    User(user_id=22222, username="active2", last_message_at=datetime.utcnow() - timedelta(hours=1))
-                ]
-                mock_tracker_instance.get_users_by_activity.return_value = active_users
-
-                await handler.handle_report_command(mock_update, mock_context)
-
-                # Should generate active users report
-                mock_update.message.reply_text.assert_called_once()
-                reply_text = mock_update.message.reply_text.call_args[0][0]
-                assert "active1" in reply_text
-                assert "active2" in reply_text
-                assert "Active Users" in reply_text
+        # Should generate active users report
+        mock_update.message.reply_text.assert_called_once()
+        reply_text = mock_update.message.reply_text.call_args[0][0]
+        assert "active1" in reply_text
+        assert "active2" in reply_text
+        assert "Active Users" in reply_text
 
     @pytest.mark.asyncio
     async def test_report_lurkers_with_custom_days(self, temp_config_dir: Path) -> None:
         """Should generate lurker report with custom day threshold."""
         from telegram_antilurk_bot.admin.report_command import ReportCommandHandler
 
-        handler = ReportCommandHandler()
+        # Mock dependencies
+        mock_config_loader = Mock()
+        mock_user_tracker = AsyncMock()
+        mock_lurker_selector = AsyncMock()
+
+        # Mock channel configuration
+        mock_channels_config = Mock()
+        mock_channel = Mock()
+        mock_channel.chat_id = -1001234567890
+        mock_channels_config.get_moderated_channels.return_value = [mock_channel]
+        mock_config_loader.load_all.return_value = (Mock(), mock_channels_config, Mock())
+
+        # Mock lurkers
+        lurkers = [
+            User(user_id=33333, username="lurker1"),
+            User(user_id=44444, username="lurker2")
+        ]
+        mock_lurker_selector.get_lurkers_for_chat.return_value = lurkers
+
+        handler = ReportCommandHandler(
+            config_loader=mock_config_loader,
+            user_tracker=mock_user_tracker,
+            lurker_selector=mock_lurker_selector
+        )
 
         mock_update = Mock()
         mock_update.effective_chat.id = -1001234567890
@@ -432,39 +455,19 @@ class TestReportCommand:
         mock_context = Mock()
         mock_context.args = ["lurkers", "--days", "7", "--limit", "5"]
 
-        with patch('telegram_antilurk_bot.admin.report_command.ConfigLoader') as mock_config:
-            mock_config_instance = Mock()
-            mock_config.return_value = mock_config_instance
-            mock_channels_config = Mock()
-            mock_channel = Mock()
-            mock_channel.chat_id = -1001234567890
-            mock_channels_config.get_moderated_channels.return_value = [mock_channel]
-            mock_config_instance.load_all.return_value = (Mock(), mock_channels_config, Mock())
+        await handler.handle_report_command(mock_update, mock_context)
 
-            with patch('telegram_antilurk_bot.admin.report_command.LurkerSelector') as mock_selector:
-                mock_selector_instance = Mock()
-                mock_selector.return_value = mock_selector_instance
+        # Should call with custom 7-day threshold
+        mock_lurker_selector.get_lurkers_for_chat.assert_called_once_with(
+            chat_id=-1001234567890,
+            days_threshold=7
+        )
 
-                # Mock lurkers
-                lurkers = [
-                    User(user_id=33333, username="lurker1", last_message_at=datetime.utcnow() - timedelta(days=10)),
-                    User(user_id=44444, username="lurker2", last_message_at=datetime.utcnow() - timedelta(days=15))
-                ]
-                mock_selector_instance.get_lurkers_for_chat.return_value = lurkers
-
-                await handler.handle_report_command(mock_update, mock_context)
-
-                # Should call with custom 7-day threshold
-                mock_selector_instance.get_lurkers_for_chat.assert_called_once_with(
-                    chat_id=-1001234567890,
-                    days_threshold=7
-                )
-
-                # Should generate lurkers report
-                mock_update.message.reply_text.assert_called_once()
-                reply_text = mock_update.message.reply_text.call_args[0][0]
-                assert "lurker1" in reply_text
-                assert "lurker2" in reply_text
+        # Should generate lurkers report
+        mock_update.message.reply_text.assert_called_once()
+        reply_text = mock_update.message.reply_text.call_args[0][0]
+        assert "lurker1" in reply_text
+        assert "lurker2" in reply_text
 
     @pytest.mark.asyncio
     async def test_report_only_works_in_moderated_chats(self, temp_config_dir: Path) -> None:

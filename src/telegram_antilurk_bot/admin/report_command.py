@@ -16,10 +16,11 @@ logger = structlog.get_logger(__name__)
 class ReportCommandHandler:
     """Handles /antlurk report commands for activity reports."""
 
-    def __init__(self) -> None:
+    def __init__(self, config_loader: ConfigLoader | None = None, user_tracker: UserTracker | None = None, lurker_selector: LurkerSelector | None = None) -> None:
         """Initialize report command handler."""
-        self.config_loader = ConfigLoader()
-        self.user_tracker = UserTracker()
+        self.config_loader = config_loader or ConfigLoader()
+        self.user_tracker = user_tracker or UserTracker()
+        self.lurker_selector = lurker_selector
 
     async def handle_report_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Handle /antlurk report active|inactive|lurkers [--days N] [--limit M] command."""
@@ -149,9 +150,12 @@ class ReportCommandHandler:
         if not update.message or not update.effective_chat:
             return
 
-        # Load configuration for lurker selection
-        global_config, channels_config, puzzles_config = self.config_loader.load_all()
-        lurker_selector = LurkerSelector(global_config)
+        # Use injected lurker selector or create one
+        if self.lurker_selector:
+            lurker_selector = self.lurker_selector
+        else:
+            global_config, channels_config, puzzles_config = self.config_loader.load_all()
+            lurker_selector = LurkerSelector(global_config)
 
         lurkers = await lurker_selector.get_lurkers_for_chat(
             chat_id=update.effective_chat.id,
