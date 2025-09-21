@@ -68,11 +68,20 @@ class BotRunner:
             signal.signal(sig, self._signal_handler)
 
         try:
-            # Start the bot
+            # Initialize and start the application using the async lifecycle
             logger.info("Bot is now running...")
-            await self.telegram_app.run_polling(  # type: ignore[func-returns-value]
-                poll_interval=1.0, drop_pending_updates=True, close_loop=False
-            )
+            await self.telegram_app.initialize()
+            await self.telegram_app.start()
+
+            # Begin polling for updates asynchronously
+            if self.telegram_app.updater:
+                await self.telegram_app.updater.start_polling(
+                    poll_interval=1.0, drop_pending_updates=True
+                )
+
+            # Keep the task alive until a shutdown signal is received
+            while not self._shutdown_requested:
+                await asyncio.sleep(0.5)
 
         except KeyboardInterrupt:
             logger.info("Received keyboard interrupt")
@@ -100,7 +109,16 @@ class BotRunner:
 
             # Stop Telegram application
             if self.telegram_app and self.telegram_app.running:
-                await self.telegram_app.stop()
+                try:
+                    if self.telegram_app.updater:
+                        await self.telegram_app.updater.stop()
+                finally:
+                    await self.telegram_app.stop()
+                    # Ensure resources are released
+                    try:
+                        await self.telegram_app.shutdown()
+                    except Exception:
+                        pass
 
             logger.info("Bot shutdown completed successfully")
 

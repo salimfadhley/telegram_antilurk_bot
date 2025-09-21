@@ -10,6 +10,9 @@
 ## Build, Test, and Development Commands
 - Run commands via Codex CLI: `/specify <feature>`, `/plan`, `/tasks`, `/implement`.
 - Run tests with uv: `uv run pytest <directory_or_file>` (e.g., `uv run pytest tests/contract`).
+- Run main with uv: `uv run python -m telegram_antilurk_bot`.
+- For a quick startup-only smoke (no polling):
+  `uv run python -c "import asyncio, os; os.environ.setdefault('TELEGRAM_TOKEN','test'); from telegram_antilurk_bot.main import BotRunner; r=BotRunner(); asyncio.run(r.startup()); asyncio.run(r.shutdown())"`
 - Direct scripts (from repo root):
   - `bash .specify/scripts/bash/create-new-feature.sh "My feature"`: Create `specs/NNN-slug/` and (if git) a branch.
   - `bash .specify/scripts/bash/setup-plan.sh [--json]`: Initialize `plan.md` for the current feature branch.

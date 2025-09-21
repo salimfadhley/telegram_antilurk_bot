@@ -23,6 +23,7 @@ dependencies = [
 
 [project.scripts]
 telegram-antilurk-bot = "telegram_antilurk_bot:main"
+telegram_antilurk_bot = "telegram_antilurk_bot:main"
 
 [build-system]
 requires = ["uv_build>=0.8.18,<0.9.0"]
@@ -88,6 +89,7 @@ select = [
     "B",  # flake8-bugbear
     "C4", # flake8-comprehensions
     "UP", # pyupgrade
+    "T201", # print found
 ]
 ignore = [
     "E501", # line too long (handled by formatter)
@@ -103,6 +105,10 @@ exclude = [
     "venv",
     ".venv",
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["T201"]
+"deploy/**" = ["T201"]
 
 [tool.ruff.format]
 quote-style = "double"

@@ -26,6 +26,13 @@ class ConfigLoader:
 
     def __init__(self, config_dir: Path | None = None):
         """Initialize the configuration loader."""
+        # Load .env if present to honor local defaults
+        try:
+            from dotenv import load_dotenv, find_dotenv
+            load_dotenv(find_dotenv(), override=False)
+        except Exception:
+            pass
+
         if config_dir:
             self.config_dir = config_dir
         else:
@@ -34,7 +41,8 @@ class ConfigLoader:
             if config_dir_env:
                 self.config_dir = self._resolve_dir(config_dir_env)
             else:
-                data_dir_env = os.environ.get("DATA_DIR", "/data")
+                # Default to a relative ./data directory if DATA_DIR not provided
+                data_dir_env = os.environ.get("DATA_DIR") or "data"
                 data_dir = self._resolve_dir(data_dir_env)
                 self.config_dir = data_dir / "config"
 
@@ -110,12 +118,14 @@ class ConfigLoader:
             return config
 
         except ValidationError as e:
-            logger.error("Invalid config.yaml", errors=e.errors())
-            print(f"ERROR: Invalid config.yaml - {self._format_validation_errors(e)}")
+            logger.error(
+                "Invalid config.yaml",
+                errors=e.errors(),
+                formatted=self._format_validation_errors(e),
+            )
             sys.exit(1)
         except Exception as e:
             logger.error("Failed to load config.yaml", error=str(e))
-            print(f"ERROR: Failed to load config.yaml - {e}")
             sys.exit(1)
 
     def _load_channels_config(self) -> ChannelsConfig:
@@ -144,12 +154,14 @@ class ConfigLoader:
             return config
 
         except ValidationError as e:
-            logger.error("Invalid channels.yaml", errors=e.errors())
-            print(f"ERROR: Invalid channels.yaml - {self._format_validation_errors(e)}")
+            logger.error(
+                "Invalid channels.yaml",
+                errors=e.errors(),
+                formatted=self._format_validation_errors(e),
+            )
             sys.exit(1)
         except Exception as e:
             logger.error("Failed to load channels.yaml", error=str(e))
-            print(f"ERROR: Failed to load channels.yaml - {e}")
             sys.exit(1)
 
     def _load_puzzles_config(self) -> PuzzlesConfig:
@@ -178,12 +190,14 @@ class ConfigLoader:
             return config
 
         except ValidationError as e:
-            logger.error("Invalid puzzles.yaml", errors=e.errors())
-            print(f"ERROR: Invalid puzzles.yaml - {self._format_validation_errors(e)}")
+            logger.error(
+                "Invalid puzzles.yaml",
+                errors=e.errors(),
+                formatted=self._format_validation_errors(e),
+            )
             sys.exit(1)
         except Exception as e:
             logger.error("Failed to load puzzles.yaml", error=str(e))
-            print(f"ERROR: Failed to load puzzles.yaml - {e}")
             sys.exit(1)
 
     def save_global_config(
