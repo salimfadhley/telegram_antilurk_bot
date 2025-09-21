@@ -15,9 +15,9 @@ logger = structlog.get_logger(__name__)
 class RebootCommandHandler:
     """Handles /antlurk reboot command for graceful shutdown."""
 
-    def __init__(self) -> None:
+    def __init__(self, config_loader: ConfigLoader | None = None) -> None:
         """Initialize reboot command handler."""
-        self.config_loader = ConfigLoader()
+        self.config_loader = config_loader or ConfigLoader()
 
     async def handle_reboot_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Handle /antlurk reboot command."""
