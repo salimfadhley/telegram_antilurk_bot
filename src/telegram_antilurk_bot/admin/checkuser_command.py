@@ -15,10 +15,10 @@ logger = structlog.get_logger(__name__)
 class CheckUserCommandHandler:
     """Handles /antlurk checkuser command for user activity lookup."""
 
-    def __init__(self) -> None:
+    def __init__(self, user_tracker: UserTracker | None = None, message_archiver: MessageArchiver | None = None) -> None:
         """Initialize checkuser command handler."""
-        self.user_tracker = UserTracker()
-        self.message_archiver = MessageArchiver()
+        self.user_tracker = user_tracker or UserTracker()
+        self.message_archiver = message_archiver or MessageArchiver()
 
     async def handle_checkuser_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Handle /antlurk checkuser <username|user_id> command."""

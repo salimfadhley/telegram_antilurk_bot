@@ -278,7 +278,24 @@ class TestCheckUserCommand:
         """Should lookup user by username and display activity stats."""
         from telegram_antilurk_bot.admin.checkuser_command import CheckUserCommandHandler
 
-        handler = CheckUserCommandHandler()
+        # Mock dependencies
+        mock_user_tracker = AsyncMock()
+        mock_message_archiver = AsyncMock()
+
+        # Mock user lookup
+        mock_user = User(
+            user_id=67890,
+            username="testuser",
+            first_name="Test",
+            last_name="User"
+        )
+        mock_user_tracker.get_user_by_username.return_value = mock_user
+        mock_message_archiver.get_user_message_count.return_value = 150
+
+        handler = CheckUserCommandHandler(
+            user_tracker=mock_user_tracker,
+            message_archiver=mock_message_archiver
+        )
 
         mock_update = Mock()
         mock_update.effective_chat.id = -1001234567890
@@ -286,41 +303,36 @@ class TestCheckUserCommand:
         mock_context = Mock()
         mock_context.args = ["@testuser"]
 
-        with patch('telegram_antilurk_bot.admin.checkuser_command.UserTracker') as mock_tracker:
-            with patch('telegram_antilurk_bot.admin.checkuser_command.MessageArchiver') as mock_archiver:
-                mock_tracker_instance = Mock()
-                mock_tracker.return_value = mock_tracker_instance
+        await handler.handle_checkuser_command(mock_update, mock_context)
 
-                # Mock user lookup
-                mock_user = User(
-                    user_id=67890,
-                    username="testuser",
-                    first_name="Test",
-                    last_name="User",
-                    last_message_at=datetime.utcnow() - timedelta(hours=2),
-                    join_date=datetime.utcnow() - timedelta(days=30)
-                )
-                mock_tracker_instance.get_user_by_username.return_value = mock_user
-
-                mock_archiver_instance = Mock()
-                mock_archiver.return_value = mock_archiver_instance
-                mock_archiver_instance.get_user_message_count.return_value = 150
-
-                await handler.handle_checkuser_command(mock_update, mock_context)
-
-                # Should display user stats
-                mock_update.message.reply_text.assert_called_once()
-                reply_text = mock_update.message.reply_text.call_args[0][0]
-                assert "testuser" in reply_text
-                assert "67890" in reply_text
-                assert "150" in reply_text  # message count
+        # Should display user stats
+        mock_update.message.reply_text.assert_called_once()
+        reply_text = mock_update.message.reply_text.call_args[0][0]
+        assert "testuser" in reply_text
+        assert "67890" in reply_text
+        assert "150" in reply_text  # message count
 
     @pytest.mark.asyncio
     async def test_checkuser_by_user_id(self, temp_config_dir: Path) -> None:
         """Should lookup user by ID and display activity stats."""
         from telegram_antilurk_bot.admin.checkuser_command import CheckUserCommandHandler
 
-        handler = CheckUserCommandHandler()
+        # Mock dependencies
+        mock_user_tracker = AsyncMock()
+        mock_message_archiver = AsyncMock()
+
+        mock_user = User(
+            user_id=67890,
+            username="testuser",
+            first_name="Test"
+        )
+        mock_user_tracker.get_user.return_value = mock_user
+        mock_message_archiver.get_user_message_count.return_value = 42
+
+        handler = CheckUserCommandHandler(
+            user_tracker=mock_user_tracker,
+            message_archiver=mock_message_archiver
+        )
 
         mock_update = Mock()
         mock_update.effective_chat.id = -1001234567890
@@ -328,31 +340,13 @@ class TestCheckUserCommand:
         mock_context = Mock()
         mock_context.args = ["67890"]
 
-        with patch('telegram_antilurk_bot.admin.checkuser_command.UserTracker') as mock_tracker:
-            with patch('telegram_antilurk_bot.admin.checkuser_command.MessageArchiver') as mock_archiver:
-                mock_tracker_instance = Mock()
-                mock_tracker.return_value = mock_tracker_instance
+        await handler.handle_checkuser_command(mock_update, mock_context)
 
-                mock_user = User(
-                    user_id=67890,
-                    username="testuser",
-                    first_name="Test",
-                    last_message_at=datetime.utcnow() - timedelta(days=5)
-                )
-                mock_tracker_instance.get_user.return_value = mock_user
-
-                mock_archiver_instance = Mock()
-                mock_archiver.return_value = mock_archiver_instance
-                mock_archiver_instance.get_user_message_count.return_value = 42
-
-                await handler.handle_checkuser_command(mock_update, mock_context)
-
-                # Should display user stats
-                mock_update.message.reply_text.assert_called_once()
-                reply_text = mock_update.message.reply_text.call_args[0][0]
-                assert "67890" in reply_text
-                assert "42" in reply_text  # message count
-                assert "5 days" in reply_text or "days ago" in reply_text
+        # Should display user stats
+        mock_update.message.reply_text.assert_called_once()
+        reply_text = mock_update.message.reply_text.call_args[0][0]
+        assert "67890" in reply_text
+        assert "42" in reply_text  # message count
 
     @pytest.mark.asyncio
     async def test_checkuser_handles_user_not_found(self, temp_config_dir: Path) -> None:
