@@ -12,9 +12,9 @@ logger = structlog.get_logger(__name__)
 class UnlinkCommandHandler:
     """Handles /antlurk unlink command for removing chat links."""
 
-    def __init__(self) -> None:
+    def __init__(self, config_loader: ConfigLoader | None = None) -> None:
         """Initialize unlink command handler."""
-        self.config_loader = ConfigLoader()
+        self.config_loader = config_loader or ConfigLoader()
 
     async def handle_unlink_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Handle /antlurk unlink <chat_id> command."""

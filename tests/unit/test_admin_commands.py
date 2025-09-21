@@ -137,42 +137,41 @@ class TestShowCommands:
         """Should display recent moderation reports in moderated chats."""
         from telegram_antilurk_bot.admin.show_commands import ShowCommandHandler
 
-        handler = ShowCommandHandler()
+        # Mock configuration for moderated chat
+        mock_config_loader = Mock()
+        mock_channels_config = Mock()
+        mock_channel = Mock()
+        mock_channel.chat_id = -1001234567890
+        mock_channels_config.get_moderated_channels.return_value = [mock_channel]
+        mock_config_loader.load_all.return_value = (Mock(), mock_channels_config, Mock())
 
-        mock_update = Mock()
-        mock_update.effective_chat.id = -1001234567890  # moderated chat
-        mock_update.message.reply_text = AsyncMock()
-        mock_context = Mock()
-        mock_context.args = ["reports", "5"]  # limit to 5 reports
+        # Mock provocation logger
+        with patch('telegram_antilurk_bot.admin.show_commands.ProvocationLogger') as mock_logger:
+            mock_logger_instance = AsyncMock()
+            mock_logger.return_value = mock_logger_instance
 
-        # Mock as moderated chat
-        with patch('telegram_antilurk_bot.admin.show_commands.ConfigLoader') as mock_config:
-            mock_config_instance = Mock()
-            mock_config.return_value = mock_config_instance
-            mock_channels_config = Mock()
-            mock_channel = Mock()
-            mock_channel.chat_id = -1001234567890
-            mock_channels_config.get_moderated_channels.return_value = [mock_channel]
-            mock_config_instance.load_all.return_value = (Mock(), mock_channels_config, Mock())
+            # Mock recent reports
+            mock_reports = [
+                {'provocation_id': 123, 'user_id': 67890, 'timestamp': datetime.utcnow(), 'event': 'created'},
+                {'provocation_id': 124, 'user_id': 67891, 'timestamp': datetime.utcnow() - timedelta(hours=1), 'event': 'failed'}
+            ]
+            mock_logger_instance.get_recent_provocations.return_value = mock_reports
 
-            with patch('telegram_antilurk_bot.admin.show_commands.ProvocationLogger') as mock_logger:
-                mock_logger_instance = Mock()
-                mock_logger.return_value = mock_logger_instance
+            handler = ShowCommandHandler(config_loader=mock_config_loader)
 
-                # Mock recent reports
-                mock_reports = [
-                    {'provocation_id': 123, 'user_id': 67890, 'timestamp': datetime.utcnow(), 'event': 'created'},
-                    {'provocation_id': 124, 'user_id': 67891, 'timestamp': datetime.utcnow() - timedelta(hours=1), 'event': 'failed'}
-                ]
-                mock_logger_instance.get_recent_provocations.return_value = mock_reports
+            mock_update = Mock()
+            mock_update.effective_chat.id = -1001234567890  # moderated chat
+            mock_update.message.reply_text = AsyncMock()
+            mock_context = Mock()
+            mock_context.args = ["reports", "5"]  # limit to 5 reports
 
-                await handler.handle_show_command(mock_update, mock_context)
+            await handler.handle_show_command(mock_update, mock_context)
 
-                # Should display reports
-                mock_update.message.reply_text.assert_called_once()
-                reply_text = mock_update.message.reply_text.call_args[0][0]
-                assert "123" in reply_text  # provocation ID
-                assert "67890" in reply_text  # user ID
+            # Should display reports
+            mock_update.message.reply_text.assert_called_once()
+            reply_text = mock_update.message.reply_text.call_args[0][0]
+            assert "123" in reply_text  # provocation ID
+            assert "67890" in reply_text  # user ID
 
 
 class TestUnlinkCommand:
@@ -183,7 +182,21 @@ class TestUnlinkCommand:
         """Should remove link between moderated and modlog chats."""
         from telegram_antilurk_bot.admin.unlink_command import UnlinkCommandHandler
 
-        handler = UnlinkCommandHandler()
+        # Mock configuration
+        mock_config_loader = Mock()
+        mock_channels_config = Mock()
+
+        # Setup linked channels
+        mock_moderated = Mock()
+        mock_moderated.chat_id = -1001234567890
+        mock_moderated.chat_name = "Test Moderated"
+        mock_moderated.modlog_ref = -1009876543210
+
+        mock_channels_config.channels = [mock_moderated]
+        mock_config_loader.load_all.return_value = (Mock(), mock_channels_config, Mock())
+        mock_config_loader.save_channels_config = Mock()
+
+        handler = UnlinkCommandHandler(config_loader=mock_config_loader)
 
         mock_update = Mock()
         mock_update.effective_chat.id = -1001234567890
@@ -191,36 +204,37 @@ class TestUnlinkCommand:
         mock_context = Mock()
         mock_context.args = ["-1009876543210"]  # chat ID to unlink
 
-        with patch('telegram_antilurk_bot.admin.unlink_command.ConfigLoader') as mock_config:
-            mock_config_instance = Mock()
-            mock_config.return_value = mock_config_instance
-            mock_channels_config = Mock()
+        await handler.handle_unlink_command(mock_update, mock_context)
 
-            # Setup linked channels
-            mock_moderated = Mock()
-            mock_moderated.chat_id = -1001234567890
-            mock_moderated.modlog_ref = -1009876543210
+        # Should remove the link
+        assert mock_moderated.modlog_ref is None
+        mock_config_loader.save_channels_config.assert_called_once()
 
-            mock_channels_config.channels = [mock_moderated]
-            mock_config_instance.load_all.return_value = (Mock(), mock_channels_config, Mock())
-
-            await handler.handle_unlink_command(mock_update, mock_context)
-
-            # Should remove the link
-            assert mock_moderated.modlog_ref is None
-            mock_config_instance.save_channels_config.assert_called_once()
-
-            # Should confirm unlink
-            mock_update.message.reply_text.assert_called_once()
-            reply_text = mock_update.message.reply_text.call_args[0][0]
-            assert "unlinked" in reply_text.lower() or "removed" in reply_text.lower()
+        # Should confirm unlink
+        mock_update.message.reply_text.assert_called_once()
+        reply_text = mock_update.message.reply_text.call_args[0][0]
+        assert "unlinked" in reply_text.lower() or "removed" in reply_text.lower()
 
     @pytest.mark.asyncio
     async def test_unlink_regenerates_linking_message(self, temp_config_dir: Path) -> None:
         """Should generate new linking message after unlinking."""
         from telegram_antilurk_bot.admin.unlink_command import UnlinkCommandHandler
 
-        handler = UnlinkCommandHandler()
+        # Mock configuration
+        mock_config_loader = Mock()
+        mock_channels_config = Mock()
+
+        # Setup linked channels
+        mock_moderated = Mock()
+        mock_moderated.chat_id = -1001234567890
+        mock_moderated.chat_name = "Test Moderated"
+        mock_moderated.modlog_ref = -1009876543210
+
+        mock_channels_config.channels = [mock_moderated]
+        mock_config_loader.load_all.return_value = (Mock(), mock_channels_config, Mock())
+        mock_config_loader.save_channels_config = Mock()
+
+        handler = UnlinkCommandHandler(config_loader=mock_config_loader)
 
         mock_update = Mock()
         mock_update.effective_chat.id = -1001234567890
@@ -228,26 +242,13 @@ class TestUnlinkCommand:
         mock_context = Mock()
         mock_context.args = ["-1009876543210"]
 
-        with patch('telegram_antilurk_bot.admin.unlink_command.ConfigLoader') as mock_config:
-            with patch('telegram_antilurk_bot.admin.unlink_command.ChallengeComposer') as mock_composer:
-                mock_config_instance = Mock()
-                mock_config.return_value = mock_config_instance
-                mock_channels_config = Mock()
-                mock_moderated = Mock()
-                mock_moderated.chat_id = -1001234567890
-                mock_moderated.modlog_ref = -1009876543210
-                mock_channels_config.channels = [mock_moderated]
-                mock_config_instance.load_all.return_value = (Mock(), mock_channels_config, Mock())
+        await handler.handle_unlink_command(mock_update, mock_context)
 
-                mock_composer_instance = Mock()
-                mock_composer.return_value = mock_composer_instance
-                mock_composer_instance.generate_link_code.return_value = "NEW123"
-
-                await handler.handle_unlink_command(mock_update, mock_context)
-
-                # Should generate new linking message
-                mock_composer_instance.generate_link_code.assert_called_once()
-                mock_update.message.reply_text.assert_called()
+        # Should confirm unlink and include new link code
+        mock_update.message.reply_text.assert_called_once()
+        reply_text = mock_update.message.reply_text.call_args[0][0]
+        assert "unlinked" in reply_text.lower()
+        assert "new link code" in reply_text.lower()
 
     @pytest.mark.asyncio
     async def test_unlink_validates_chat_id_format(self, temp_config_dir: Path) -> None:
