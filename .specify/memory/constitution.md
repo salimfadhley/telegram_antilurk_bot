@@ -1,10 +1,10 @@
 <!--
 Sync Impact Report
-- Version change: 1.0.0 → 1.1.0
-- Modified principles: III strengthened to Strict TDD Methodology
-- Added sections: Core Principles; Additional Constraints & Security; Development Workflow & Quality Gates; Governance
-- Templates requiring updates: Optional — add "Tests first" prompt to tasks template
-- Follow-up TODOs: Consider adding CI stub to enforce tests exist for changes
+- Version change: 1.1.0 → 1.1.1
+- Modified principles: VI. Test Tooling Standard enhanced with pytest fixture guidance
+- Added sections: Environment Management and Mocking guidelines under Test Tooling
+- Templates requiring updates: None (clarification of existing testing practices)
+- Follow-up TODOs: None
 -->
 
 # Mind of Steele Bot Constitution
@@ -50,6 +50,13 @@ notes in PRs.
 - Framework: pytest for all unit/contract/integration tests.
 - Conventions: `pytest -q` default, `-k` for focused runs; prefer fixtures over
   ad-hoc setup; use markers for slow/integration.
+- Environment Management: Use pytest's built-in fixtures for test isolation:
+  * `monkeypatch` fixture for environment variable and attribute patching
+  * `tmp_path` fixture for temporary file operations
+  * `capsys`/`capfd` fixtures for stdout/stderr capture
+  * Never manually restore environment state in finally blocks
+- Mocking: Use pytest-mock (`mocker` fixture) or unittest.mock appropriately;
+  prefer dependency injection and fixtures over extensive mocking.
 
 ### VII. Code Quality & Hooks (Enforced)
 - Lint/format: Use ruff to keep code tidy and consistent. Code must be formatted
@@ -87,6 +94,19 @@ notes in PRs.
   mypy to include it. Include `py.typed` for this project to signal typed code.
 - Minimize `ignore` usage; if unavoidable, add a short justification.
 
+### XII. Exception Handling Principles
+- Raise as specifically as possible, catch as generally as you need — but only
+  where handling is appropriate.
+  - Raise precise exception types close to the source so intent is clear and
+    diagnostics remain rich.
+  - Avoid `except Exception:`. Catch only the exception types you anticipate
+    and are prepared to handle, using multiple `except` clauses if needed.
+  - At application boundaries (e.g., CLI entry points), catching broadly may be
+    acceptable to present a friendly message; preserve traceback in development
+    and re‑raise or exit cleanly without hiding errors.
+  - Prefer exception chaining (`raise NewError(...) from e`) when adding
+    context.
+
 ## Additional Constraints & Security
 - Default runtime is workspace-write with restricted network; avoid networked
   dependencies unless explicitly approved.
@@ -106,11 +126,27 @@ notes in PRs.
 Quality gates: Constitution Check passes; research complete; tests exist and
 fail before implementation; tasks.md fully executed; docs updated.
 
+## Error Handling & Test Failures (Policy)
+- No blanket `except Exception:` in production or tests unless immediately
+  re-raising the original exception. Prefer catching the narrowest expected
+  exception types.
+- Never swallow tracebacks. Handlers must preserve context (either by not
+  catching at all, or by using `raise` without arguments inside an `except` to
+  re-raise).
+- Integration tests must not convert genuine failures (e.g., connection
+  refused) into skips. Use explicit precondition checks up front (e.g., skip
+  when required env vars are missing), then let unexpected errors fail loudly
+  with full tracebacks.
+- Skips are only allowed for unmet, detectable preconditions (e.g., missing
+  `DATABASE_URL`) — not for runtime failures.
+- Prefer failing fast with clear assertions/messages over defensive
+  try/except blocks that hide root causes.
+
 ## Governance
 This constitution supersedes ad-hoc practices. Amendments require a PR with
 rationale, version bump, and migration notes if behavior changes. Reviewers
 must verify compliance (principles, gates, structure). Deviations require a
 filled "Complexity Tracking" section in plan.md with explicit justification.
 
-**Version**: 1.1.0 | **Ratified**: 2025-09-20 | **Last Amended**: 2025-09-20
+**Version**: 1.2.0 | **Ratified**: 2025-09-20 | **Last Amended**: 2025-09-21
 <!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->

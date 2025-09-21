@@ -10,13 +10,21 @@ from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from faker import Faker
+from dotenv import load_dotenv
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-# Set test environment variables
-os.environ["TELEGRAM_TOKEN"] = "test_token_123456789:ABCdefGhIJKlmNoPQRstuVwxyZ"
-os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5432/test_antilurk"
+# Load .env if present (do not override explicitly set env)
+load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env", override=False)
+
+# Set default test environment variables if missing
+os.environ.setdefault(
+    "TELEGRAM_TOKEN", "test_token_123456789:ABCdefGhIJKlmNoPQRstuVwxyZ"
+)
+os.environ.setdefault(
+    "DATABASE_URL", "postgresql://test:test@localhost:5432/test_antilurk"
+)
 
 
 @pytest.fixture
