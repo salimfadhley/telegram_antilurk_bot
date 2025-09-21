@@ -1,10 +1,9 @@
 """Lurker selection logic for identifying inactive users."""
 
 from datetime import datetime, timedelta
+from typing import Any, cast
 
 import structlog
-
-from typing import Any, cast
 
 from ..config.loader import ConfigLoader
 from ..config.schemas import GlobalConfig
