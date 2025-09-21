@@ -16,12 +16,12 @@ logger = structlog.get_logger(__name__)
 class AuditScheduler:
     """Scheduler for running periodic audits of lurker activity."""
 
-    def __init__(self, config_dir: Path | None = None) -> None:
+    def __init__(self, config_dir: Path | None = None, config_loader: ConfigLoader | None = None, audit_engine: AuditEngine | None = None) -> None:
         """Initialize the audit scheduler."""
-        self.config_loader = ConfigLoader(config_dir=config_dir) if config_dir else ConfigLoader()
+        self.config_loader = config_loader or (ConfigLoader(config_dir=config_dir) if config_dir else ConfigLoader())
         self.global_config, _, _ = self.config_loader.load_all()
         self.audit_cadence_minutes = self.global_config.audit_cadence_minutes
-        self.audit_engine = AuditEngine()
+        self.audit_engine = audit_engine or AuditEngine()
         self._running = False
         self._task: asyncio.Task[None] | None = None
         self._last_run: datetime | None = None
@@ -30,6 +30,11 @@ class AuditScheduler:
             "AuditScheduler initialized",
             audit_cadence_minutes=self.audit_cadence_minutes
         )
+
+    @property
+    def is_running(self) -> bool:
+        """Check if the scheduler is currently running."""
+        return self._running
 
     async def start(self) -> None:
         """Start the audit scheduler."""

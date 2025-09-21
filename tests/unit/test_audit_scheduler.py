@@ -27,17 +27,18 @@ class TestAuditScheduler:
         from telegram_antilurk_bot.audit.scheduler import AuditScheduler
         from telegram_antilurk_bot.config.schemas import GlobalConfig
 
-        # Create custom config
+        # Create custom config and mock config loader
         config = GlobalConfig(audit_cadence_minutes=30)
+        mock_config_loader = Mock()
+        mock_config_loader.load_all.return_value = (config, Mock(), Mock())
 
         with patch.dict('os.environ', {
             'TELEGRAM_TOKEN': 'test_token',
             'DATABASE_URL': 'postgresql://test:test@localhost/test',
             'CONFIG_DIR': str(temp_config_dir)
         }):
-            with patch.object(AuditScheduler, '_load_config', return_value=(config, Mock(), Mock())):
-                scheduler = AuditScheduler()
-                assert scheduler.audit_cadence_minutes == 30
+            scheduler = AuditScheduler(config_loader=mock_config_loader)
+            assert scheduler.audit_cadence_minutes == 30
 
     @pytest.mark.asyncio
     async def test_scheduler_runs_audit_cycle(self, temp_config_dir: Path) -> None:
@@ -51,12 +52,13 @@ class TestAuditScheduler:
         }):
             scheduler = AuditScheduler()
 
-            with patch.object(scheduler, '_run_audit_cycle') as mock_audit:
-                mock_audit.return_value = AsyncMock()
+            with patch.object(scheduler, 'run_audit_cycle') as mock_audit:
+                mock_audit.return_value = {'cycles_completed': 1}
 
                 # Run one cycle
-                await scheduler._run_audit_cycle()
+                result = await scheduler.run_audit_cycle()
                 mock_audit.assert_called_once()
+                assert result == {'cycles_completed': 1}
 
     def test_scheduler_can_be_stopped(self, temp_config_dir: Path) -> None:
         """Scheduler should be stoppable."""
@@ -84,13 +86,15 @@ class TestLurkerSelection:
         """Should identify users who haven't interacted within threshold days."""
         from telegram_antilurk_bot.audit.lurker_selector import LurkerSelector
         from telegram_antilurk_bot.models.user import User
+        from telegram_antilurk_bot.config.schemas import GlobalConfig
 
         with patch.dict('os.environ', {
             'TELEGRAM_TOKEN': 'test_token',
             'DATABASE_URL': 'postgresql://test:test@localhost/test',
             'CONFIG_DIR': str(temp_config_dir)
         }):
-            selector = LurkerSelector()
+            global_config = GlobalConfig()
+            selector = LurkerSelector(global_config)
 
             # Mock users - one lurker, one active
             lurker_user = Mock(spec=User)

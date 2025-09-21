@@ -159,3 +159,34 @@ class ChallengeEngine:
 
         logger.info("Expired challenges processed", **result)
         return result
+
+    # --- Contract compatibility methods ---
+    async def create_challenge(self, chat_id: int, user: User) -> int:
+        """Contract alias for starting a challenge."""
+        return await self.start_challenge(chat_id=chat_id, user=user)
+
+    async def handle_challenge_response(
+        self,
+        provocation_id: int,
+        user_id: int,
+        correct: bool
+    ) -> bool:
+        """Contract alias for handling a user response."""
+        return await self.handle_user_response(
+            provocation_id=provocation_id,
+            user_id=user_id,
+            correct=correct,
+        )
+
+    async def can_create_challenge(self, chat_id: int, user: User) -> bool:
+        """Indicate whether a new challenge can be created.
+
+        Placeholder implementation always allows creation. Future versions may
+        check for existing pending provocations or rate limits.
+        """
+        _ = (chat_id, user)
+        return True
+
+    async def cleanup_expired_challenges(self) -> dict[str, Any]:
+        """Contract alias for processing expired challenges."""
+        return await self.process_expired_challenges()
