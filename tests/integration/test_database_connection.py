@@ -8,8 +8,8 @@ import os
 
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
-from sqlalchemy import text
 from dotenv import load_dotenv
+from sqlalchemy import text
 
 from telegram_antilurk_bot.database.session import get_engine
 
@@ -36,7 +36,7 @@ def test_database_connect_and_simple_query() -> None:
         # Access by column name via mapping for portability
         assert result._mapping["a"] == 1
 
-        print(f"✅ Database connectivity test passed - simple query successful")
+        print("✅ Database connectivity test passed - simple query successful")
 
 
 def test_database_engine_creation(monkeypatch: MonkeyPatch) -> None:

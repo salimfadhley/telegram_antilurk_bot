@@ -9,8 +9,8 @@ from typing import Any
 from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
-from faker import Faker
 from dotenv import load_dotenv
+from faker import Faker
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))

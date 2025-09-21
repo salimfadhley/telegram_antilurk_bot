@@ -1212,6 +1212,6 @@ puzzles:
   - text: Quantum meruit
     is_correct: false
 provenance:
-  updated_at: '2025-09-21T01:41:19.365967'
+  updated_at: '2025-09-21T01:43:21.233601'
   updated_by: bot-startup
   checksum: 6bac58629b8bfa2f9fd17962d7a4db533a74e30a648daec94311a8a90cf2395e

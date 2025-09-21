@@ -8,9 +8,12 @@ import json
 import os
 import socket
 import time
-from typing import Dict, Any
 
 import pytest
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 class TestNATSConnectivity:
@@ -230,7 +233,7 @@ class TestNATSConnectivity:
                     print("✅ NATS subscription working")
                 else:
                     print(f"ℹ️  NATS subscription response: {response[:100]}")
-            except socket.timeout:
+            except TimeoutError:
                 print("ℹ️  NATS subscription test timeout (this may be normal)")
 
             # Unsubscribe and close
@@ -267,7 +270,7 @@ class TestNATSConnectivity:
                     if response.status == 200:
                         varz_data = json.loads(response.read().decode())
 
-                        print(f"✅ NATS Server Performance Info:")
+                        print("✅ NATS Server Performance Info:")
                         print(f"   Server ID: {varz_data.get('server_id', 'unknown')}")
                         print(f"   Version: {varz_data.get('version', 'unknown')}")
                         print(f"   Uptime: {varz_data.get('uptime', 'unknown')}")

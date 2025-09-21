@@ -402,7 +402,9 @@ class TestPropertyBasedTesting:
 
     def test_rate_limiter_invariants_with_hypothesis(self, temp_config_dir: Path) -> None:
         """Rate limiting should maintain invariants across various inputs."""
-        from hypothesis import given, strategies as st
+        from hypothesis import given
+        from hypothesis import strategies as st
+
         from telegram_antilurk_bot.audit.rate_limiter import RateLimiter
 
         @given(

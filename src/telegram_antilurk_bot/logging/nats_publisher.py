@@ -31,9 +31,10 @@ class NATSEventPublisher:
 
         try:
             # Import nats here to avoid dependency if not used
-            import nats  # type: ignore
+            import nats
 
             # Connect to NATS
+            assert self.nats_url is not None  # mypy: we already checked self.enabled
             nc = await nats.connect(self.nats_url)
 
             # Prepare subject with prefix

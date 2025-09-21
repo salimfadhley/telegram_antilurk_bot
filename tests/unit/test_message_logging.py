@@ -6,8 +6,6 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from telegram_antilurk_bot.database.models import MessageArchive, User
-
 
 class TestMessageArchiver:
     """Tests for message archiving functionality."""

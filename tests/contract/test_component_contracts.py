@@ -1,10 +1,6 @@
 """Contract tests for component interfaces and API boundaries."""
 
-from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-
-import pytest
 
 from telegram_antilurk_bot.database.models import User
 

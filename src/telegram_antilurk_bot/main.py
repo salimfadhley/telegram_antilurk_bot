@@ -72,7 +72,7 @@ class BotRunner:
         try:
             # Start the bot
             logger.info("Bot is now running...")
-            await self.telegram_app.run_polling(
+            await self.telegram_app.run_polling(  # type: ignore[func-returns-value]
                 poll_interval=1.0,
                 drop_pending_updates=True,
                 close_loop=False

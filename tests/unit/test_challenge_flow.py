@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardMarkup
 
 from telegram_antilurk_bot.config.schemas import Puzzle, PuzzleChoice
 from telegram_antilurk_bot.database.models import User

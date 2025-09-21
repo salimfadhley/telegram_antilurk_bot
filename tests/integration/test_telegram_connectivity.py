@@ -6,8 +6,8 @@ Tests connectivity to actual Telegram Bot API using TELEGRAM_TOKEN environment v
 
 import os
 
-import pytest
 import aiohttp
+import pytest
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -175,7 +175,7 @@ class TestTelegramBotAPI:
                 can_join_groups = bot_info.get("can_join_groups", False)
                 can_read_all_messages = bot_info.get("can_read_all_group_messages", False)
 
-                print(f"✅ Bot permissions check:")
+                print("✅ Bot permissions check:")
                 print(f"   Can join groups: {can_join_groups}")
                 print(f"   Can read all group messages: {can_read_all_messages}")
                 print(f"   Supports inline queries: {bot_info.get('supports_inline_queries', False)}")
@@ -220,7 +220,7 @@ class TestTelegramIntegration:
         # Bot token should be long enough
         assert len(bot_token) >= 35, "Bot token portion appears too short"
 
-        print(f"✅ Token format validation passed")
+        print("✅ Token format validation passed")
         print(f"   Bot ID: {bot_id}")
         print(f"   Token length: {len(bot_token)} characters")
 
@@ -243,7 +243,7 @@ class TestTelegramIntegration:
                 assert not data.get("ok"), "Invalid API call should have ok=false"
                 assert "description" in data, "Error response should include description"
 
-                print(f"✅ Error handling test passed")
+                print("✅ Error handling test passed")
                 print(f"   Error description: {data.get('description', 'Unknown')}")
 
     @pytest.mark.asyncio

@@ -1,6 +1,5 @@
 """Smoke tests for deployment validation."""
 
-import os
 import subprocess
 from pathlib import Path
 
@@ -189,7 +188,6 @@ class TestHealthChecks:
         """Basic health check should be simple and fast."""
         # Simple Python import test - this is what our health check does
         try:
-            import sys
             result = 0  # Success
         except Exception:
             result = 1  # Failure

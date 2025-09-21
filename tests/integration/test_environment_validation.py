@@ -7,8 +7,8 @@ Tests connectivity to actual external services: PostgreSQL, NATS, Telegram API.
 import os
 
 import pytest
-from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
+from sqlalchemy import create_engine, text
 
 from telegram_antilurk_bot.database.session import get_engine
 
