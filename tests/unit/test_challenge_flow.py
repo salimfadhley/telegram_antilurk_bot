@@ -132,7 +132,7 @@ class TestProvocationTracker:
 
         # Mock time passage
         with patch('telegram_antilurk_bot.challenges.tracker.datetime') as mock_datetime:
-            mock_datetime.utcnow.return_value = datetime.utcnow() + timedelta(minutes=2)
+            mock_datetime.utcnow.return_value = datetime.now(datetime.UTC) + timedelta(minutes=2)
             assert await tracker.is_provocation_expired(provocation_id)
 
 

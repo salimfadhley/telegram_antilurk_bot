@@ -66,14 +66,14 @@ class TestUserModel:
 
         # Create user with old interaction
         user = User(user_id=123)
-        user.last_interaction_at = datetime.utcnow() - timedelta(days=20)
+        user.last_interaction_at = datetime.now(datetime.UTC) - timedelta(days=20)
 
         # Test with different thresholds
         assert user.is_lurker(14) is True  # 20 days > 14 days
         assert user.is_lurker(30) is False  # 20 days < 30 days
 
         # Test with recent interaction
-        user.last_interaction_at = datetime.utcnow() - timedelta(days=5)
+        user.last_interaction_at = datetime.now(datetime.UTC) - timedelta(days=5)
         assert user.is_lurker(14) is False  # 5 days < 14 days
 
     def test_user_is_protected(self):
@@ -115,7 +115,7 @@ class TestMessageArchiveModel:
             user_id=123456789,
             text="Hello, world!",
             message_type="text",
-            sent_at=datetime.utcnow()
+            sent_at=datetime.now(datetime.UTC)
         )
 
         assert message.chat_id == -1001234567890
@@ -135,7 +135,7 @@ class TestMessageArchiveModel:
             chat_id=1,
             message_id=1,
             user_id=1,
-            sent_at=datetime.utcnow()
+            sent_at=datetime.now(datetime.UTC)
         )
         assert message.is_reply is False
 
@@ -152,7 +152,7 @@ class TestMessageArchiveModel:
             chat_id=1,
             message_id=1,
             user_id=1,
-            sent_at=datetime.utcnow()
+            sent_at=datetime.now(datetime.UTC)
         )
         assert message.is_forward is False
 
@@ -168,7 +168,7 @@ class TestProvocationModel:
         """Provocation should store challenge data."""
         from telegram_antilurk_bot.models.provocation import Provocation, ProvocationOutcome
 
-        expires = datetime.utcnow() + timedelta(hours=48)
+        expires = datetime.now(datetime.UTC) + timedelta(hours=48)
         provocation = Provocation(
             chat_id=-1001234567890,
             user_id=123456789,
@@ -197,12 +197,12 @@ class TestProvocationModel:
             puzzle_id="p1",
             puzzle_question="Q?",
             correct_answer="A",
-            expires_at=datetime.utcnow() + timedelta(hours=1)
+            expires_at=datetime.now(datetime.UTC) + timedelta(hours=1)
         )
         assert provocation.is_expired is False
 
         # Expired
-        provocation.expires_at = datetime.utcnow() - timedelta(hours=1)
+        provocation.expires_at = datetime.now(datetime.UTC) - timedelta(hours=1)
         assert provocation.is_expired is True
 
     def test_provocation_mark_sent(self):
@@ -215,7 +215,7 @@ class TestProvocationModel:
             puzzle_id="p1",
             puzzle_question="Q?",
             correct_answer="A",
-            expires_at=datetime.utcnow() + timedelta(hours=48)
+            expires_at=datetime.now(datetime.UTC) + timedelta(hours=48)
         )
 
         assert provocation.sent_at is None
@@ -236,7 +236,7 @@ class TestProvocationModel:
             puzzle_id="p1",
             puzzle_question="Q?",
             correct_answer="A",
-            expires_at=datetime.utcnow() + timedelta(hours=48)
+            expires_at=datetime.now(datetime.UTC) + timedelta(hours=48)
         )
 
         # Correct answer
@@ -265,7 +265,7 @@ class TestProvocationModel:
             puzzle_id="p1",
             puzzle_question="Q?",
             correct_answer="A",
-            expires_at=datetime.utcnow() + timedelta(hours=48)
+            expires_at=datetime.now(datetime.UTC) + timedelta(hours=48)
         )
 
         provocation.mark_timeout()
@@ -281,7 +281,7 @@ class TestProvocationModel:
             puzzle_id="p1",
             puzzle_question="Q?",
             correct_answer="A",
-            expires_at=datetime.utcnow() + timedelta(hours=48)
+            expires_at=datetime.now(datetime.UTC) + timedelta(hours=48)
         )
 
         provocation.mark_cancelled()

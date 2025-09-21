@@ -161,8 +161,8 @@ class TestShowCommands:
 
                 # Mock recent reports
                 mock_reports = [
-                    {'provocation_id': 123, 'user_id': 67890, 'timestamp': datetime.utcnow(), 'event': 'created'},
-                    {'provocation_id': 124, 'user_id': 67891, 'timestamp': datetime.utcnow() - timedelta(hours=1), 'event': 'failed'}
+                    {'provocation_id': 123, 'user_id': 67890, 'timestamp': datetime.now(datetime.UTC), 'event': 'created'},
+                    {'provocation_id': 124, 'user_id': 67891, 'timestamp': datetime.now(datetime.UTC) - timedelta(hours=1), 'event': 'failed'}
                 ]
                 mock_logger_instance.get_recent_provocations.return_value = mock_reports
 
@@ -296,8 +296,8 @@ class TestCheckUserCommand:
                     username="testuser",
                     first_name="Test",
                     last_name="User",
-                    last_message_at=datetime.utcnow() - timedelta(hours=2),
-                    join_date=datetime.utcnow() - timedelta(days=30)
+                    last_message_at=datetime.now(datetime.UTC) - timedelta(hours=2),
+                    join_date=datetime.now(datetime.UTC) - timedelta(days=30)
                 )
                 mock_tracker_instance.get_user_by_username.return_value = mock_user
 
@@ -336,7 +336,7 @@ class TestCheckUserCommand:
                     user_id=67890,
                     username="testuser",
                     first_name="Test",
-                    last_message_at=datetime.utcnow() - timedelta(days=5)
+                    last_message_at=datetime.now(datetime.UTC) - timedelta(days=5)
                 )
                 mock_tracker_instance.get_user.return_value = mock_user
 
@@ -410,8 +410,8 @@ class TestReportCommand:
 
                 # Mock active users
                 active_users = [
-                    User(user_id=11111, username="active1", last_message_at=datetime.utcnow()),
-                    User(user_id=22222, username="active2", last_message_at=datetime.utcnow() - timedelta(hours=1))
+                    User(user_id=11111, username="active1", last_message_at=datetime.now(datetime.UTC)),
+                    User(user_id=22222, username="active2", last_message_at=datetime.now(datetime.UTC) - timedelta(hours=1))
                 ]
                 mock_tracker_instance.get_users_by_activity.return_value = active_users
 
@@ -452,8 +452,8 @@ class TestReportCommand:
 
                 # Mock lurkers
                 lurkers = [
-                    User(user_id=33333, username="lurker1", last_message_at=datetime.utcnow() - timedelta(days=10)),
-                    User(user_id=44444, username="lurker2", last_message_at=datetime.utcnow() - timedelta(days=15))
+                    User(user_id=33333, username="lurker1", last_message_at=datetime.now(datetime.UTC) - timedelta(days=10)),
+                    User(user_id=44444, username="lurker2", last_message_at=datetime.now(datetime.UTC) - timedelta(days=15))
                 ]
                 mock_selector_instance.get_lurkers_for_chat.return_value = lurkers
 
