@@ -1,0 +1,1217 @@
+puzzles:
+- id: common_001
+  type: common_sense
+  question: Which 'trust' did Richard Vobes claim could pay a water bill?
+  choices:
+  - text: Cestui Que Vie trust
+    is_correct: true
+  - text: Santa's Gift Fund
+    is_correct: false
+  - text: Enid Blyton Trust
+    is_correct: false
+  - text: Otter Conservation Fund
+    is_correct: false
+- id: common_002
+  type: common_sense
+  question: What does Sovereign Pete claim DVLA 'registration' does to your car?
+  choices:
+  - text: Transfers ownership to the state
+    is_correct: true
+  - text: Doubles horsepower
+    is_correct: false
+  - text: Makes it amphibious
+    is_correct: false
+  - text: Erases speeding points
+    is_correct: false
+- id: common_003
+  type: common_sense
+  question: Why do conspiracy theorists think you can pay bills with a signature?
+  choices:
+  - text: They believe 'acceptance for value' taps a secret trust
+    is_correct: true
+  - text: A wet-ink signature instructs banks to transfer funds
+    is_correct: false
+  - text: Using blue ink nullifies debts
+    is_correct: false
+  - text: Paper naturally absorbs taxes on contact
+    is_correct: false
+- id: common_004
+  type: common_sense
+  question: Banaman puzzled over a crest on which document in the Liverpool saga?
+  choices:
+  - text: A warrant
+    is_correct: true
+  - text: A bus ticket
+    is_correct: false
+  - text: A TV licence
+    is_correct: false
+  - text: A library card
+    is_correct: false
+- id: common_005
+  type: common_sense
+  question: Which group appears alongside Banaman in the Liverpool court caper?
+  choices:
+  - text: TPR (Liverpool People's Resistance)
+    is_correct: true
+  - text: Mensa Liverpool
+    is_correct: false
+  - text: Knights of Columbus
+    is_correct: false
+  - text: Rotary Club of Crosby
+    is_correct: false
+- id: common_006
+  type: common_sense
+  question: In the Banaman/Liverpool TPR court video, which 'doctrine' was mis-invoked
+    to justify 'home defense'?
+  choices:
+  - text: Castle Doctrine
+    is_correct: true
+  - text: Doctrine of Discovery
+    is_correct: false
+  - text: Monroe Doctrine
+    is_correct: false
+  - text: Shock Doctrine
+    is_correct: false
+- id: common_007
+  type: common_sense
+  question: Which complaint do sovereign citizens often make about ALL CAPS names?
+  choices:
+  - text: It's 'Dog Latin' with no standing
+    is_correct: true
+  - text: It's Morse code for taxes
+    is_correct: false
+  - text: It's a naval distress flag
+    is_correct: false
+  - text: It's an anagram for 'Crown'
+    is_correct: false
+- id: common_008
+  type: common_sense
+  question: Fuel 'catalyst' grifters on Vobes's show claimed pellets worked in what?
+  choices:
+  - text: 'Any engine: cars, bikes, even lawnmowers'
+    is_correct: true
+  - text: Only vintage carburetted cars
+    is_correct: false
+  - text: Only diesel trucks over 3.5t
+    is_correct: false
+  - text: Only hybrid vehicles
+    is_correct: false
+- id: common_009
+  type: common_sense
+  question: Why do 'fuel-catalyst' claims about a galvanic reaction in petrol fail?
+  choices:
+  - text: Petrol is an electrical insulator
+    is_correct: true
+  - text: Diesel freezes at room temp
+    is_correct: false
+  - text: Oxygen is a noble gas
+    is_correct: false
+  - text: Water burns in engines
+    is_correct: false
+- id: common_010
+  type: common_sense
+  question: Which trope explains why miracle devices 'never catch on'?
+  choices:
+  - text: Grand suppression narrative
+    is_correct: true
+  - text: Patent office backlog
+    is_correct: false
+  - text: Quantum misalignment
+    is_correct: false
+  - text: Astrological embargo
+    is_correct: false
+- id: common_011
+  type: common_sense
+  question: Chemtrail believers misread which ordinary phenomenon?
+  choices:
+  - text: Persistent contrails from jet exhaust
+    is_correct: true
+  - text: Sun dogs at low angles
+    is_correct: false
+  - text: Noctilucent clouds only at poles
+    is_correct: false
+  - text: Sprites above thunderstorms
+    is_correct: false
+- id: common_012
+  type: common_sense
+  question: Who claimed nicotine isn't addictive?
+  choices:
+  - text: Bryan Ardis
+    is_correct: true
+  - text: Andrew Wakefield
+    is_correct: false
+  - text: David Icke
+    is_correct: false
+  - text: Sasha Stone
+    is_correct: false
+- id: common_013
+  type: common_sense
+  question: Rachel Matthews's 'experiment' involved what, to Vobes's delight?
+  choices:
+  - text: Trying pipe tobacco
+    is_correct: true
+  - text: Measuring chemtrails
+    is_correct: false
+  - text: Building a Faraday cage
+    is_correct: false
+  - text: Counting pyramids
+    is_correct: false
+- id: common_014
+  type: common_sense
+  question: Which bogus fix did Vobes platform to 'save fuel'?
+  choices:
+  - text: Drop-in tank pellets
+    is_correct: true
+  - text: Aluminium foil on bonnet
+    is_correct: false
+  - text: Stronger spark plugs only
+    is_correct: false
+  - text: Inflatable spoiler
+    is_correct: false
+- id: common_015
+  type: common_sense
+  question: What UK agency is cast as a 'corporation' that 'owns your car' if you
+    register it?
+  choices:
+  - text: DVLA
+    is_correct: true
+  - text: HMRC
+    is_correct: false
+  - text: Ofcom
+    is_correct: false
+  - text: NATS
+    is_correct: false
+- id: common_016
+  type: common_sense
+  question: Which set phrase is mocked as a magic debt-eraser?
+  choices:
+  - text: Acceptance for Value
+    is_correct: true
+  - text: In Perpetuity Forever
+    is_correct: false
+  - text: Force Majeure Me
+    is_correct: false
+  - text: Without Prejudice Pay
+    is_correct: false
+- id: common_017
+  type: common_sense
+  question: What do sovereign-citizen influencers claim the term 'license' means?
+  choices:
+  - text: Asking permission to use 'their' property
+    is_correct: true
+  - text: Secret Crown lien
+    is_correct: false
+  - text: Immunity from traffic laws
+    is_correct: false
+  - text: Automatic diplomatic status
+    is_correct: false
+- id: common_018
+  type: common_sense
+  question: Which scientific point dismantles 'fog full of nanobots' claims?
+  choices:
+  - text: Weather and illness co-occur without causation
+    is_correct: true
+  - text: Fog is dry ice residue
+    is_correct: false
+  - text: Nanobots need 5G to swim
+    is_correct: false
+  - text: Humidity kills viruses instantly
+    is_correct: false
+- id: common_019
+  type: common_sense
+  question: What implausible authority did a TPR spokesman cite for global crimes?
+  choices:
+  - text: Canada's Defence Minister
+    is_correct: true
+  - text: Interpol's Pope
+    is_correct: false
+  - text: UN Sheriff of Health
+    is_correct: false
+  - text: MI5 Chief Pharmacist
+    is_correct: false
+- id: common_020
+  type: common_sense
+  question: What courtroom step did Michael (with Liverpool TPR) claim he could refuse?
+  choices:
+  - text: Entering a plea for the 'legal fiction'
+    is_correct: true
+  - text: Sitting in the dock
+    is_correct: false
+  - text: Standing for the judge
+    is_correct: false
+  - text: Swearing on any book
+    is_correct: false
+- id: common_021
+  type: common_sense
+  question: Which phrase do sovereigns misuse to claim 'government has no authority'?
+  choices:
+  - text: Clearfield Doctrine
+    is_correct: true
+  - text: Section 31 Immunity
+    is_correct: false
+  - text: Rule in Shelley's Case
+    is_correct: false
+  - text: Nemo Dat Doctrine
+    is_correct: false
+- id: common_022
+  type: common_sense
+  question: Which claim about 5G streetlights do conspiracy influencers promote?
+  choices:
+  - text: They are secret energy weapons
+    is_correct: true
+  - text: They harvest rainwater
+    is_correct: false
+  - text: They detect flat tyres
+    is_correct: false
+  - text: They contain petrol
+    is_correct: false
+- id: common_023
+  type: common_sense
+  question: What body part did a protester say 5G uniquely harms tenfold?
+  choices:
+  - text: Ovaries
+    is_correct: true
+  - text: Appendix
+    is_correct: false
+  - text: Eyelashes
+    is_correct: false
+  - text: Kneecaps
+    is_correct: false
+- id: common_024
+  type: common_sense
+  question: Which brain area was bizarrely blamed on 5G damage?
+  choices:
+  - text: Amygdala
+    is_correct: true
+  - text: Pons
+    is_correct: false
+  - text: Occipital lobe
+    is_correct: false
+  - text: Cerebellar vermis
+    is_correct: false
+- id: common_025
+  type: common_sense
+  question: When protest videos show a handheld meter 'off the scale' near 5G masts,
+    what does that actually indicate?
+  choices:
+  - text: Nothing scientific about 5G risk
+    is_correct: true
+  - text: Guaranteed lethal rays
+    is_correct: false
+  - text: Quantum weather hacks
+    is_correct: false
+  - text: Ion engines in lampposts
+    is_correct: false
+- id: common_026
+  type: common_sense
+  question: What mythical paperwork status do sovereigns seek for jurors?
+  choices:
+  - text: '''Sovereign men'' not on electoral roll'
+    is_correct: true
+  - text: All jurors must be tradesmen
+    is_correct: false
+  - text: Jury of internet subscribers
+    is_correct: false
+  - text: Only unlicensed drivers allowed
+    is_correct: false
+- id: common_027
+  type: common_sense
+  question: What everyday thing did Vobes compare to 'financial noclip mode'?
+  choices:
+  - text: Signing bills to 'pay' them
+    is_correct: true
+  - text: Using contactless twice
+    is_correct: false
+  - text: Refunding a refund
+    is_correct: false
+  - text: Tapping a lamppost
+    is_correct: false
+- id: common_028
+  type: common_sense
+  question: Which literary figure is used to frame 'escape from responsibility'?
+  choices:
+  - text: Reginald Perrin
+    is_correct: true
+  - text: Jay Gatsby
+    is_correct: false
+  - text: Holden Caulfield
+    is_correct: false
+  - text: Bertie Wooster
+    is_correct: false
+- id: common_029
+  type: common_sense
+  question: What do some conspiracy influencers claim a warrant must bear to be 'valid'?
+  choices:
+  - text: An original wet-ink signature
+    is_correct: true
+  - text: A proclamation of common law
+    is_correct: false
+  - text: A gold seal proving nobility
+    is_correct: false
+  - text: A chemtrail-resistant watermark
+    is_correct: false
+- id: common_030
+  type: common_sense
+  question: Which profession did Banaman repeatedly confuse in his videos?
+  choices:
+  - text: Basic legal procedure
+    is_correct: true
+  - text: Basic plumbing
+    is_correct: false
+  - text: Basic cartography
+    is_correct: false
+  - text: Basic bee keeping
+    is_correct: false
+- id: common_031
+  type: common_sense
+  question: What's the punchline about 'sovereign' status, as claimed by sovereign
+    citizens?
+  choices:
+  - text: "A sovereign cannot be subject\u2014so they invent loopholes"
+    is_correct: true
+  - text: Sovereigns get free petrol
+    is_correct: false
+  - text: Sovereigns outrank traffic lights
+    is_correct: false
+  - text: Sovereigns vote twice
+    is_correct: false
+- id: common_032
+  type: common_sense
+  question: What sky claim does Ian Livingstone make?
+  choices:
+  - text: He can spot 'real' vs 'fake' clouds
+    is_correct: true
+  - text: He owns a private weather map
+    is_correct: false
+  - text: He pilots anti-cloud drones
+    is_correct: false
+  - text: He times rainbow durations
+    is_correct: false
+- id: common_033
+  type: common_sense
+  question: Which absurd machine is invoked to 'manufacture clouds'?
+  choices:
+  - text: A mainframe with an antenna
+    is_correct: true
+  - text: A lawnmower on a kite
+    is_correct: false
+  - text: A copper pyramid engine
+    is_correct: false
+  - text: An inflatable Tesla coil
+    is_correct: false
+- id: common_034
+  type: common_sense
+  question: If a 'mainframe' makes clouds, what happens to chemtrails logic?
+  choices:
+  - text: It contradicts itself
+    is_correct: true
+  - text: It becomes proven
+    is_correct: false
+  - text: It needs bigger planes
+    is_correct: false
+  - text: It requires 6G
+    is_correct: false
+- id: common_035
+  type: common_sense
+  question: What basic property of petrol prevents any 'galvanic reaction' in a fuel
+    tank?
+  choices:
+  - text: 'No ions: current can''t flow'
+    is_correct: true
+  - text: Wrong pH for sparks
+    is_correct: false
+  - text: Too cold to oxidize
+    is_correct: false
+  - text: Too viscous for voltage
+    is_correct: false
+- id: common_036
+  type: common_sense
+  question: Which sales tactic do grifters use on Vobes's channel?
+  choices:
+  - text: Anonymous testimonials and vague tech
+    is_correct: true
+  - text: ISO lab certification
+    is_correct: false
+  - text: Peer-reviewed trials
+    is_correct: false
+  - text: Refund guarantees honored
+    is_correct: false
+- id: common_037
+  type: common_sense
+  question: What role does Richard Vobes effectively play for product scammers?
+  choices:
+  - text: Their marketing department
+    is_correct: true
+  - text: Their compliance auditor
+    is_correct: false
+  - text: Their chief engineer
+    is_correct: false
+  - text: Their legal counsel
+    is_correct: false
+- id: common_038
+  type: common_sense
+  question: What everyday agency do sovereigns insist is purely 'corporate'?
+  choices:
+  - text: United Kingdom via DVLA
+    is_correct: true
+  - text: NHS surgical wards
+    is_correct: false
+  - text: BBC local radio
+    is_correct: false
+  - text: National Trust properties
+    is_correct: false
+- id: common_039
+  type: common_sense
+  question: What do sovereign-citizen influencers claim about UK driving test pass
+    rates?
+  choices:
+  - text: Only 49% can ever pass by design
+    is_correct: true
+  - text: You pass automatically at 30
+    is_correct: false
+  - text: Manual cars get bonus points
+    is_correct: false
+  - text: Sunroof owners always fail
+    is_correct: false
+- id: common_040
+  type: common_sense
+  question: What do some sovereign-citizen influencers claim is a 'test' of male authority
+    at dinner?
+  choices:
+  - text: Stopping a partner from taking a chip
+    is_correct: true
+  - text: Choosing the restaurant proves leadership
+    is_correct: false
+  - text: Passing the salt establishes dominance
+    is_correct: false
+  - text: Forks must display a royal crest
+    is_correct: false
+- id: common_041
+  type: common_sense
+  question: What mythical emergency power does a 'registered keeper' grant police?
+  choices:
+  - text: Kick your door in without warrant
+    is_correct: true
+  - text: Seize your goldfish
+    is_correct: false
+  - text: Rewrite your MOT
+    is_correct: false
+  - text: Downgrade your license
+    is_correct: false
+- id: common_042
+  type: common_sense
+  question: Which fictional 'code' do sovereigns claim governs roads?
+  choices:
+  - text: Corporate Highway Code contract
+    is_correct: true
+  - text: Pirate Admiralty Roadbook
+    is_correct: false
+  - text: Royal Coachman's Ledger
+    is_correct: false
+  - text: Motor Magna Carta
+    is_correct: false
+- id: common_043
+  type: common_sense
+  question: Why are 'fuel conspiracies' attractive to guests on Richard Vobes's channel?
+  choices:
+  - text: They sell easy, magical fixes
+    is_correct: true
+  - text: They require lab skill
+    is_correct: false
+  - text: They need patents first
+    is_correct: false
+  - text: They reduce emissions reliably
+    is_correct: false
+- id: common_044
+  type: common_sense
+  question: What mundane explanation beats 'chemtrail' timing coincidences?
+  choices:
+  - text: Weather + illness co-occur often
+    is_correct: true
+  - text: Moon phase dictates trails
+    is_correct: false
+  - text: Pilot's mood affects clouds
+    is_correct: false
+  - text: Airport lunch menu changes
+    is_correct: false
+- id: common_045
+  type: common_sense
+  question: Sovereign paperwork often seeks what escape?
+  choices:
+  - text: Freedom from consequences
+    is_correct: true
+  - text: Extra voting rights
+    is_correct: false
+  - text: Secret tax refunds
+    is_correct: false
+  - text: Airport lounge access
+    is_correct: false
+- id: common_046
+  type: common_sense
+  question: What should skeptics do when hearing grand claims from conspiracy influencers?
+  choices:
+  - text: Skepticism should also question grifters
+    is_correct: true
+  - text: Questioning equals truth
+    is_correct: false
+  - text: Belief beats data
+    is_correct: false
+  - text: Intuition trumps physics
+    is_correct: false
+- id: common_047
+  type: common_sense
+  question: The 'Crown has no standing' rant bundled what?
+  choices:
+  - text: A grab-bag of misused international laws
+    is_correct: true
+  - text: Precise case law citations
+    is_correct: false
+  - text: Accurate treaty summaries
+    is_correct: false
+  - text: Verified lab results
+    is_correct: false
+- id: common_048
+  type: common_sense
+  question: What do UK conspiracy activists often claim about recent persistent fog?
+  choices:
+  - text: It contains harmful chemicals or 'nanobots'
+    is_correct: true
+  - text: It's cold soot from vintage planes
+    is_correct: false
+  - text: It's harmless water droplets
+    is_correct: false
+  - text: It's invisible 7G foam
+    is_correct: false
+- id: common_049
+  type: common_sense
+  question: Why do 'suppressed truth' myths persist among conspiracy promoters?
+  choices:
+  - text: They flatter believers as heroes
+    is_correct: true
+  - text: They demand hard work
+    is_correct: false
+  - text: They punish lying
+    is_correct: false
+  - text: They hate attention
+    is_correct: false
+- id: common_050
+  type: common_sense
+  question: What 'legal fiction' trick did Michael's group attempt?
+  choices:
+  - text: Power of attorney games
+    is_correct: true
+  - text: Embassy-as-home claim
+    is_correct: false
+  - text: Common law ID badge
+    is_correct: false
+  - text: Sovereign postage stamp
+    is_correct: false
+- id: common_051
+  type: common_sense
+  question: In the fog panic, what measurement was requested?
+  choices:
+  - text: Use a voltmeter on the fog
+    is_correct: true
+  - text: Send a stool sample
+    is_correct: false
+  - text: Weigh a cloud at noon
+    is_correct: false
+  - text: Time raindrop speed
+    is_correct: false
+- id: common_052
+  type: common_sense
+  question: What do product promoters on conspiracy shows often do during interviews?
+  choices:
+  - text: Flog unproven products to the audience
+    is_correct: true
+  - text: Provide balanced technical briefings
+    is_correct: false
+  - text: Discourage purchases as unsafe
+    is_correct: false
+  - text: Offer free MOT vouchers
+    is_correct: false
+- id: common_053
+  type: common_sense
+  question: Which UK town area featured in 5G panic meters?
+  choices:
+  - text: Crosby
+    is_correct: true
+  - text: Swindon
+    is_correct: false
+  - text: Truro
+    is_correct: false
+  - text: Grantham
+    is_correct: false
+- id: common_054
+  type: common_sense
+  question: What everyday physics explains contrails lingering?
+  choices:
+  - text: Humidity/temperature at altitude
+    is_correct: true
+  - text: Magnetic north drift
+    is_correct: false
+  - text: Solar wind pressure
+    is_correct: false
+  - text: Cosmic ray showers
+    is_correct: false
+- id: common_055
+  type: common_sense
+  question: What does 'acceptance for value' promise believers?
+  choices:
+  - text: Debt erasure by signature
+    is_correct: true
+  - text: Cheaper mortgages
+    is_correct: false
+  - text: Free road tax
+    is_correct: false
+  - text: Unlimited childcare
+    is_correct: false
+- id: common_056
+  type: common_sense
+  question: Which character archetype do scammers assume on Vobes's show?
+  choices:
+  - text: Tortured, suppressed prophet
+    is_correct: true
+  - text: Reluctant billionaire
+    is_correct: false
+  - text: Accidental genius chef
+    is_correct: false
+  - text: Undercover meteorologist
+    is_correct: false
+- id: common_057
+  type: common_sense
+  question: The 'lawnmower test' mocked what claim?
+  choices:
+  - text: Universal fuel gadget works anywhere
+    is_correct: true
+  - text: Grass blocks airflow
+    is_correct: false
+  - text: Two-stroke engines can't idle
+    is_correct: false
+  - text: Electric mowers drink petrol
+    is_correct: false
+- id: common_058
+  type: common_sense
+  question: When jurors are on the electoral roll, the sovereign says what?
+  choices:
+  - text: They're 'subjects', not peers
+    is_correct: true
+  - text: They are 'aliens' in law
+    is_correct: false
+  - text: They owe maritime fees
+    is_correct: false
+  - text: They must wear caps
+    is_correct: false
+- id: common_059
+  type: common_sense
+  question: What do sovereign citizens claim about the ALL CAPS 'strawman' vs the
+    living person?
+  choices:
+  - text: ALL CAPS is a separate corporate entity
+    is_correct: true
+  - text: Itals indicate maritime law applies
+    is_correct: false
+  - text: Emojis indicate consent to contract
+    is_correct: false
+  - text: Invisible ink proves sovereignty
+    is_correct: false
+- id: common_060
+  type: common_sense
+  question: "What pattern is seen among product\u2011promoting guests on Richard Vobes's\
+    \ channel?"
+  choices:
+  - text: Charlatans flogging products
+    is_correct: true
+  - text: Qualified experts only
+    is_correct: false
+  - text: Neutral historians
+    is_correct: false
+  - text: Meteorologists debating weather
+    is_correct: false
+- id: common_061
+  type: common_sense
+  question: A 'crest' on paperwork caused what reaction?
+  choices:
+  - text: Confusion marketed as mystery
+    is_correct: true
+  - text: Instant compliance
+    is_correct: false
+  - text: Blank acceptance
+    is_correct: false
+  - text: Shredding on sight
+    is_correct: false
+- id: common_062
+  type: common_sense
+  question: What supposed 'digital product' did Vobes scorn compared to tobacco?
+  choices:
+  - text: Vapes
+    is_correct: true
+  - text: Nicotine gum
+    is_correct: false
+  - text: Air purifiers
+    is_correct: false
+  - text: Smart kettles
+    is_correct: false
+- id: common_063
+  type: common_sense
+  question: The show's chemistry point about fuels emphasizes what?
+  choices:
+  - text: Refined hydrocarbons lack free ions
+    is_correct: true
+  - text: Diesel dissolves magnets
+    is_correct: false
+  - text: Octane resists gravity
+    is_correct: false
+  - text: Petrol emits cold heat
+    is_correct: false
+- id: common_064
+  type: common_sense
+  question: Which line best sums up sovereign-citizen logic?
+  choices:
+  - text: Invent loopholes to dodge reality
+    is_correct: true
+  - text: Respect law to fix policy
+    is_correct: false
+  - text: Use courts to clarify science
+    is_correct: false
+  - text: Balance rights with duties
+    is_correct: false
+- id: common_065
+  type: common_sense
+  question: Which UK doc is joked about as needing 'wet ink'?
+  choices:
+  - text: Any 'warrant' they don't like
+    is_correct: true
+  - text: Supermarket receipt
+    is_correct: false
+  - text: Passport photo page
+    is_correct: false
+  - text: Cinema ticket
+    is_correct: false
+- id: common_066
+  type: common_sense
+  question: In spoof legalisms, what is 'spelling'?
+  choices:
+  - text: '''Witchcraft'' that binds you'
+    is_correct: true
+  - text: A maritime tax trap
+    is_correct: false
+  - text: A VAT for letters
+    is_correct: false
+  - text: A railway bylaw
+    is_correct: false
+- id: common_067
+  type: common_sense
+  question: What do sovereign-citizen narratives implicitly promise followers?
+  choices:
+  - text: Escapism from consequences
+    is_correct: true
+  - text: Expertise in explosives
+    is_correct: false
+  - text: Soap-making metaphors
+    is_correct: false
+  - text: Basement leases
+    is_correct: false
+- id: common_068
+  type: common_sense
+  question: What cure-all status did Ardis ascribe to nicotine?
+  choices:
+  - text: Preventative/curative for Alzheimer's
+    is_correct: true
+  - text: Antibiotic for colds
+    is_correct: false
+  - text: Antidote to chemtrails
+    is_correct: false
+  - text: Vaccine booster
+    is_correct: false
+- id: common_069
+  type: common_sense
+  question: Why are 'suppressed devices' stories convenient?
+  choices:
+  - text: They justify selling unproven junk
+    is_correct: true
+  - text: They demand peer review first
+    is_correct: false
+  - text: They forbid online sales
+    is_correct: false
+  - text: They cap profits
+    is_correct: false
+- id: common_070
+  type: common_sense
+  question: What do believers forget about illness spikes and weather?
+  choices:
+  - text: Correlation isn't causation
+    is_correct: true
+  - text: Colds require 5G
+    is_correct: false
+  - text: Fog produces viruses
+    is_correct: false
+  - text: Rain sterilizes cities
+    is_correct: false
+- id: common_071
+  type: common_sense
+  question: What do scam product demonstrations frequently avoid?
+  choices:
+  - text: Transparent methodology and data
+    is_correct: true
+  - text: Friendly audiences
+    is_correct: false
+  - text: Dramatic music cues
+    is_correct: false
+  - text: PowerPoint slides
+    is_correct: false
+- id: common_072
+  type: common_sense
+  question: What common prop appears in 'meter panic' videos?
+  choices:
+  - text: A beeping handheld RF meter
+    is_correct: true
+  - text: A Bunsen burner
+    is_correct: false
+  - text: A stethoscope
+    is_correct: false
+  - text: A sextant
+    is_correct: false
+- id: common_073
+  type: common_sense
+  question: What do sovereigns call the person-state mismatch?
+  choices:
+  - text: Strawman in ALL CAPS
+    is_correct: true
+  - text: Ghost debtor in italics
+    is_correct: false
+  - text: Maritime echo in brackets
+    is_correct: false
+  - text: Shadow ID in bold
+    is_correct: false
+- id: common_074
+  type: common_sense
+  question: What emotions do grifters commonly exploit?
+  choices:
+  - text: Fear and grievance
+    is_correct: true
+  - text: Professional pride
+    is_correct: false
+  - text: Math anxiety
+    is_correct: false
+  - text: Love of Latin
+    is_correct: false
+- id: common_075
+  type: common_sense
+  question: Which absurd residency claim shows up in protests?
+  choices:
+  - text: '''Embassy'' houses immune to law'
+    is_correct: true
+  - text: '''Cloud nation'' passports'
+    is_correct: false
+  - text: '''Sovereign tents'' on roads'
+    is_correct: false
+  - text: '''Sea lane'' driveways'
+    is_correct: false
+- id: common_076
+  type: common_sense
+  question: What do contrails primarily consist of?
+  choices:
+  - text: Water vapor/ice crystals
+    is_correct: true
+  - text: Liquid mercury
+    is_correct: false
+  - text: Graphene flakes
+    is_correct: false
+  - text: Boron dust
+    is_correct: false
+- id: common_077
+  type: common_sense
+  question: Why is 'unlimited debt-clearing' so tempting in the story?
+  choices:
+  - text: It promises reward without effort
+    is_correct: true
+  - text: It needs training
+    is_correct: false
+  - text: It builds community
+    is_correct: false
+  - text: It funds schools
+    is_correct: false
+- id: common_078
+  type: common_sense
+  question: What lighthearted animal is contrasted with extremists?
+  choices:
+  - text: Otter
+    is_correct: true
+  - text: Badger
+    is_correct: false
+  - text: Hedgehog
+    is_correct: false
+  - text: Puffin
+    is_correct: false
+- id: common_079
+  type: common_sense
+  question: When RF meters 'go off the scale' in protest videos, what does that often
+    signal?
+  choices:
+  - text: User error or misuse
+    is_correct: true
+  - text: Nuclear fallout
+    is_correct: false
+  - text: Tesla coils nearby
+    is_correct: false
+  - text: X-ray beams in lampposts
+    is_correct: false
+- id: common_080
+  type: common_sense
+  question: What UK paperwork do sovereigns demand to see on the spot?
+  choices:
+  - text: Original wet-ink warrant
+    is_correct: true
+  - text: MP's voting record
+    is_correct: false
+  - text: Council's Wi-Fi password
+    is_correct: false
+  - text: Judge's private notes
+    is_correct: false
+- id: common_081
+  type: common_sense
+  question: Why is 'jury of sovereigns only' impossible?
+  choices:
+  - text: It defies basic civic rules
+    is_correct: true
+  - text: It requires DNA tests
+    is_correct: false
+  - text: It needs royal assent
+    is_correct: false
+  - text: It must be televised
+    is_correct: false
+- id: common_082
+  type: common_sense
+  question: What product type is a red flag on Vobes's show?
+  choices:
+  - text: Universal miracle fix
+    is_correct: true
+  - text: Open-source software
+    is_correct: false
+  - text: Workshop manuals
+    is_correct: false
+  - text: Tyre pressure gauges
+    is_correct: false
+- id: common_083
+  type: common_sense
+  question: Banaman's videos often begin with what?
+  choices:
+  - text: Confusion about the obvious
+    is_correct: true
+  - text: A legal citation spree
+    is_correct: false
+  - text: Drone establishing shots
+    is_correct: false
+  - text: A weather report
+    is_correct: false
+- id: common_084
+  type: common_sense
+  question: How do conspiracy promoters often react when basic science contradicts
+    them?
+  choices:
+  - text: "Dismiss it as part of the cover\u2011up"
+    is_correct: true
+  - text: Submit to peer review
+    is_correct: false
+  - text: Immediately retract the claim
+    is_correct: false
+  - text: Report themselves to trading standards
+    is_correct: false
+- id: common_085
+  type: common_sense
+  question: Which phrase best captures the flaw in sovereign-citizen thinking about
+    reality?
+  choices:
+  - text: You can't loophole reality
+    is_correct: true
+  - text: Paper beats physics
+    is_correct: false
+  - text: Ink outruns gravity
+    is_correct: false
+  - text: Caps lock trumps law
+    is_correct: false
+- id: common_086
+  type: common_sense
+  question: What do 'sovereign' court antics usually produce?
+  choices:
+  - text: Self-sabotage and delays
+    is_correct: true
+  - text: Instant acquittal
+    is_correct: false
+  - text: Case dismissal with apology
+    is_correct: false
+  - text: Jury standing ovations
+    is_correct: false
+- id: common_087
+  type: common_sense
+  question: Which device port did a scam claim to use?
+  choices:
+  - text: OBD diagnostic port
+    is_correct: true
+  - text: HDMI port
+    is_correct: false
+  - text: USB-C on the dash
+    is_correct: false
+  - text: SIM tray under seat
+    is_correct: false
+- id: common_088
+  type: common_sense
+  question: Why do persistent contrails vary so much?
+  choices:
+  - text: Atmospheric conditions differ
+    is_correct: true
+  - text: Plane brand logos differ
+    is_correct: false
+  - text: Pilot birthdays differ
+    is_correct: false
+  - text: Fuel octane birthdays
+    is_correct: false
+- id: common_089
+  type: common_sense
+  question: What kind of 'proof' do chemtrailers offer most?
+  choices:
+  - text: Anecdotes and vibes
+    is_correct: true
+  - text: Weather station logs
+    is_correct: false
+  - text: Satellite humidity maps
+    is_correct: false
+  - text: Peer-reviewed aerosol spectra
+    is_correct: false
+- id: common_090
+  type: common_sense
+  question: Why are 'mainframe weather beams' mocked?
+  choices:
+  - text: No mechanism or evidence
+    is_correct: true
+  - text: They aim too high
+    is_correct: false
+  - text: "They cost \xA312.50"
+    is_correct: false
+  - text: They need moonlight
+    is_correct: false
+- id: common_091
+  type: common_sense
+  question: What rhetorical move frames grifters as martyrs?
+  choices:
+  - text: Cassandra/Galileo comparison
+    is_correct: true
+  - text: Robin Hood swagger
+    is_correct: false
+  - text: Sherlock deduction
+    is_correct: false
+  - text: Bond villain monologue
+    is_correct: false
+- id: common_092
+  type: common_sense
+  question: Which document did Vobes 'accept for value'?
+  choices:
+  - text: A water bill
+    is_correct: true
+  - text: A TV license renewal
+    is_correct: false
+  - text: A parking ticket
+    is_correct: false
+  - text: A train timetable
+    is_correct: false
+- id: common_093
+  type: common_sense
+  question: What 'department' supposedly issues the property you drive?
+  choices:
+  - text: Transport via DVLA
+    is_correct: true
+  - text: Housing via HM Land Reg
+    is_correct: false
+  - text: Defence via MOD
+    is_correct: false
+  - text: Culture via DCMS
+    is_correct: false
+- id: common_094
+  type: common_sense
+  question: The show's view of 'question everything' is what?
+  choices:
+  - text: Question grifters hardest
+    is_correct: true
+  - text: Question only the state
+    is_correct: false
+  - text: Question clouds exclusively
+    is_correct: false
+  - text: "Question never\u2014just feel"
+    is_correct: false
+- id: common_095
+  type: common_sense
+  question: Why do chemtrail narratives appeal to believers?
+  choices:
+  - text: They explain any weather as deliberate action
+    is_correct: true
+  - text: They limit claims to rare events
+    is_correct: false
+  - text: They are falsified by every cloud
+    is_correct: false
+  - text: They require no airplanes
+    is_correct: false
+- id: common_096
+  type: common_sense
+  question: What petty 'test' of respect do some influencers promote at dinner?
+  choices:
+  - text: Stealing a chip at dinner
+    is_correct: true
+  - text: Holding the TV remote
+    is_correct: false
+  - text: Parking left of bins
+    is_correct: false
+  - text: Counting teaspoons
+    is_correct: false
+- id: common_097
+  type: common_sense
+  question: Why do 'magic signatures' fail in reality?
+  choices:
+  - text: Contracts and debts require payment
+    is_correct: true
+  - text: Pens lack legal ink
+    is_correct: false
+  - text: Paper is maritime-only
+    is_correct: false
+  - text: Numbers outrank names
+    is_correct: false
+- id: common_098
+  type: common_sense
+  question: Why do simple miracle products appeal to conspiracy audiences?
+  choices:
+  - text: Simple stories beat complex truths
+    is_correct: true
+  - text: Labs are too noisy
+    is_correct: false
+  - text: Pilots fly too low
+    is_correct: false
+  - text: Meters beep too softly
+    is_correct: false
+- id: common_099
+  type: common_sense
+  question: What's the comedic fate of many Vobes-endorsed gadgets?
+  choices:
+  - text: No evidence, then silence
+    is_correct: true
+  - text: Immediate regulation
+    is_correct: false
+  - text: Open-source replication
+    is_correct: false
+  - text: University adoption
+    is_correct: false
+- id: common_100
+  type: common_sense
+  question: What courtroom buzzword do sovereigns misuse most?
+  choices:
+  - text: Standing
+    is_correct: true
+  - text: Res judicata
+    is_correct: false
+  - text: Mens rea
+    is_correct: false
+  - text: Quantum meruit
+    is_correct: false
+provenance:
+  updated_at: '2025-09-21T01:49:42.984395'
+  updated_by: bot-startup
+  checksum: 6bac58629b8bfa2f9fd17962d7a4db533a74e30a648daec94311a8a90cf2395e
