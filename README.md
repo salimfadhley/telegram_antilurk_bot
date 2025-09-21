@@ -60,11 +60,12 @@ Then:
 - `TELEGRAM_TOKEN` (required): Telegram Bot API token.
   - How to get it: In Telegram, start a chat with `@BotFather` → `/newbot` → follow prompts. BotFather returns a token similar to `123456789:AAE2Zx…`.
   - Keep it secret; treat like a password.
-- `DATABASE_URL` (required): PostgreSQL connection string.
-  - Formats supported: `postgres://user:pass@host:port/dbname` or `postgresql://user:pass@host:port/dbname`
+- `DATABASE_URL` (required): PostgreSQL connection string used by the bot (only this is read by the app).
+  - Formats: `postgres://user:pass@host:port/dbname` or `postgresql://user:pass@host:port/dbname`
   - Example: `postgres://antilurk:changeme@postgres:5432/antilurk`
-- `DATA_DIR` (optional): Base data directory. Defaults to `/data`.
-- `CONFIG_DIR` (optional): Directory for YAML configs. Defaults to `$DATA_DIR/config`.
+  - Note: If you run a Postgres container, its internal variables (`POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, etc.) are for that container only. The bot itself only uses `DATABASE_URL`.
+- `DATA_DIR` (optional): Base data directory. Defaults to `/data`. May be absolute or relative; relative paths resolve against the current working directory.
+- `CONFIG_DIR` (optional): Directory for YAML configs. Defaults to `$DATA_DIR/config`. May be absolute or relative; relative paths resolve against the current working directory.
   - Files used:
     - `channels.yaml`: Links moderated chats → modlog chat; per‑chat overrides.
     - `config.yaml`: Global defaults (lurk threshold, provocation interval, audit cadence, rate limits).

@@ -28,8 +28,14 @@ class ConfigLoader:
         if config_dir:
             self.config_dir = config_dir
         else:
-            config_dir_env = os.environ.get('CONFIG_DIR', '/data/config')
-            self.config_dir = Path(config_dir_env)
+            # Resolve CONFIG_DIR or derive from DATA_DIR, supporting relative paths
+            config_dir_env = os.environ.get('CONFIG_DIR')
+            if config_dir_env:
+                self.config_dir = self._resolve_dir(config_dir_env)
+            else:
+                data_dir_env = os.environ.get('DATA_DIR', '/data')
+                data_dir = self._resolve_dir(data_dir_env)
+                self.config_dir = data_dir / 'config'
 
         # Create directory if it doesn't exist (but handle permission errors gracefully)
         try:
@@ -256,6 +262,13 @@ class ConfigLoader:
                     obj[i] = item.isoformat()
                 elif isinstance(item, (dict, list)):
                     self._convert_datetimes(item)
+
+    def _resolve_dir(self, path_str: str) -> Path:
+        """Resolve directories: expand user and resolve relative paths against CWD."""
+        p = Path(path_str).expanduser()
+        if not p.is_absolute():
+            p = Path.cwd() / p
+        return p
 
     def _format_validation_errors(self, e: ValidationError) -> str:
         """Format Pydantic validation errors for display."""

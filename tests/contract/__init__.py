@@ -1,0 +1,1 @@
+"""Contract tests for API boundaries and component interfaces."""
