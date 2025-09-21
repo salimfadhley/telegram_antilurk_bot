@@ -26,7 +26,7 @@ class TestMessageArchiver:
         mock_update.message.from_user.first_name = "Test"
         mock_update.message.from_user.last_name = "User"
         mock_update.message.text = "Hello, this is a test message!"
-        mock_update.message.date = datetime.now(datetime.UTC)
+        mock_update.message.date = datetime.utcnow()
 
         # Mock the configuration to return this as a moderated chat
         mock_config_loader = Mock()
@@ -62,7 +62,7 @@ class TestMessageArchiver:
         mock_photo_update.message.text = None
         mock_photo_update.message.photo = [Mock()]
         mock_photo_update.message.caption = "Photo caption"
-        mock_photo_update.message.date = datetime.now(datetime.UTC)
+        mock_photo_update.message.date = datetime.utcnow()
 
         photo_archive = await archiver.archive_message(mock_photo_update)
 
@@ -78,7 +78,7 @@ class TestMessageArchiver:
         mock_sticker_update.message.photo = None
         mock_sticker_update.message.sticker = Mock()
         mock_sticker_update.message.sticker.emoji = "😀"
-        mock_sticker_update.message.date = datetime.now(datetime.UTC)
+        mock_sticker_update.message.date = datetime.utcnow()
 
         sticker_archive = await archiver.archive_message(mock_sticker_update)
 
@@ -97,7 +97,7 @@ class TestMessageArchiver:
         mock_update.message.chat.id = -1001234567890
         mock_update.message.from_user.id = 67890
         mock_update.message.text = "Activity message"
-        mock_update.message.date = datetime.now(datetime.UTC)
+        mock_update.message.date = datetime.utcnow()
 
         with patch('telegram_antilurk_bot.logging.message_archiver.UserTracker') as mock_tracker:
             mock_tracker_instance = AsyncMock()
@@ -175,7 +175,7 @@ class TestUserTracker:
             setattr(mock_telegram_user, key, value)
 
         chat_id = -1001234567890
-        timestamp = datetime.now(datetime.UTC)
+        timestamp = datetime.utcnow()
 
         user = await tracker.update_user_activity(
             user_id=12345,
@@ -199,7 +199,7 @@ class TestUserTracker:
         tracker = UserTracker()
 
         # First message
-        first_timestamp = datetime.now(datetime.UTC) - timedelta(hours=1)
+        first_timestamp = datetime.utcnow() - timedelta(hours=1)
         await tracker.update_user_activity(
             user_id=67890,
             chat_id=-1001234567890,
@@ -207,7 +207,7 @@ class TestUserTracker:
         )
 
         # Second message (more recent)
-        second_timestamp = datetime.now(datetime.UTC)
+        second_timestamp = datetime.utcnow()
         user2 = await tracker.update_user_activity(
             user_id=67890,
             chat_id=-1001234567890,
@@ -224,7 +224,7 @@ class TestUserTracker:
 
         tracker = UserTracker()
 
-        join_time = datetime.now(datetime.UTC)
+        join_time = datetime.utcnow()
         user = await tracker.update_user_activity(
             user_id=11111,
             chat_id=-1001234567890,
@@ -251,8 +251,8 @@ class TestProvocationLogger:
             'chat_id': -1001234567890,
             'user_id': 67890,
             'puzzle_id': 'math_001',
-            'created_at': datetime.now(datetime.UTC),
-            'expires_at': datetime.now(datetime.UTC) + timedelta(minutes=30)
+            'created_at': datetime.utcnow(),
+            'expires_at': datetime.utcnow() + timedelta(minutes=30)
         }
 
         await logger.log_provocation_created(**provocation_data)
@@ -274,7 +274,7 @@ class TestProvocationLogger:
         response_data = {
             'provocation_id': provocation_id,
             'user_id': 67890,
-            'response_time': datetime.now(datetime.UTC),
+            'response_time': datetime.utcnow(),
             'choice_selected': 2,
             'is_correct': True
         }
@@ -298,7 +298,7 @@ class TestProvocationLogger:
         provocation_id = 789
         expiration_data = {
             'provocation_id': provocation_id,
-            'expired_at': datetime.now(datetime.UTC),
+            'expired_at': datetime.utcnow(),
             'final_status': 'expired'
         }
 
@@ -318,7 +318,7 @@ class TestProvocationLogger:
         logger = ProvocationLogger()
 
         chat_id = -1001234567890
-        current_time = datetime.now(datetime.UTC)
+        current_time = datetime.utcnow()
 
         # Log multiple provocations for rate limiting test
         for i in range(3):
@@ -355,7 +355,7 @@ class TestNATSEventPublisher:
                 'chat_id': -1001234567890,
                 'user_id': 67890,
                 'provocation_id': 123,
-                'timestamp': datetime.now(datetime.UTC).isoformat()
+                'timestamp': datetime.utcnow().isoformat()
             }
 
             with patch('telegram_antilurk_bot.logging.nats_publisher.nats') as mock_nats:
@@ -418,7 +418,7 @@ class TestMessageLoggingIntegration:
         mock_update.message.from_user.first_name = 'Test'
         mock_update.message.from_user.is_bot = False
         mock_update.message.text = "Integration test message"
-        mock_update.message.date = datetime.now(datetime.UTC)
+        mock_update.message.date = datetime.utcnow()
 
         with patch.multiple(
             'telegram_antilurk_bot.logging.message_processor',
@@ -459,7 +459,7 @@ class TestMessageLoggingIntegration:
             await updater.record_user_activity(
                 user_id=user_id,
                 chat_id=chat_id,
-                timestamp=datetime.now(datetime.UTC) - timedelta(minutes=i)
+                timestamp=datetime.utcnow() - timedelta(minutes=i)
             )
 
         # Check view reflects activity

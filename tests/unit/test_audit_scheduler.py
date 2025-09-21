@@ -274,8 +274,8 @@ class TestBacklogManagement:
 
             # Mock backlogged user entries
             mock_entries = [
-                {'user_id': 111, 'added_at': datetime.now(datetime.UTC) - timedelta(hours=1)},
-                {'user_id': 222, 'added_at': datetime.now(datetime.UTC) - timedelta(minutes=30)}
+                {'user_id': 111, 'added_at': datetime.utcnow() - timedelta(hours=1)},
+                {'user_id': 222, 'added_at': datetime.utcnow() - timedelta(minutes=30)}
             ]
 
             with patch.object(backlog, '_get_backlog_entries', return_value=mock_entries):

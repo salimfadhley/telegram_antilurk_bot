@@ -6,6 +6,6 @@ rate_limit_per_day: 15
 enable_nats: false
 enable_announcements: false
 provenance:
-  updated_at: '2025-09-21T08:22:13.077118'
+  updated_at: '2025-09-21T08:23:53.163843'
   updated_by: bot-startup
   checksum: 34007bd41c944dc240d83133d22764327502aa7993488922435504787735b0ea

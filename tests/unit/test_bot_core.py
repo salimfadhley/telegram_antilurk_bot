@@ -238,7 +238,7 @@ class TestLinkingHandshake:
             bot._active_links[link_code] = {
                 'chat_id': chat_id,
                 'chat_name': 'Test Channel',
-                'expires_at': datetime.now(datetime.UTC) + timedelta(minutes=10),
+                'expires_at': datetime.utcnow() + timedelta(minutes=10),
                 'message_id': 12345
             }
 
@@ -246,7 +246,7 @@ class TestLinkingHandshake:
             assert bot._is_link_valid(link_code) is True
 
             # Test that expired link is invalid
-            bot._active_links[link_code]['expires_at'] = datetime.now(datetime.UTC) - timedelta(minutes=1)
+            bot._active_links[link_code]['expires_at'] = datetime.utcnow() - timedelta(minutes=1)
             assert bot._is_link_valid(link_code) is False
 
     @pytest.mark.asyncio
@@ -271,7 +271,7 @@ class TestLinkingHandshake:
             bot._active_links["ABC123"] = {
                 'chat_id': -1001234567890,
                 'chat_name': 'Test Moderated',
-                'expires_at': datetime.now(datetime.UTC) + timedelta(minutes=5),
+                'expires_at': datetime.utcnow() + timedelta(minutes=5),
                 'message_id': 12345
             }
 
