@@ -408,7 +408,7 @@ class TestChallengeIntegration:
                 ProvocationTracker=Mock(),
                 CallbackHandler=Mock(),
                 ModlogNotifier=Mock(),
-            ) as mocks:
+            ):
                 # Access patched class via module to avoid patch.multiple return dict nuances
                 from telegram_antilurk_bot.challenges import challenge_engine as _ce
 
@@ -449,7 +449,7 @@ class TestChallengeIntegration:
                 ChallengeComposer=Mock(),
                 ProvocationTracker=Mock(),
                 ModlogNotifier=Mock(),
-            ) as mocks:
+            ):
                 from telegram_antilurk_bot.challenges import challenge_engine as _ce
 
                 mock_tracker = _ce.ProvocationTracker.return_value

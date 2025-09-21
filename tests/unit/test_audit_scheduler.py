@@ -2,7 +2,7 @@
 
 from datetime import datetime, timedelta
 from pathlib import Path
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -97,8 +97,8 @@ class TestLurkerSelection:
     def test_identifies_lurkers_by_threshold(self, temp_config_dir: Path) -> None:
         """Should identify users who haven't interacted within threshold days."""
         from telegram_antilurk_bot.audit.lurker_selector import LurkerSelector
-        from telegram_antilurk_bot.models.user import User
         from telegram_antilurk_bot.config.schemas import GlobalConfig
+        from telegram_antilurk_bot.models.user import User
 
         with patch.dict(
             "os.environ",

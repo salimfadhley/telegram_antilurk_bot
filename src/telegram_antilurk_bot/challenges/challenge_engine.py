@@ -1,9 +1,9 @@
 """Main challenge engine coordinating the complete flow."""
 
+import inspect
 import os
 import random
 from typing import Any
-import inspect
 
 import structlog
 
@@ -149,7 +149,13 @@ class ChallengeEngine:
         # expired_provocations may be a Mock; if not iterable, fall back to recent ids
         candidates: list[int]
         try:
-            candidates = [getattr(p, "provocation_id", p) for p in expired_provocations]
+            candidates = []
+            for p in expired_provocations:
+                pid = getattr(p, "provocation_id", None)
+                if isinstance(pid, int):
+                    candidates.append(pid)
+                elif isinstance(p, int):
+                    candidates.append(p)
         except TypeError:
             candidates = list(self._recent_provocations)
 
@@ -186,7 +192,7 @@ class ChallengeEngine:
                 )
 
         try:
-            expired_count = len(expired_provocations)  # type: ignore[arg-type]
+            expired_count = len(expired_provocations)
         except Exception:
             expired_count = len(candidates)
 

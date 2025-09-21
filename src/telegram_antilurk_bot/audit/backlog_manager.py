@@ -1,7 +1,8 @@
 """Backlog management for rate-limited provocations."""
 
+from collections.abc import Iterable
 from datetime import datetime
-from typing import Any, Iterable
+from typing import Any
 
 import structlog
 

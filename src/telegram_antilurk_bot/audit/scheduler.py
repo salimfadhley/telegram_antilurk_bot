@@ -50,7 +50,7 @@ class AuditScheduler:
         self._task = asyncio.create_task(self._run_scheduler())
         logger.info("Audit scheduler started")
 
-    async def stop(self) -> None:
+    async def stop_async(self) -> None:
         """Stop the audit scheduler."""
         if not self._running:
             return
@@ -65,7 +65,7 @@ class AuditScheduler:
 
         logger.info("Audit scheduler stopped")
 
-    def stop(self) -> None:  # type: ignore[override]
+    def stop(self) -> None:
         """Synchronous stop helper for unit tests."""
         self._running = False
         if self._task:

@@ -1,9 +1,10 @@
 """Lurker selection logic for identifying inactive users."""
 
 from datetime import datetime, timedelta
-from typing import List
 
 import structlog
+
+from typing import Any, cast
 
 from ..config.loader import ConfigLoader
 from ..config.schemas import GlobalConfig
@@ -35,17 +36,18 @@ class LurkerSelector:
         chat_id: int,
         threshold_days: int,
         provocation_interval_hours: int = 48,
-    ) -> List[User]:
+    ) -> list[User]:
         """Identify lurkers for a chat applying protection and recency filters."""
         users = self._get_chat_users(chat_id)
         result: list[User] = []
         for user in users:
             try:
-                if user.is_protected():
+                u = cast(Any, user)
+                if u.is_protected():
                     continue
-                if not user.is_lurker(threshold_days):
+                if not u.is_lurker(threshold_days):
                     continue
-                if self._was_recently_provoked(chat_id, user.user_id, provocation_interval_hours):
+                if self._was_recently_provoked(chat_id, u.user_id, provocation_interval_hours):
                     continue
                 result.append(user)
             except AttributeError:
@@ -59,7 +61,7 @@ class LurkerSelector:
         )
         return result
 
-    def _get_chat_users(self, chat_id: int) -> List[User]:
+    def _get_chat_users(self, chat_id: int) -> list[User]:
         """Fetch users for a chat. Placeholder for tests to patch."""
         _ = chat_id
         return []

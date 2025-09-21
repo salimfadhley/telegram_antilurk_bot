@@ -10,6 +10,7 @@ It imports and executes the main function from the main module.
 import asyncio
 import sys
 from pathlib import Path
+
 import structlog
 
 # Add project root to path for imports

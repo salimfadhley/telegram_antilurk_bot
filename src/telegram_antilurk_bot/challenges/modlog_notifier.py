@@ -115,13 +115,14 @@ class ModlogNotifier:
         self, provocation_id: int, admin_user_id: int, action: str
     ) -> None:
         """Handle kick confirmation callback."""
-        provocation = await self.tracker.get_provocation(provocation_id)
+        tracker = self.tracker or ProvocationTracker()
+        provocation = await tracker.get_provocation(provocation_id)
         if not provocation:
             return
 
         if action == "confirm":
             # Mark as manually handled
-            await self.tracker.update_provocation_status(provocation_id, "manually_kicked")
+            await tracker.update_provocation_status(provocation_id, "manually_kicked")
             logger.info(
                 "Kick confirmed by admin",
                 provocation_id=provocation_id,
@@ -130,7 +131,7 @@ class ModlogNotifier:
 
         elif action == "dismiss":
             # Mark as dismissed
-            await self.tracker.update_provocation_status(provocation_id, "dismissed")
+            await tracker.update_provocation_status(provocation_id, "dismissed")
             logger.info(
                 "Kick dismissed by admin",
                 provocation_id=provocation_id,

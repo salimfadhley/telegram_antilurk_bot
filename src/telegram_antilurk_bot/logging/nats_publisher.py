@@ -2,7 +2,7 @@
 
 import json
 import os
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import structlog
 
@@ -17,7 +17,10 @@ class NATSEventPublisher:
         self.nats_url = os.environ.get("NATS_URL")
         self.subject_prefix = os.environ.get("NATS_SUBJECT_PREFIX", "antilurk")
         self.enabled = bool(self.nats_url)
-        self._nc = None  # Lazy NATS connection (if available)
+        # Lazy NATS connection (if available)
+        if TYPE_CHECKING:  # pragma: no cover - typing only
+            from nats.aio.client import Client as NATSClient  # noqa: F401
+        self._nc: Any = None
 
         if self.enabled:
             logger.info("NATS publishing enabled", nats_url=self.nats_url)

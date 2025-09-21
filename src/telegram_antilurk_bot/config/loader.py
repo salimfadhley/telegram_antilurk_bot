@@ -28,7 +28,8 @@ class ConfigLoader:
         """Initialize the configuration loader."""
         # Load .env if present to honor local defaults
         try:
-            from dotenv import load_dotenv, find_dotenv
+            from dotenv import find_dotenv, load_dotenv
+
             load_dotenv(find_dotenv(), override=False)
         except Exception:
             pass
