@@ -16,23 +16,23 @@ class TestConfigLoader:
 
         loader = ConfigLoader(config_dir=temp_config_dir)
         assert loader.config_dir == temp_config_dir
-        assert loader.config_path == temp_config_dir / 'config.yaml'
-        assert loader.channels_path == temp_config_dir / 'channels.yaml'
-        assert loader.puzzles_path == temp_config_dir / 'puzzles.yaml'
+        assert loader.config_path == temp_config_dir / "config.yaml"
+        assert loader.channels_path == temp_config_dir / "channels.yaml"
+        assert loader.puzzles_path == temp_config_dir / "puzzles.yaml"
 
     def test_config_loader_uses_environment_variable(self) -> None:
         """ConfigLoader should use CONFIG_DIR from environment if not specified."""
         from telegram_antilurk_bot.config.loader import ConfigLoader
 
-        with patch.dict('os.environ', {'CONFIG_DIR': '/custom/config'}):
+        with patch.dict("os.environ", {"CONFIG_DIR": "/custom/config"}):
             loader = ConfigLoader()
-            assert str(loader.config_dir) == '/custom/config'
+            assert str(loader.config_dir) == "/custom/config"
 
     def test_config_loader_creates_directory_if_missing(self, temp_config_dir: Path) -> None:
         """ConfigLoader should create config directory if it doesn't exist."""
         from telegram_antilurk_bot.config.loader import ConfigLoader
 
-        new_dir = temp_config_dir / 'new_subdir'
+        new_dir = temp_config_dir / "new_subdir"
         assert not new_dir.exists()
 
         ConfigLoader(config_dir=new_dir)
@@ -74,19 +74,19 @@ class TestConfigLoader:
         config.update_provenance("test-init")
 
         # Save it manually
-        config_dict = config.model_dump(mode='json')
-        with open(loader.config_path, 'w') as f:
+        config_dict = config.model_dump(mode="json")
+        with open(loader.config_path, "w") as f:
             yaml.dump(config_dict, f)
 
         # Now manually edit the file (simulate manual edit)
         with open(loader.config_path) as f:
             data = yaml.safe_load(f)
-        data['lurk_threshold_days'] = 10  # Change a value
-        with open(loader.config_path, 'w') as f:
+        data["lurk_threshold_days"] = 10  # Change a value
+        with open(loader.config_path, "w") as f:
             yaml.dump(data, f)
 
         # Load should detect checksum mismatch
-        with patch('telegram_antilurk_bot.config.loader.logger') as mock_logger:
+        with patch("telegram_antilurk_bot.config.loader.logger") as mock_logger:
             loaded_config = loader._load_global_config()
 
             # Should log a warning about checksum mismatch
@@ -105,8 +105,8 @@ class TestConfigLoader:
         loader = ConfigLoader(config_dir=temp_config_dir)
 
         # Write invalid config
-        with open(loader.config_path, 'w') as f:
-            yaml.dump({'lurk_threshold_days': -1}, f)  # Invalid value
+        with open(loader.config_path, "w") as f:
+            yaml.dump({"lurk_threshold_days": -1}, f)  # Invalid value
 
         # Should exit with error
         with pytest.raises(SystemExit) as exc_info:
@@ -128,13 +128,13 @@ class TestConfigLoader:
         # Manually edit the file
         with open(loader.config_path) as f:
             data = yaml.safe_load(f)
-        data['lurk_threshold_days'] = 10
-        with open(loader.config_path, 'w') as f:
+        data["lurk_threshold_days"] = 10
+        with open(loader.config_path, "w") as f:
             yaml.dump(data, f)
 
         # Save new config should detect manual edit
         config2 = GlobalConfig(lurk_threshold_days=14)
-        with patch('telegram_antilurk_bot.config.loader.logger') as mock_logger:
+        with patch("telegram_antilurk_bot.config.loader.logger") as mock_logger:
             old_checksum, new_checksum = loader.save_global_config(config2, "update")
 
             # Should have detected manual edit
@@ -176,9 +176,7 @@ class TestConfigLoader:
         loader = ConfigLoader(config_dir=temp_config_dir)
 
         config = GlobalConfig(
-            lurk_threshold_days=7,
-            provocation_interval_hours=24,
-            enable_nats=True
+            lurk_threshold_days=7, provocation_interval_hours=24, enable_nats=True
         )
 
         loader.save_global_config(config, "test")
@@ -188,10 +186,10 @@ class TestConfigLoader:
             data = yaml.safe_load(f)
 
         # Check structure
-        assert data['lurk_threshold_days'] == 7
-        assert data['provocation_interval_hours'] == 24
-        assert data['enable_nats'] is True
-        assert 'provenance' in data
-        assert 'updated_at' in data['provenance']
-        assert 'updated_by' in data['provenance']
-        assert 'checksum' in data['provenance']
+        assert data["lurk_threshold_days"] == 7
+        assert data["provocation_interval_hours"] == 24
+        assert data["enable_nats"] is True
+        assert "provenance" in data
+        assert "updated_at" in data["provenance"]
+        assert "updated_by" in data["provenance"]
+        assert "checksum" in data["provenance"]

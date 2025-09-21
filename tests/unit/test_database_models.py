@@ -12,12 +12,7 @@ class TestUserModel:
         """User model should store user information."""
         from telegram_antilurk_bot.models.user import User
 
-        user = User(
-            user_id=123456789,
-            username="testuser",
-            first_name="Test",
-            last_name="User"
-        )
+        user = User(user_id=123456789, username="testuser", first_name="Test", last_name="User")
 
         assert user.user_id == 123456789
         assert user.username == "testuser"
@@ -36,6 +31,7 @@ class TestUserModel:
 
         # Mock time passing
         import time
+
         time.sleep(0.01)
 
         user.update_last_seen()
@@ -53,6 +49,7 @@ class TestUserModel:
 
         # Mock time passing
         import time
+
         time.sleep(0.01)
 
         user.update_interaction()
@@ -115,7 +112,7 @@ class TestMessageArchiveModel:
             user_id=123456789,
             text="Hello, world!",
             message_type="text",
-            sent_at=datetime.utcnow()
+            sent_at=datetime.utcnow(),
         )
 
         assert message.chat_id == -1001234567890
@@ -131,12 +128,7 @@ class TestMessageArchiveModel:
         from telegram_antilurk_bot.models.message import MessageArchive
 
         # Regular message
-        message = MessageArchive(
-            chat_id=1,
-            message_id=1,
-            user_id=1,
-            sent_at=datetime.utcnow()
-        )
+        message = MessageArchive(chat_id=1, message_id=1, user_id=1, sent_at=datetime.utcnow())
         assert message.is_reply is False
 
         # Reply message
@@ -148,12 +140,7 @@ class TestMessageArchiveModel:
         from telegram_antilurk_bot.models.message import MessageArchive
 
         # Regular message
-        message = MessageArchive(
-            chat_id=1,
-            message_id=1,
-            user_id=1,
-            sent_at=datetime.utcnow()
-        )
+        message = MessageArchive(chat_id=1, message_id=1, user_id=1, sent_at=datetime.utcnow())
         assert message.is_forward is False
 
         # Forwarded message
@@ -175,7 +162,7 @@ class TestProvocationModel:
             puzzle_id="test_001",
             puzzle_question="What is 2 + 2?",
             correct_answer="4",
-            expires_at=expires
+            expires_at=expires,
         )
 
         assert provocation.chat_id == -1001234567890
@@ -197,7 +184,7 @@ class TestProvocationModel:
             puzzle_id="p1",
             puzzle_question="Q?",
             correct_answer="A",
-            expires_at=datetime.utcnow() + timedelta(hours=1)
+            expires_at=datetime.utcnow() + timedelta(hours=1),
         )
         assert provocation.is_expired is False
 
@@ -215,7 +202,7 @@ class TestProvocationModel:
             puzzle_id="p1",
             puzzle_question="Q?",
             correct_answer="A",
-            expires_at=datetime.utcnow() + timedelta(hours=48)
+            expires_at=datetime.utcnow() + timedelta(hours=48),
         )
 
         assert provocation.sent_at is None
@@ -236,7 +223,7 @@ class TestProvocationModel:
             puzzle_id="p1",
             puzzle_question="Q?",
             correct_answer="A",
-            expires_at=datetime.utcnow() + timedelta(hours=48)
+            expires_at=datetime.utcnow() + timedelta(hours=48),
         )
 
         # Correct answer
@@ -265,7 +252,7 @@ class TestProvocationModel:
             puzzle_id="p1",
             puzzle_question="Q?",
             correct_answer="A",
-            expires_at=datetime.utcnow() + timedelta(hours=48)
+            expires_at=datetime.utcnow() + timedelta(hours=48),
         )
 
         provocation.mark_timeout()
@@ -281,7 +268,7 @@ class TestProvocationModel:
             puzzle_id="p1",
             puzzle_question="Q?",
             correct_answer="A",
-            expires_at=datetime.utcnow() + timedelta(hours=48)
+            expires_at=datetime.utcnow() + timedelta(hours=48),
         )
 
         provocation.mark_cancelled()
@@ -298,14 +285,14 @@ class TestDatabaseInitialization:
         from telegram_antilurk_bot.models.base import get_db_url
 
         # Test with postgres:// format
-        os.environ['DATABASE_URL'] = 'postgres://user:pass@host:5432/db'
+        os.environ["DATABASE_URL"] = "postgres://user:pass@host:5432/db"
         url = get_db_url()
-        assert url == 'postgresql://user:pass@host:5432/db'
+        assert url == "postgresql://user:pass@host:5432/db"
 
         # Test with postgresql:// format
-        os.environ['DATABASE_URL'] = 'postgresql://user:pass@host:5432/db'
+        os.environ["DATABASE_URL"] = "postgresql://user:pass@host:5432/db"
         url = get_db_url()
-        assert url == 'postgresql://user:pass@host:5432/db'
+        assert url == "postgresql://user:pass@host:5432/db"
 
     def test_get_db_url_missing(self):
         """Should raise error if DATABASE_URL is not set."""
@@ -314,7 +301,7 @@ class TestDatabaseInitialization:
         from telegram_antilurk_bot.models.base import get_db_url
 
         # Remove DATABASE_URL if it exists
-        original = os.environ.pop('DATABASE_URL', None)
+        original = os.environ.pop("DATABASE_URL", None)
         try:
             with pytest.raises(ValueError) as exc_info:
                 get_db_url()
@@ -322,4 +309,4 @@ class TestDatabaseInitialization:
         finally:
             # Restore original value
             if original:
-                os.environ['DATABASE_URL'] = original
+                os.environ["DATABASE_URL"] = original

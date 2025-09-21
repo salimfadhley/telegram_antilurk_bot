@@ -76,7 +76,11 @@ class TestShowCommands:
         mock_puzzles_config = Mock()
         mock_puzzles_config.puzzles = []
 
-        mock_config_loader.load_all.return_value = (mock_global_config, mock_channels_config, mock_puzzles_config)
+        mock_config_loader.load_all.return_value = (
+            mock_global_config,
+            mock_channels_config,
+            mock_puzzles_config,
+        )
 
         handler = ShowCommandHandler(config_loader=mock_config_loader)
 
@@ -93,7 +97,7 @@ class TestShowCommands:
         reply_text = mock_update.message.reply_text.call_args[0][0]
         assert "14" in reply_text  # lurk_threshold_days
         assert "15" in reply_text  # audit_cadence_minutes
-        assert "2" in reply_text   # rate_limit_per_hour
+        assert "2" in reply_text  # rate_limit_per_hour
 
     @pytest.mark.asyncio
     async def test_show_reports_only_works_in_moderated_chats(self, temp_config_dir: Path) -> None:
@@ -106,7 +110,11 @@ class TestShowCommands:
         mock_channels_config = Mock()
         mock_channels_config.get_moderated_channels.return_value = []  # No moderated channels
 
-        mock_config_loader.load_all.return_value = (mock_global_config, mock_channels_config, Mock())
+        mock_config_loader.load_all.return_value = (
+            mock_global_config,
+            mock_channels_config,
+            Mock(),
+        )
 
         handler = ShowCommandHandler(config_loader=mock_config_loader)
 
@@ -117,7 +125,7 @@ class TestShowCommands:
         mock_context.args = ["reports"]
 
         # Mock configuration - this chat is modlog, not moderated
-        with patch('telegram_antilurk_bot.admin.show_commands.ConfigLoader') as mock_config:
+        with patch("telegram_antilurk_bot.admin.show_commands.ConfigLoader") as mock_config:
             mock_config_instance = Mock()
             mock_config.return_value = mock_config_instance
             mock_channels_config = Mock()
@@ -146,14 +154,24 @@ class TestShowCommands:
         mock_config_loader.load_all.return_value = (Mock(), mock_channels_config, Mock())
 
         # Mock provocation logger
-        with patch('telegram_antilurk_bot.admin.show_commands.ProvocationLogger') as mock_logger:
+        with patch("telegram_antilurk_bot.admin.show_commands.ProvocationLogger") as mock_logger:
             mock_logger_instance = AsyncMock()
             mock_logger.return_value = mock_logger_instance
 
             # Mock recent reports
             mock_reports = [
-                {'provocation_id': 123, 'user_id': 67890, 'timestamp': datetime.utcnow(), 'event': 'created'},
-                {'provocation_id': 124, 'user_id': 67891, 'timestamp': datetime.utcnow() - timedelta(hours=1), 'event': 'failed'}
+                {
+                    "provocation_id": 123,
+                    "user_id": 67890,
+                    "timestamp": datetime.utcnow(),
+                    "event": "created",
+                },
+                {
+                    "provocation_id": 124,
+                    "user_id": 67891,
+                    "timestamp": datetime.utcnow() - timedelta(hours=1),
+                    "event": "failed",
+                },
             ]
             mock_logger_instance.get_recent_provocations.return_value = mock_reports
 
@@ -283,18 +301,12 @@ class TestCheckUserCommand:
         mock_message_archiver = AsyncMock()
 
         # Mock user lookup
-        mock_user = User(
-            user_id=67890,
-            username="testuser",
-            first_name="Test",
-            last_name="User"
-        )
+        mock_user = User(user_id=67890, username="testuser", first_name="Test", last_name="User")
         mock_user_tracker.get_user_by_username.return_value = mock_user
         mock_message_archiver.get_user_message_count.return_value = 150
 
         handler = CheckUserCommandHandler(
-            user_tracker=mock_user_tracker,
-            message_archiver=mock_message_archiver
+            user_tracker=mock_user_tracker, message_archiver=mock_message_archiver
         )
 
         mock_update = Mock()
@@ -321,17 +333,12 @@ class TestCheckUserCommand:
         mock_user_tracker = AsyncMock()
         mock_message_archiver = AsyncMock()
 
-        mock_user = User(
-            user_id=67890,
-            username="testuser",
-            first_name="Test"
-        )
+        mock_user = User(user_id=67890, username="testuser", first_name="Test")
         mock_user_tracker.get_user.return_value = mock_user
         mock_message_archiver.get_user_message_count.return_value = 42
 
         handler = CheckUserCommandHandler(
-            user_tracker=mock_user_tracker,
-            message_archiver=mock_message_archiver
+            user_tracker=mock_user_tracker, message_archiver=mock_message_archiver
         )
 
         mock_update = Mock()
@@ -360,7 +367,7 @@ class TestCheckUserCommand:
         mock_context = Mock()
         mock_context.args = ["@nonexistentuser"]
 
-        with patch('telegram_antilurk_bot.admin.checkuser_command.UserTracker') as mock_tracker:
+        with patch("telegram_antilurk_bot.admin.checkuser_command.UserTracker") as mock_tracker:
             mock_tracker_instance = Mock()
             mock_tracker.return_value = mock_tracker_instance
             mock_tracker_instance.get_user_by_username.return_value = None
@@ -395,13 +402,12 @@ class TestReportCommand:
         # Mock active users
         active_users = [
             User(user_id=11111, username="active1"),
-            User(user_id=22222, username="active2")
+            User(user_id=22222, username="active2"),
         ]
         mock_user_tracker.get_users_by_activity.return_value = active_users
 
         handler = ReportCommandHandler(
-            config_loader=mock_config_loader,
-            user_tracker=mock_user_tracker
+            config_loader=mock_config_loader, user_tracker=mock_user_tracker
         )
 
         mock_update = Mock()
@@ -437,16 +443,13 @@ class TestReportCommand:
         mock_config_loader.load_all.return_value = (Mock(), mock_channels_config, Mock())
 
         # Mock lurkers
-        lurkers = [
-            User(user_id=33333, username="lurker1"),
-            User(user_id=44444, username="lurker2")
-        ]
+        lurkers = [User(user_id=33333, username="lurker1"), User(user_id=44444, username="lurker2")]
         mock_lurker_selector.get_lurkers_for_chat.return_value = lurkers
 
         handler = ReportCommandHandler(
             config_loader=mock_config_loader,
             user_tracker=mock_user_tracker,
-            lurker_selector=mock_lurker_selector
+            lurker_selector=mock_lurker_selector,
         )
 
         mock_update = Mock()
@@ -459,8 +462,7 @@ class TestReportCommand:
 
         # Should call with custom 7-day threshold
         mock_lurker_selector.get_lurkers_for_chat.assert_called_once_with(
-            chat_id=-1001234567890,
-            days_threshold=7
+            chat_id=-1001234567890, days_threshold=7
         )
 
         # Should generate lurkers report
@@ -482,7 +484,7 @@ class TestReportCommand:
         mock_context = Mock()
         mock_context.args = ["active"]
 
-        with patch('telegram_antilurk_bot.admin.report_command.ConfigLoader') as mock_config:
+        with patch("telegram_antilurk_bot.admin.report_command.ConfigLoader") as mock_config:
             mock_config_instance = Mock()
             mock_config.return_value = mock_config_instance
             mock_channels_config = Mock()
@@ -518,7 +520,11 @@ class TestRebootCommand:
         mock_puzzles_config = Mock()
         mock_puzzles_config.update_provenance = Mock()
 
-        mock_config_loader.load_all.return_value = (mock_global_config, mock_channels_config, mock_puzzles_config)
+        mock_config_loader.load_all.return_value = (
+            mock_global_config,
+            mock_channels_config,
+            mock_puzzles_config,
+        )
 
         handler = RebootCommandHandler(config_loader=mock_config_loader)
 
@@ -527,7 +533,7 @@ class TestRebootCommand:
         mock_update.message.reply_text = AsyncMock()
         mock_context = Mock()
 
-        with patch('telegram_antilurk_bot.admin.reboot_command.sys.exit') as mock_exit:
+        with patch("telegram_antilurk_bot.admin.reboot_command.sys.exit") as mock_exit:
             await handler.handle_reboot_command(mock_update, mock_context)
 
             # Should update provenance (save_all_configs is commented out in current impl)
@@ -568,8 +574,8 @@ class TestRebootCommand:
         mock_update.message.reply_text = AsyncMock()
         mock_context = Mock()
 
-        with patch('telegram_antilurk_bot.admin.reboot_command.Application') as mock_app:
-            with patch('telegram_antilurk_bot.admin.reboot_command.sys.exit'):
+        with patch("telegram_antilurk_bot.admin.reboot_command.Application") as mock_app:
+            with patch("telegram_antilurk_bot.admin.reboot_command.sys.exit"):
                 mock_bot = AsyncMock()
                 mock_app.builder().token().build.return_value.bot = mock_bot
 
@@ -580,7 +586,7 @@ class TestRebootCommand:
 
                 # Check that both modlog channels received shutdown notice
                 call_args_list = mock_bot.send_message.call_args_list
-                chat_ids_called = [call[1]['chat_id'] for call in call_args_list]
+                chat_ids_called = [call[1]["chat_id"] for call in call_args_list]
                 assert -1009876543210 in chat_ids_called
                 assert -1009876543211 in chat_ids_called
 
@@ -601,7 +607,7 @@ class TestPermissionValidation:
         mock_update.message.reply_text = AsyncMock()
 
         # Mock user as non-admin
-        with patch('telegram_antilurk_bot.admin.permission_validator.UserTracker') as mock_tracker:
+        with patch("telegram_antilurk_bot.admin.permission_validator.UserTracker") as mock_tracker:
             mock_tracker_instance = Mock()
             mock_tracker.return_value = mock_tracker_instance
             mock_user = User(user_id=67890, is_admin=False)
@@ -625,7 +631,7 @@ class TestPermissionValidation:
         mock_update.effective_chat.id = -1009876543210  # modlog chat
         mock_update.message.reply_text = AsyncMock()
 
-        with patch('telegram_antilurk_bot.admin.permission_validator.ConfigLoader') as mock_config:
+        with patch("telegram_antilurk_bot.admin.permission_validator.ConfigLoader") as mock_config:
             mock_config_instance = Mock()
             mock_config.return_value = mock_config_instance
             mock_channels_config = Mock()
@@ -648,7 +654,7 @@ class TestPermissionValidation:
         mock_update.effective_chat.id = -1001234567890
         mock_update.effective_user.id = 67890
 
-        with patch('telegram_antilurk_bot.admin.permission_validator.Application') as mock_app:
+        with patch("telegram_antilurk_bot.admin.permission_validator.Application") as mock_app:
             mock_bot = AsyncMock()
             mock_app.builder().token().build.return_value.bot = mock_bot
 
@@ -660,7 +666,4 @@ class TestPermissionValidation:
             is_admin = await validator.validate_telegram_admin(mock_update)
 
             assert is_admin is True
-            mock_bot.get_chat_member.assert_called_once_with(
-                chat_id=-1001234567890,
-                user_id=67890
-            )
+            mock_bot.get_chat_member.assert_called_once_with(chat_id=-1001234567890, user_id=67890)

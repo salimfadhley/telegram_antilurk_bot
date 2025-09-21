@@ -15,7 +15,9 @@ logger = structlog.get_logger(__name__)
 class CallbackHandler:
     """Handles inline keyboard button callbacks for challenges."""
 
-    def __init__(self, tracker: ProvocationTracker | None = None, notifier: ModlogNotifier | None = None) -> None:
+    def __init__(
+        self, tracker: ProvocationTracker | None = None, notifier: ModlogNotifier | None = None
+    ) -> None:
         """Initialize callback handler.
 
         If dependencies are not provided, they are instantiated lazily during
@@ -33,7 +35,7 @@ class CallbackHandler:
         user_id = update.callback_query.from_user.id
 
         # Parse callback data: provocation_{id}_choice_{index}
-        match = re.match(r'provocation_(\d+)_choice_(\d+)', callback_data)
+        match = re.match(r"provocation_(\d+)_choice_(\d+)", callback_data)
         if not match:
             logger.warning("Invalid callback data format", callback_data=callback_data)
             return False
@@ -63,15 +65,16 @@ class CallbackHandler:
             # Edit message to show completion
             message = update.callback_query.message
             if message is not None:
-                edit = getattr(message, 'edit_text', None)
+                edit = getattr(message, "edit_text", None)
                 if callable(edit):
                     result = edit(
                         f"✅ Challenge completed successfully by {getattr(update.callback_query.from_user, 'first_name', None) or 'User'}!",
-                        reply_markup=None
+                        reply_markup=None,
                     )
                     try:
                         # If the result is awaitable, await it; otherwise it's a sync call
                         import inspect
+
                         if inspect.isawaitable(result):
                             await result
                     except TypeError:
@@ -79,9 +82,7 @@ class CallbackHandler:
                         pass
 
             logger.info(
-                "Challenge completed successfully",
-                provocation_id=provocation_id,
-                user_id=user_id
+                "Challenge completed successfully", provocation_id=provocation_id, user_id=user_id
             )
 
         else:
@@ -94,14 +95,14 @@ class CallbackHandler:
             # Edit message to show failure
             message = update.callback_query.message
             if message is not None:
-                edit = getattr(message, 'edit_text', None)
+                edit = getattr(message, "edit_text", None)
                 if callable(edit):
                     result = edit(
-                        "❌ Challenge failed. Administrators have been notified.",
-                        reply_markup=None
+                        "❌ Challenge failed. Administrators have been notified.", reply_markup=None
                     )
                     try:
                         import inspect
+
                         if inspect.isawaitable(result):
                             await result
                     except TypeError:
@@ -110,10 +111,6 @@ class CallbackHandler:
             # Schedule modlog notification for kick
             await notifier.schedule_kick_notification(provocation_id)
 
-            logger.info(
-                "Challenge failed",
-                provocation_id=provocation_id,
-                user_id=user_id
-            )
+            logger.info("Challenge failed", provocation_id=provocation_id, user_id=user_id)
 
         return True

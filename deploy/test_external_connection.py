@@ -66,20 +66,20 @@ def main():
     test_scenarios = [
         {
             "name": "Halob with hostname (postgres superuser)",
-            "url": "postgresql://postgres:postgres@halob:5432/postgres"
+            "url": "postgresql://postgres:postgres@halob:5432/postgres",
         },
         {
             "name": "Halob with IP (postgres superuser)",
-            "url": "postgresql://postgres:postgres@192.168.86.31:5432/postgres"
+            "url": "postgresql://postgres:postgres@192.168.86.31:5432/postgres",
         },
         {
             "name": "Bot user (if created)",
-            "url": "postgresql://antilurk_bot:AntiLurk2024!SecurePass@halob:5432/antilurk"
+            "url": "postgresql://antilurk_bot:AntiLurk2024!SecurePass@halob:5432/antilurk",
         },
         {
             "name": "Custom DATABASE_URL (from environment)",
-            "url": os.environ.get("DATABASE_URL", "")
-        }
+            "url": os.environ.get("DATABASE_URL", ""),
+        },
     ]
 
     print("🔍 Testing PostgreSQL External Connectivity")
@@ -98,7 +98,9 @@ def main():
             success_count += 1
 
     print(f"\n{'=' * 50}")
-    print(f"Summary: {success_count}/{len([s for s in test_scenarios if s['url']])} connections successful")
+    print(
+        f"Summary: {success_count}/{len([s for s in test_scenarios if s['url']])} connections successful"
+    )
 
     if success_count == 0:
         print("\n🚨 No successful connections!")

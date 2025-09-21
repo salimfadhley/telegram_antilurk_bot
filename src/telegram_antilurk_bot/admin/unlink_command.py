@@ -16,15 +16,17 @@ class UnlinkCommandHandler:
         """Initialize unlink command handler."""
         self.config_loader = config_loader or ConfigLoader()
 
-    async def handle_unlink_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def handle_unlink_command(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> None:
         """Handle /antlurk unlink <chat_id> command."""
         if not update.message or not context.args:
             if update.message:
                 await update.message.reply_text(
-                "❌ Usage: `/antlurk unlink <chat_id>`\n\n"
-                "Example: `/antlurk unlink -1009876543210`",
-                parse_mode='Markdown'
-            )
+                    "❌ Usage: `/antlurk unlink <chat_id>`\n\n"
+                    "Example: `/antlurk unlink -1009876543210`",
+                    parse_mode="Markdown",
+                )
             return
 
         # Parse chat ID argument
@@ -53,15 +55,14 @@ class UnlinkCommandHandler:
                     logger.info(
                         "Unlinked moderated chat from modlog",
                         moderated_chat=channel.chat_id,
-                        modlog_chat=target_chat_id
+                        modlog_chat=target_chat_id,
                     )
                     break
 
             if not unlink_performed:
                 # Check if target is a moderated chat linked to something
                 target_channel = next(
-                    (ch for ch in channels_config.channels if ch.chat_id == target_chat_id),
-                    None
+                    (ch for ch in channels_config.channels if ch.chat_id == target_chat_id), None
                 )
                 if target_channel and target_channel.modlog_ref:
                     affected_chat_name = target_channel.chat_name
@@ -70,13 +71,13 @@ class UnlinkCommandHandler:
                     logger.info(
                         "Unlinked moderated chat",
                         moderated_chat=target_chat_id,
-                        was_linked_to=target_channel.modlog_ref
+                        was_linked_to=target_channel.modlog_ref,
                     )
 
             if not unlink_performed:
                 await update.message.reply_text(
                     f"❌ No active link found involving chat ID `{target_chat_id}`.",
-                    parse_mode='Markdown'
+                    parse_mode="Markdown",
                 )
                 return
 
@@ -87,11 +88,15 @@ class UnlinkCommandHandler:
             new_link_code = self._generate_link_code()
 
             success_text = "✅ **Unlink Successful**\n\n"
-            success_text += f"Chat `{affected_chat_name}` has been unlinked from `{target_chat_id}`.\n\n"
+            success_text += (
+                f"Chat `{affected_chat_name}` has been unlinked from `{target_chat_id}`.\n\n"
+            )
             success_text += f"**New Link Code: `{new_link_code}`**\n\n"
-            success_text += "To re-establish connections, use this code in the linking handshake process."
+            success_text += (
+                "To re-establish connections, use this code in the linking handshake process."
+            )
 
-            await update.message.reply_text(success_text, parse_mode='Markdown')
+            await update.message.reply_text(success_text, parse_mode="Markdown")
 
         except Exception as e:
             logger.error("Failed to unlink chat", target_chat_id=target_chat_id, error=str(e))
@@ -101,4 +106,5 @@ class UnlinkCommandHandler:
         """Generate a new link code for re-linking."""
         import random
         import string
-        return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+        return "".join(random.choices(string.ascii_uppercase + string.digits, k=6))

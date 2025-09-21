@@ -1,6 +1,5 @@
 """Rate limiting for provocation enforcement."""
 
-
 import structlog
 
 from ..config.loader import ConfigLoader
@@ -13,7 +12,9 @@ logger = structlog.get_logger(__name__)
 class RateLimiter:
     """Enforces rate limits for provocations per chat."""
 
-    def __init__(self, global_config: GlobalConfig | None = None, config_loader: ConfigLoader | None = None) -> None:
+    def __init__(
+        self, global_config: GlobalConfig | None = None, config_loader: ConfigLoader | None = None
+    ) -> None:
         """Initialize rate limiter with configuration.
 
         Accepts an optional `GlobalConfig` or a `ConfigLoader` to load one.
@@ -80,11 +81,13 @@ class RateLimiter:
         remaining_hourly = max(0, self.hourly_limit - hourly_count)
         remaining_daily = max(0, self.daily_limit - daily_count)
         return {
-            'hourly': remaining_hourly,
-            'daily': remaining_daily,
+            "hourly": remaining_hourly,
+            "daily": remaining_daily,
         }
 
-    async def filter_users_by_rate_limit(self, chat_id: int, users: list[User]) -> tuple[list[User], list[User]]:
+    async def filter_users_by_rate_limit(
+        self, chat_id: int, users: list[User]
+    ) -> tuple[list[User], list[User]]:
         """Filter users based on rate limits, returning (allowed, blocked)."""
         allowed = []
         blocked = []
@@ -108,7 +111,7 @@ class RateLimiter:
             total_users=len(users),
             allowed_users=len(allowed),
             blocked_users=len(blocked),
-            available_slots=available_slots
+            available_slots=available_slots,
         )
 
         return allowed, blocked

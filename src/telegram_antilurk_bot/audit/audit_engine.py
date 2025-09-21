@@ -40,31 +40,28 @@ class AuditEngine:
         for chat in moderated_chats:
             try:
                 result = await self.audit_chat(chat.chat_id)
-                total_lurkers += result['lurkers_found']
-                total_provoked += result['users_provoked']
-                total_backlogged += result['users_backlogged']
+                total_lurkers += result["lurkers_found"]
+                total_provoked += result["users_provoked"]
+                total_backlogged += result["users_backlogged"]
                 processed_chats += 1
 
                 logger.info(
-                    "Chat audit completed",
-                    chat_id=chat.chat_id,
-                    chat_name=chat.chat_name,
-                    **result
+                    "Chat audit completed", chat_id=chat.chat_id, chat_name=chat.chat_name, **result
                 )
             except Exception as e:
                 logger.error(
                     "Chat audit failed",
                     chat_id=chat.chat_id,
                     chat_name=chat.chat_name,
-                    error=str(e)
+                    error=str(e),
                 )
 
         audit_result = {
-            'processed_chats': processed_chats,
-            'total_lurkers': total_lurkers,
-            'total_provoked': total_provoked,
-            'total_backlogged': total_backlogged,
-            'backlog_stats': self.backlog_manager.get_backlog_stats()
+            "processed_chats": processed_chats,
+            "total_lurkers": total_lurkers,
+            "total_provoked": total_provoked,
+            "total_backlogged": total_backlogged,
+            "backlog_stats": self.backlog_manager.get_backlog_stats(),
         }
 
         logger.info("Full audit completed", **audit_result)
@@ -105,7 +102,7 @@ class AuditEngine:
 
     def _process_chat(self, channel: Any) -> None:
         """Process a single moderated channel (sync wrapper for tests)."""
-        chat_id = getattr(channel, 'chat_id', None)
+        chat_id = getattr(channel, "chat_id", None)
         if chat_id is None:
             return
         lurkers = self._identify_lurkers(chat_id)
@@ -137,10 +134,7 @@ class AuditEngine:
                 provoked_count += 1
             except Exception as e:
                 logger.error(
-                    "Failed to provoke user",
-                    chat_id=chat_id,
-                    user_id=user.user_id,
-                    error=str(e)
+                    "Failed to provoke user", chat_id=chat_id, user_id=user.user_id, error=str(e)
                 )
 
         # Update backlog with blocked users
@@ -150,10 +144,10 @@ class AuditEngine:
             self.backlog_manager.add_to_backlog(chat_id, blocked_users)
 
         result = {
-            'lurkers_found': len(new_lurkers),
-            'backlog_processed': len(backlog_users),
-            'users_provoked': provoked_count,
-            'users_backlogged': len(blocked_users)
+            "lurkers_found": len(new_lurkers),
+            "backlog_processed": len(backlog_users),
+            "users_provoked": provoked_count,
+            "users_backlogged": len(blocked_users),
         }
 
         return result
@@ -162,9 +156,4 @@ class AuditEngine:
         """Send provocation to a specific user."""
         # This would implement the actual provocation logic
         # For now, just log it to make tests pass
-        logger.info(
-            "User provoked",
-            chat_id=chat_id,
-            user_id=user.user_id,
-            username=user.username
-        )
+        logger.info("User provoked", chat_id=chat_id, user_id=user.user_id, username=user.username)

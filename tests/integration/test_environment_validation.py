@@ -37,7 +37,9 @@ class TestEnvironmentVariables:
 
         assert len(token) > 20, "TELEGRAM_TOKEN appears too short"
         assert ":" in token, "TELEGRAM_TOKEN should contain ':' (format: botid:token)"
-        assert db_url.startswith(("postgresql://", "postgres://")), "DATABASE_URL should be PostgreSQL URL"
+        assert db_url.startswith(("postgresql://", "postgres://")), (
+            "DATABASE_URL should be PostgreSQL URL"
+        )
 
     def test_optional_environment_variables_format(self) -> None:
         """Test format of optional environment variables if present."""
@@ -71,8 +73,12 @@ class TestEnvironmentVariables:
             # Should not use default/insecure passwords in production-like URLs
             if "halob" in db_url or "192.168.86.31" in db_url:
                 # This is expected to be a real server, check for security
-                assert "password" not in db_url.lower(), "DATABASE_URL contains 'password' - use secure credentials"
-                assert "admin" not in db_url.lower(), "DATABASE_URL contains 'admin' - use specific user"
+                assert "password" not in db_url.lower(), (
+                    "DATABASE_URL contains 'password' - use secure credentials"
+                )
+                assert "admin" not in db_url.lower(), (
+                    "DATABASE_URL contains 'admin' - use specific user"
+                )
 
 
 class TestPostgreSQLConnectivity:
@@ -108,14 +114,16 @@ class TestPostgreSQLConnectivity:
             assert result._mapping["test"] == 1
 
             # Test database info
-            db_info = conn.execute(text("""
+            db_info = conn.execute(
+                text("""
                 SELECT
                     current_database() as db_name,
                     current_user as username,
                     version() as pg_version,
                     inet_server_addr() as server_ip,
                     inet_server_port() as server_port
-            """)).first()
+            """)
+            ).first()
 
             assert db_info is not None
             print(f"✅ Connected to database: {db_info.db_name}")
@@ -124,7 +132,11 @@ class TestPostgreSQLConnectivity:
             print(f"✅ PostgreSQL version: {db_info.pg_version[:60]}...")
 
             # Test permissions
-            conn.execute(text("CREATE TEMP TABLE env_test_permissions (id SERIAL, created_at TIMESTAMP DEFAULT NOW())"))
+            conn.execute(
+                text(
+                    "CREATE TEMP TABLE env_test_permissions (id SERIAL, created_at TIMESTAMP DEFAULT NOW())"
+                )
+            )
             conn.execute(text("INSERT INTO env_test_permissions DEFAULT VALUES"))
             count = conn.execute(text("SELECT COUNT(*) FROM env_test_permissions")).first()
             conn.execute(text("DROP TABLE env_test_permissions"))
@@ -205,6 +217,7 @@ class TestServiceIntegration:
         else:
             try:
                 import socket
+
                 host, port = url_parts[0], int(url_parts[1])
                 sock = socket.socket()
                 sock.settimeout(3)
@@ -228,8 +241,7 @@ class TestServiceIntegration:
 
         # Fail if any services are down
         failed_services = [
-            service for service, status in services_status.items()
-            if status.startswith("❌")
+            service for service, status in services_status.items() if status.startswith("❌")
         ]
 
         if failed_services:

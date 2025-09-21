@@ -16,9 +16,16 @@ logger = structlog.get_logger(__name__)
 class AuditScheduler:
     """Scheduler for running periodic audits of lurker activity."""
 
-    def __init__(self, config_dir: Path | None = None, config_loader: ConfigLoader | None = None, audit_engine: AuditEngine | None = None) -> None:
+    def __init__(
+        self,
+        config_dir: Path | None = None,
+        config_loader: ConfigLoader | None = None,
+        audit_engine: AuditEngine | None = None,
+    ) -> None:
         """Initialize the audit scheduler."""
-        self.config_loader = config_loader or (ConfigLoader(config_dir=config_dir) if config_dir else ConfigLoader())
+        self.config_loader = config_loader or (
+            ConfigLoader(config_dir=config_dir) if config_dir else ConfigLoader()
+        )
         self.global_config, _, _ = self.config_loader.load_all()
         self.audit_cadence_minutes = self.global_config.audit_cadence_minutes
         self.audit_engine = audit_engine or AuditEngine()
@@ -26,10 +33,7 @@ class AuditScheduler:
         self._task: asyncio.Task[None] | None = None
         self._last_run: datetime | None = None
 
-        logger.info(
-            "AuditScheduler initialized",
-            audit_cadence_minutes=self.audit_cadence_minutes
-        )
+        logger.info("AuditScheduler initialized", audit_cadence_minutes=self.audit_cadence_minutes)
 
     @property
     def is_running(self) -> bool:
@@ -103,13 +107,13 @@ class AuditScheduler:
                     logger.info(
                         "Audit cycle completed",
                         duration_seconds=(datetime.utcnow() - start_time).total_seconds(),
-                        **result
+                        **result,
                     )
                 except Exception as e:
                     logger.error(
                         "Audit cycle failed",
                         error=str(e),
-                        duration_seconds=(datetime.utcnow() - start_time).total_seconds()
+                        duration_seconds=(datetime.utcnow() - start_time).total_seconds(),
                     )
 
                 # Wait for next cycle

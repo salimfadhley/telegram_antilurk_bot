@@ -73,13 +73,15 @@ def test_external_database_connection() -> None:
         assert calc_result._mapping["result"] == 2
 
         # Test server info
-        server_info = conn.execute(text("""
+        server_info = conn.execute(
+            text("""
             SELECT
                 current_database() as db_name,
                 current_user as username,
                 inet_server_addr() as server_ip,
                 inet_server_port() as server_port
-        """)).first()
+        """)
+        ).first()
 
         assert server_info is not None
         print(f"✅ Database: {server_info.db_name}")
@@ -94,7 +96,11 @@ def test_database_connection_resilience(monkeypatch: MonkeyPatch) -> None:
         pytest.fail("DATABASE_URL not set - required for integration tests")
 
     # Skip if this is a localhost/test URL
-    if "localhost" in original_db_url or "127.0.0.1" in original_db_url or "test:test@" in original_db_url:
+    if (
+        "localhost" in original_db_url
+        or "127.0.0.1" in original_db_url
+        or "test:test@" in original_db_url
+    ):
         pytest.skip("DATABASE_URL points to localhost/test - use real external database")
 
     # Test original URL first
@@ -127,7 +133,9 @@ def test_connection_with_custom_database_url(monkeypatch: MonkeyPatch) -> None:
     """Test connection using environment variable if provided."""
     db_url = os.environ.get("TEST_DATABASE_URL")
     if not db_url:
-        pytest.skip("TEST_DATABASE_URL not set - provide a connection string to test external database")
+        pytest.skip(
+            "TEST_DATABASE_URL not set - provide a connection string to test external database"
+        )
 
     monkeypatch.setenv("DATABASE_URL", db_url)
 

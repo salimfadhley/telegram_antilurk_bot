@@ -19,6 +19,7 @@ class User(BaseModel):
 
     class Config:
         """Pydantic configuration."""
+
         from_attributes = True
 
 
@@ -34,6 +35,7 @@ class MessageArchive(BaseModel):
 
     class Config:
         """Pydantic configuration."""
+
         from_attributes = True
 
 
@@ -52,4 +54,5 @@ class Provocation(BaseModel):
 
     class Config:
         """Pydantic configuration."""
+
         from_attributes = True

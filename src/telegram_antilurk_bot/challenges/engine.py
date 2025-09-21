@@ -5,4 +5,3 @@ This module re-exports the implementation from `challenge_engine`.
 """
 
 from .challenge_engine import ChallengeEngine  # noqa: F401
-

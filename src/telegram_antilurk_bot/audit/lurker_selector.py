@@ -15,7 +15,9 @@ logger = structlog.get_logger(__name__)
 class LurkerSelector:
     """Selects lurkers based on activity thresholds."""
 
-    def __init__(self, global_config: GlobalConfig | None = None, config_loader: ConfigLoader | None = None) -> None:
+    def __init__(
+        self, global_config: GlobalConfig | None = None, config_loader: ConfigLoader | None = None
+    ) -> None:
         """Initialize lurker selector with configuration.
 
         Accepts an optional `GlobalConfig` or a `ConfigLoader` to load one.
@@ -53,7 +55,7 @@ class LurkerSelector:
             "Identified lurkers",
             chat_id=chat_id,
             threshold_days=threshold_days,
-            selected=len(result)
+            selected=len(result),
         )
         return result
 
@@ -68,7 +70,9 @@ class LurkerSelector:
         return False
 
     # --- Async helpers retained for other parts of the codebase ---
-    async def get_lurkers_for_chat(self, chat_id: int, days_threshold: int | None = None) -> list[User]:
+    async def get_lurkers_for_chat(
+        self, chat_id: int, days_threshold: int | None = None
+    ) -> list[User]:
         """Get list of lurkers for a specific chat using basic rules.
 
         This is a simplified async variant used by the audit engine.

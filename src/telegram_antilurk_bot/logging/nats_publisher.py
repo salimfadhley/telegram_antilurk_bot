@@ -14,8 +14,8 @@ class NATSEventPublisher:
 
     def __init__(self) -> None:
         """Initialize NATS publisher."""
-        self.nats_url = os.environ.get('NATS_URL')
-        self.subject_prefix = os.environ.get('NATS_SUBJECT_PREFIX', 'antilurk')
+        self.nats_url = os.environ.get("NATS_URL")
+        self.subject_prefix = os.environ.get("NATS_SUBJECT_PREFIX", "antilurk")
         self.enabled = bool(self.nats_url)
         self._nc = None  # Lazy NATS connection (if available)
 
@@ -56,20 +56,22 @@ class NATSEventPublisher:
             logger.info(
                 "Event published to NATS",
                 subject=full_subject,
-                event_type=event_data.get('event_type', 'unknown')
+                event_type=event_data.get("event_type", "unknown"),
             )
 
             return True
 
         except ImportError:
-            logger.warning("NATS library not available - install 'nats-py' to enable NATS publishing")
+            logger.warning(
+                "NATS library not available - install 'nats-py' to enable NATS publishing"
+            )
             return False
         except Exception as e:
             logger.error(
                 "Failed to publish event to NATS",
                 subject=subject,
                 error=str(e),
-                nats_url=self.nats_url
+                nats_url=self.nats_url,
             )
             return False
 
@@ -81,6 +83,7 @@ class NATSEventPublisher:
             return True
         try:
             import nats
+
             assert self.nats_url is not None
             self._nc = await nats.connect(self.nats_url)
             logger.info("Connected to NATS", nats_url=self.nats_url)
@@ -98,88 +101,76 @@ class NATSEventPublisher:
             self._nc = None
 
     async def publish_challenge_failed(
-        self,
-        chat_id: int,
-        user_id: int,
-        provocation_id: int
+        self, chat_id: int, user_id: int, provocation_id: int
     ) -> None:
         """Publish challenge failed event."""
         if not self.enabled:
             return
 
         event_data = {
-            'event_type': 'challenge_failed',
-            'chat_id': chat_id,
-            'user_id': user_id,
-            'provocation_id': provocation_id,
-            'timestamp': self._get_timestamp()
+            "event_type": "challenge_failed",
+            "chat_id": chat_id,
+            "user_id": user_id,
+            "provocation_id": provocation_id,
+            "timestamp": self._get_timestamp(),
         }
 
-        await self.publish_event('challenge.failed', event_data)
+        await self.publish_event("challenge.failed", event_data)
 
     async def publish_challenge_completed(
-        self,
-        chat_id: int,
-        user_id: int,
-        provocation_id: int
+        self, chat_id: int, user_id: int, provocation_id: int
     ) -> None:
         """Publish challenge completed event."""
         if not self.enabled:
             return
 
         event_data = {
-            'event_type': 'challenge_completed',
-            'chat_id': chat_id,
-            'user_id': user_id,
-            'provocation_id': provocation_id,
-            'timestamp': self._get_timestamp()
+            "event_type": "challenge_completed",
+            "chat_id": chat_id,
+            "user_id": user_id,
+            "provocation_id": provocation_id,
+            "timestamp": self._get_timestamp(),
         }
 
-        await self.publish_event('challenge.completed', event_data)
+        await self.publish_event("challenge.completed", event_data)
 
     async def publish_user_kicked(
-        self,
-        chat_id: int,
-        user_id: int,
-        admin_user_id: int,
-        reason: str = "failed_challenge"
+        self, chat_id: int, user_id: int, admin_user_id: int, reason: str = "failed_challenge"
     ) -> None:
         """Publish user kicked event."""
         if not self.enabled:
             return
 
         event_data = {
-            'event_type': 'user_kicked',
-            'chat_id': chat_id,
-            'user_id': user_id,
-            'admin_user_id': admin_user_id,
-            'reason': reason,
-            'timestamp': self._get_timestamp()
+            "event_type": "user_kicked",
+            "chat_id": chat_id,
+            "user_id": user_id,
+            "admin_user_id": admin_user_id,
+            "reason": reason,
+            "timestamp": self._get_timestamp(),
         }
 
-        await self.publish_event('user.kicked', event_data)
+        await self.publish_event("user.kicked", event_data)
 
     async def publish_audit_completed(
-        self,
-        processed_chats: int,
-        total_lurkers: int,
-        total_provoked: int
+        self, processed_chats: int, total_lurkers: int, total_provoked: int
     ) -> None:
         """Publish audit cycle completed event."""
         if not self.enabled:
             return
 
         event_data = {
-            'event_type': 'audit_completed',
-            'processed_chats': processed_chats,
-            'total_lurkers': total_lurkers,
-            'total_provoked': total_provoked,
-            'timestamp': self._get_timestamp()
+            "event_type": "audit_completed",
+            "processed_chats": processed_chats,
+            "total_lurkers": total_lurkers,
+            "total_provoked": total_provoked,
+            "timestamp": self._get_timestamp(),
         }
 
-        await self.publish_event('audit.completed', event_data)
+        await self.publish_event("audit.completed", event_data)
 
     def _get_timestamp(self) -> str:
         """Get current timestamp as ISO string."""
         from datetime import datetime
-        return datetime.utcnow().isoformat() + 'Z'
+
+        return datetime.utcnow().isoformat() + "Z"

@@ -19,7 +19,9 @@ class RebootCommandHandler:
         """Initialize reboot command handler."""
         self.config_loader = config_loader or ConfigLoader()
 
-    async def handle_reboot_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def handle_reboot_command(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> None:
         """Handle /antlurk reboot command."""
         if not update.message:
             return
@@ -30,7 +32,7 @@ class RebootCommandHandler:
                 "🔄 **System Reboot Initiated**\n\n"
                 "Persisting configuration state and shutting down gracefully...\n"
                 "The bot will restart automatically if configured with a process manager.",
-                parse_mode='Markdown'
+                parse_mode="Markdown",
             )
 
             # Persist all configuration state
@@ -42,7 +44,7 @@ class RebootCommandHandler:
             logger.info(
                 "Reboot command executed",
                 requested_by=update.effective_user.id if update.effective_user else None,
-                chat_id=update.effective_chat.id if update.effective_chat else None
+                chat_id=update.effective_chat.id if update.effective_chat else None,
             )
 
             # Exit with code 0 for graceful shutdown
@@ -94,7 +96,7 @@ class RebootCommandHandler:
                 return
 
             # Get bot token
-            bot_token = os.environ.get('TELEGRAM_TOKEN')
+            bot_token = os.environ.get("TELEGRAM_TOKEN")
             if not bot_token:
                 logger.warning("No TELEGRAM_TOKEN available for shutdown notifications")
                 return
@@ -115,20 +117,18 @@ class RebootCommandHandler:
             for modlog in modlog_channels:
                 try:
                     await app.bot.send_message(
-                        chat_id=modlog.chat_id,
-                        text=shutdown_message,
-                        parse_mode='Markdown'
+                        chat_id=modlog.chat_id, text=shutdown_message, parse_mode="Markdown"
                     )
                     logger.info(
                         "Shutdown notice sent",
                         modlog_chat_id=modlog.chat_id,
-                        modlog_name=modlog.chat_name
+                        modlog_name=modlog.chat_name,
                     )
                 except Exception as e:
                     logger.error(
                         "Failed to send shutdown notice",
                         modlog_chat_id=modlog.chat_id,
-                        error=str(e)
+                        error=str(e),
                     )
 
         except Exception as e:

@@ -33,18 +33,21 @@ class TestDeploymentSmoke:
         """Main module should be importable."""
         try:
             from telegram_antilurk_bot.main import main
+
             assert callable(main), "Main function should be callable"
         except ImportError as e:
             pytest.fail(f"Could not import main module: {e}")
 
     def test_package_entry_point_exists(self) -> None:
         """Package should have __main__.py entry point."""
-        main_path = Path(__file__).parent.parent.parent / "src" / "telegram_antilurk_bot" / "__main__.py"
+        main_path = (
+            Path(__file__).parent.parent.parent / "src" / "telegram_antilurk_bot" / "__main__.py"
+        )
         assert main_path.exists(), "__main__.py not found in package"
 
     @pytest.mark.skipif(
         subprocess.run(["which", "docker"], capture_output=True).returncode != 0,
-        reason="Docker not available"
+        reason="Docker not available",
     )
     def test_dockerfile_builds(self) -> None:
         """Dockerfile should build successfully."""
@@ -55,7 +58,7 @@ class TestDeploymentSmoke:
             ["docker", "build", "-t", "telegram-antilurk-bot:test", "."],
             cwd=project_root,
             capture_output=True,
-            text=True
+            text=True,
         )
 
         if result.returncode != 0:
@@ -63,17 +66,14 @@ class TestDeploymentSmoke:
 
     @pytest.mark.skipif(
         subprocess.run(["which", "docker-compose"], capture_output=True).returncode != 0,
-        reason="Docker Compose not available"
+        reason="Docker Compose not available",
     )
     def test_docker_compose_validates(self) -> None:
         """Docker compose configuration should be valid."""
         deploy_dir = Path(__file__).parent.parent.parent / "deploy"
 
         result = subprocess.run(
-            ["docker-compose", "config"],
-            cwd=deploy_dir,
-            capture_output=True,
-            text=True
+            ["docker-compose", "config"], cwd=deploy_dir, capture_output=True, text=True
         )
 
         if result.returncode != 0:
@@ -91,7 +91,9 @@ class TestDeploymentSmoke:
 
     def test_startup_script_executable(self) -> None:
         """Main module should be executable."""
-        main_path = Path(__file__).parent.parent.parent / "src" / "telegram_antilurk_bot" / "__main__.py"
+        main_path = (
+            Path(__file__).parent.parent.parent / "src" / "telegram_antilurk_bot" / "__main__.py"
+        )
         content = main_path.read_text()
 
         # Check for async main execution
@@ -156,7 +158,7 @@ class TestEnvironmentValidation:
             "DATA_DIR": "/data",
             "CONFIG_DIR": "/data/config",
             "TZ": "UTC",
-            "LOG_LEVEL": "INFO"
+            "LOG_LEVEL": "INFO",
         }
 
         # These would be tested in the actual configuration loading

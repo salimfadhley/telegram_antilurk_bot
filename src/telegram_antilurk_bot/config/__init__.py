@@ -14,15 +14,15 @@ from .schemas import (
 )
 
 __all__ = [
-    'GlobalConfig',
-    'ChannelsConfig',
-    'PuzzlesConfig',
-    'ChannelEntry',
-    'ChannelOverride',
-    'Puzzle',
-    'PuzzleChoice',
-    'ProvenanceInfo',
-    'ConfigLoader',
-    'ConfigurationError',
-    'get_default_puzzles',
+    "GlobalConfig",
+    "ChannelsConfig",
+    "PuzzlesConfig",
+    "ChannelEntry",
+    "ChannelOverride",
+    "Puzzle",
+    "PuzzleChoice",
+    "ProvenanceInfo",
+    "ConfigLoader",
+    "ConfigurationError",
+    "get_default_puzzles",
 ]

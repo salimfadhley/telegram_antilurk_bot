@@ -52,7 +52,7 @@ class ChallengeEngine:
         puzzle = random.choice(puzzles_config.puzzles)
 
         # Create provocation record first to get ID
-        bot_token = os.environ.get('TELEGRAM_TOKEN')
+        bot_token = os.environ.get("TELEGRAM_TOKEN")
         if not bot_token:
             raise ValueError("TELEGRAM_TOKEN not configured")
 
@@ -62,7 +62,7 @@ class ChallengeEngine:
             user_id=user.user_id,
             puzzle_id=puzzle.id,
             message_id=0,  # Will be updated after posting
-            expiration_minutes=30
+            expiration_minutes=30,
         )
         provocation_id = await created if inspect.isawaitable(created) else created
         if not isinstance(provocation_id, int):
@@ -79,7 +79,7 @@ class ChallengeEngine:
                 puzzle=puzzle,
                 user=user,
                 bot_token=bot_token,
-                provocation_id=provocation_id
+                provocation_id=provocation_id,
             )
             message_id = await posted if inspect.isawaitable(posted) else posted
 
@@ -95,29 +95,20 @@ class ChallengeEngine:
                 chat_id=chat_id,
                 user_id=user.user_id,
                 puzzle_id=puzzle.id,
-                message_id=message_id
+                message_id=message_id,
             )
 
             return provocation_id
 
         except Exception as e:
-            logger.error(
-                "Failed to post challenge",
-                provocation_id=provocation_id,
-                error=str(e)
-            )
+            logger.error("Failed to post challenge", provocation_id=provocation_id, error=str(e))
             # Mark provocation as failed
             upd = tracker.update_provocation_status(provocation_id, "failed")
             if inspect.isawaitable(upd):
                 await upd
             raise
 
-    async def handle_user_response(
-        self,
-        provocation_id: int,
-        user_id: int,
-        correct: bool
-    ) -> bool:
+    async def handle_user_response(self, provocation_id: int, user_id: int, correct: bool) -> bool:
         """Handle user response to challenge (for testing purposes)."""
         tracker = self.tracker or ProvocationTracker()
         notifier = self.notifier or ModlogNotifier()
@@ -128,11 +119,7 @@ class ChallengeEngine:
             )
             if inspect.isawaitable(upd):
                 await upd
-            logger.info(
-                "Challenge completed",
-                provocation_id=provocation_id,
-                user_id=user_id
-            )
+            logger.info("Challenge completed", provocation_id=provocation_id, user_id=user_id)
         else:
             upd = tracker.update_provocation_status(
                 provocation_id, "failed", response_user_id=user_id
@@ -145,7 +132,7 @@ class ChallengeEngine:
             logger.info(
                 "Challenge failed, notification sent",
                 provocation_id=provocation_id,
-                user_id=user_id
+                user_id=user_id,
             )
 
         return True
@@ -162,14 +149,14 @@ class ChallengeEngine:
         # expired_provocations may be a Mock; if not iterable, fall back to recent ids
         candidates: list[int]
         try:
-            candidates = [getattr(p, 'provocation_id', p) for p in expired_provocations]
+            candidates = [getattr(p, "provocation_id", p) for p in expired_provocations]
         except TypeError:
             candidates = list(self._recent_provocations)
 
         for provocation_id in candidates:
             try:
                 # If tracker exposes is_provocation_expired, honor it
-                expired_check = getattr(tracker, 'is_provocation_expired', None)
+                expired_check = getattr(tracker, "is_provocation_expired", None)
                 is_expired = True
                 if callable(expired_check):
                     res = expired_check(provocation_id)
@@ -192,7 +179,11 @@ class ChallengeEngine:
                 logger.info("Expired challenge processed", provocation_id=provocation_id)
 
             except Exception as e:
-                logger.error("Failed to process expired challenge", provocation_id=provocation_id, error=str(e))
+                logger.error(
+                    "Failed to process expired challenge",
+                    provocation_id=provocation_id,
+                    error=str(e),
+                )
 
         try:
             expired_count = len(expired_provocations)  # type: ignore[arg-type]
@@ -200,9 +191,9 @@ class ChallengeEngine:
             expired_count = len(candidates)
 
         result = {
-            'expired_challenges': expired_count,
-            'processed_count': processed_count,
-            'notifications_sent': notification_count
+            "expired_challenges": expired_count,
+            "processed_count": processed_count,
+            "notifications_sent": notification_count,
         }
 
         logger.info("Expired challenges processed", **result)
@@ -214,10 +205,7 @@ class ChallengeEngine:
         return await self.start_challenge(chat_id=chat_id, user=user)
 
     async def handle_challenge_response(
-        self,
-        provocation_id: int,
-        user_id: int,
-        correct: bool
+        self, provocation_id: int, user_id: int, correct: bool
     ) -> bool:
         """Contract alias for handling a user response."""
         return await self.handle_user_response(

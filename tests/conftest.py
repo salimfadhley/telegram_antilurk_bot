@@ -19,12 +19,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env", override=False)
 
 # Set default test environment variables if missing
-os.environ.setdefault(
-    "TELEGRAM_TOKEN", "test_token_123456789:ABCdefGhIJKlmNoPQRstuVwxyZ"
-)
-os.environ.setdefault(
-    "DATABASE_URL", "postgresql://test:test@localhost:5432/test_antilurk"
-)
+os.environ.setdefault("TELEGRAM_TOKEN", "test_token_123456789:ABCdefGhIJKlmNoPQRstuVwxyZ")
+os.environ.setdefault("DATABASE_URL", "postgresql://test:test@localhost:5432/test_antilurk")
 
 
 @pytest.fixture
@@ -104,6 +100,7 @@ def sample_config_data() -> dict[str, Any]:
 def mock_database_engine() -> MagicMock:
     """Mock database engine for testing."""
     from unittest.mock import MagicMock
+
     engine = MagicMock()
     engine.connect = MagicMock()
     return engine

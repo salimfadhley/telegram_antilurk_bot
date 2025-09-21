@@ -12,4 +12,3 @@ def db_url() -> str:
     if not url:
         pytest.skip("DATABASE_URL not set; skipping external DB connectivity test")
     return url
-

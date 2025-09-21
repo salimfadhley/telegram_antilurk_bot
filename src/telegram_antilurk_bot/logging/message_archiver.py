@@ -15,7 +15,9 @@ logger = structlog.get_logger(__name__)
 class MessageArchiver:
     """Archives messages from moderated chats to the database."""
 
-    def __init__(self, config_loader: ConfigLoader | None = None, user_tracker: UserTracker | None = None) -> None:
+    def __init__(
+        self, config_loader: ConfigLoader | None = None, user_tracker: UserTracker | None = None
+    ) -> None:
         """Initialize message archiver."""
         self.config_loader = config_loader or ConfigLoader()
         self.user_tracker = user_tracker or UserTracker()
@@ -48,7 +50,7 @@ class MessageArchiver:
             user_id=update.message.from_user.id,
             message_text=message_text,
             message_date=update.message.date,
-            message_type=message_type
+            message_type=message_type,
         )
 
         # Store in archive (placeholder for database)
@@ -59,7 +61,7 @@ class MessageArchiver:
             user_id=update.message.from_user.id,
             chat_id=update.message.chat.id,
             timestamp=update.message.date,
-            telegram_user=update.message.from_user
+            telegram_user=update.message.from_user,
         )
 
         logger.info(
@@ -67,7 +69,7 @@ class MessageArchiver:
             message_id=update.message.message_id,
             chat_id=update.message.chat.id,
             user_id=update.message.from_user.id,
-            message_type=message_type
+            message_type=message_type,
         )
 
         return archive_entry
@@ -89,7 +91,7 @@ class MessageArchiver:
         elif message.photo:
             return "photo", message.caption
         elif message.sticker:
-            return "sticker", getattr(message.sticker, 'emoji', None)
+            return "sticker", getattr(message.sticker, "emoji", None)
         elif message.document:
             return "document", message.caption
         elif message.video:
@@ -105,17 +107,17 @@ class MessageArchiver:
 
     async def get_recent_messages(self, chat_id: int, limit: int = 100) -> list[MessageArchive]:
         """Get recent messages from a chat."""
-        chat_messages = [
-            msg for msg in self._message_archive
-            if msg.chat_id == chat_id
-        ]
+        chat_messages = [msg for msg in self._message_archive if msg.chat_id == chat_id]
         # Sort by date descending and limit
         chat_messages.sort(key=lambda x: x.message_date, reverse=True)
         return chat_messages[:limit]
 
     async def get_user_message_count(self, user_id: int, chat_id: int) -> int:
         """Get count of messages from user in specific chat."""
-        return len([
-            msg for msg in self._message_archive
-            if msg.user_id == user_id and msg.chat_id == chat_id
-        ])
+        return len(
+            [
+                msg
+                for msg in self._message_archive
+                if msg.user_id == user_id and msg.chat_id == chat_id
+            ]
+        )

@@ -32,11 +32,7 @@ class BacklogManager:
         """Get backlog for a specific chat."""
         backlog = self._backlogs.get(chat_id, [])
 
-        logger.debug(
-            "Retrieved backlog",
-            chat_id=chat_id,
-            backlog_size=len(backlog)
-        )
+        logger.debug("Retrieved backlog", chat_id=chat_id, backlog_size=len(backlog))
 
         return backlog.copy()
 
@@ -52,11 +48,7 @@ class BacklogManager:
         cleared_count = len(self._backlogs[chat_id])
         self._backlogs[chat_id] = []
 
-        logger.info(
-            "Cleared backlog",
-            chat_id=chat_id,
-            cleared_count=cleared_count
-        )
+        logger.info("Cleared backlog", chat_id=chat_id, cleared_count=cleared_count)
 
         return cleared_count
 
@@ -77,7 +69,7 @@ class BacklogManager:
             "Removed users from backlog",
             chat_id=chat_id,
             removed_count=len(removed_users),
-            remaining_backlog=len(self._backlogs[chat_id])
+            remaining_backlog=len(self._backlogs[chat_id]),
         )
 
         return removed_users
@@ -92,10 +84,10 @@ class BacklogManager:
     def get_backlog_stats(self) -> dict[str, Any]:
         """Get statistics about current backlogs."""
         stats = {
-            'total_chats': len(self._backlogs),
-            'total_users': self.get_total_backlog_size(),
-            'per_chat_counts': {chat_id: len(users) for chat_id, users in self._backlogs.items()},
-            'timestamp': datetime.utcnow()
+            "total_chats": len(self._backlogs),
+            "total_users": self.get_total_backlog_size(),
+            "per_chat_counts": {chat_id: len(users) for chat_id, users in self._backlogs.items()},
+            "timestamp": datetime.utcnow(),
         }
 
         logger.debug("Backlog statistics", **stats)
@@ -104,7 +96,11 @@ class BacklogManager:
     # --- Private helpers expected by unit tests ---
     def _save_to_backlog(self, chat_id: int, user: User, reason: str | None = None) -> None:
         """Persist a single user entry into the backlog."""
-        entry = {'user_id': getattr(user, 'user_id', None), 'added_at': datetime.utcnow(), 'reason': reason}
+        entry = {
+            "user_id": getattr(user, "user_id", None),
+            "added_at": datetime.utcnow(),
+            "reason": reason,
+        }
         self._backlogs.setdefault(chat_id, [])
         # Maintain a list of User objects for production, but tests can patch this function
         self._backlogs[chat_id].append(user)
@@ -113,11 +109,15 @@ class BacklogManager:
     def _get_backlog_entries(self, chat_id: int) -> list[dict[str, Any]]:
         """Return serialized backlog entries (user_id + timestamps)."""
         users = self._backlogs.get(chat_id, [])
-        return [{'user_id': getattr(u, 'user_id', None), 'added_at': datetime.utcnow()} for u in users]
+        return [
+            {"user_id": getattr(u, "user_id", None), "added_at": datetime.utcnow()} for u in users
+        ]
 
     def _clear_backlog_entries(self, chat_id: int, user_ids: Iterable[int]) -> None:
         """Remove entries for the specified user ids from the backlog."""
         if chat_id not in self._backlogs:
             return
-        remaining = [u for u in self._backlogs[chat_id] if getattr(u, 'user_id', None) not in set(user_ids)]
+        remaining = [
+            u for u in self._backlogs[chat_id] if getattr(u, "user_id", None) not in set(user_ids)
+        ]
         self._backlogs[chat_id] = remaining

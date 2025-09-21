@@ -1,6 +1,5 @@
 """Unit tests for configuration schemas - written FIRST in TDD style."""
 
-
 import pytest
 from pydantic import ValidationError
 
@@ -31,7 +30,7 @@ class TestGlobalConfigSchema:
             provocation_interval_hours=24,
             audit_cadence_minutes=30,
             rate_limit_per_hour=5,
-            rate_limit_per_day=50
+            rate_limit_per_day=50,
         )
 
         assert config.lurk_threshold_days == 7
@@ -73,7 +72,7 @@ class TestGlobalConfigSchema:
         # Checksum should be a valid hex string
         checksum = config1.compute_checksum()
         assert len(checksum) == 64  # SHA256 produces 64 hex chars
-        assert all(c in '0123456789abcdef' for c in checksum)
+        assert all(c in "0123456789abcdef" for c in checksum)
 
     def test_global_config_provenance_update(self) -> None:
         """GlobalConfig should track provenance correctly."""
@@ -103,7 +102,7 @@ class TestPuzzleSchema:
             id="test_001",
             type="arithmetic",
             question="What is 2 + 2?",
-            choices=["4", "3", "5", "6"]  # First choice is correct
+            choices=["4", "3", "5", "6"],  # First choice is correct
         )
 
         assert puzzle.id == "test_001"
@@ -141,7 +140,7 @@ class TestPuzzleSchema:
                 id="p1",
                 type="arithmetic",
                 question="Q?",
-                choices=["A", "B"]  # Only 2 choices, need at least 3
+                choices=["A", "B"],  # Only 2 choices, need at least 3
             )
         assert "at least 3" in str(exc_info.value).lower()
 
@@ -151,7 +150,7 @@ class TestPuzzleSchema:
                 id="p2",
                 type="arithmetic",
                 question="Q?",
-                choices=["A", "B", "C", "D", "E"]  # 5 choices, max is 4
+                choices=["A", "B", "C", "D", "E"],  # 5 choices, max is 4
             )
         assert "at most 4" in str(exc_info.value).lower()
 
@@ -160,11 +159,10 @@ class TestPuzzleSchema:
             id="p3",
             type="arithmetic",
             question="Q?",
-            choices=["A", "B", "C"]  # Minimum 3 choices
+            choices=["A", "B", "C"],  # Minimum 3 choices
         )
         assert len(puzzle.choices) == 3
         assert puzzle.get_correct_answer() == "A"
-
 
 
 class TestChannelSchema:
@@ -174,11 +172,7 @@ class TestChannelSchema:
         """ChannelEntry should store channel configuration."""
         from telegram_antilurk_bot.config.schemas import ChannelEntry
 
-        channel = ChannelEntry(
-            chat_id=-1001234567890,
-            chat_name="Test Channel",
-            mode="moderated"
-        )
+        channel = ChannelEntry(chat_id=-1001234567890, chat_name="Test Channel", mode="moderated")
 
         assert channel.chat_id == -1001234567890
         assert channel.chat_name == "Test Channel"
@@ -206,16 +200,10 @@ class TestChannelSchema:
         """ChannelEntry should accept per-channel overrides."""
         from telegram_antilurk_bot.config.schemas import ChannelEntry, ChannelOverride
 
-        override = ChannelOverride(
-            lurk_threshold_days=7,
-            rate_limit_per_hour=3
-        )
+        override = ChannelOverride(lurk_threshold_days=7, rate_limit_per_hour=3)
 
         channel = ChannelEntry(
-            chat_id=-1001234567890,
-            chat_name="Test Channel",
-            mode="moderated",
-            overrides=override
+            chat_id=-1001234567890, chat_name="Test Channel", mode="moderated", overrides=override
         )
 
         assert channel.overrides is not None
@@ -227,12 +215,14 @@ class TestChannelSchema:
         """ChannelsConfig should provide helper methods."""
         from telegram_antilurk_bot.config.schemas import ChannelEntry, ChannelsConfig
 
-        config = ChannelsConfig(channels=[
-            ChannelEntry(chat_id=1, chat_name="Mod1", mode="moderated", modlog_ref=3),
-            ChannelEntry(chat_id=2, chat_name="Mod2", mode="moderated", modlog_ref=3),
-            ChannelEntry(chat_id=3, chat_name="Log1", mode="modlog"),
-            ChannelEntry(chat_id=4, chat_name="Log2", mode="modlog"),
-        ])
+        config = ChannelsConfig(
+            channels=[
+                ChannelEntry(chat_id=1, chat_name="Mod1", mode="moderated", modlog_ref=3),
+                ChannelEntry(chat_id=2, chat_name="Mod2", mode="moderated", modlog_ref=3),
+                ChannelEntry(chat_id=3, chat_name="Log1", mode="modlog"),
+                ChannelEntry(chat_id=4, chat_name="Log2", mode="modlog"),
+            ]
+        )
 
         # Get moderated channels
         moderated = config.get_moderated_channels()
